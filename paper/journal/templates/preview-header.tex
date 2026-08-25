@@ -1,0 +1,88 @@
+% preview-header.tex — LaTeX preamble that encodes the journal's format rules.
+%
+% Used by paper/preview.ps1 (pandoc -> XeLaTeX -> PDF) to render the drafts the
+% way the printed article will look, WITHOUT going through Word.  It is the
+% LaTeX counterpart of journal/templates/reference.docx: reference.docx carries
+% the format for the .docx that gets submitted, this file carries it for the
+% on-screen preview.  Every rule below is traceable to journal/FORMAT_GUIDE.md.
+%
+% Page geometry, font family and base size are passed on the pandoc command
+% line in preview.ps1, not set here.
+
+% --- s.1  จำนวนคอลัมน์: 2 คอลัมน์ ระยะห่าง 0.5 ซม. -------------------------
+% (column WIDTH follows from the page geometry; see the note in preview.ps1)
+\setlength{\columnsep}{0.5cm}
+
+% --- s.1  ระยะระหว่างบรรทัด: บรรทัดเดี่ยว (Single Space) --------------------
+% TH Sarabun New declares hhea asc/desc/gap = 844/-457/30 per 1000 upem
+% = 1.331 em, so Word's "single" spacing leads at 14 x 1.331 = 18.6 pt.  The
+% 12 pt class leads at 14.5 pt, hence 18.6/14.5 = 1.285.  Without this the
+% preview is ~25% denser than the .docx and under-reports the page count.
+\linespread{1.285}
+
+% --- Thai line breaking ----------------------------------------------------
+% XeTeX does not wrap Thai at all without a Thai locale; lines would simply
+% overflow the column.  The break glue must stay at 0pt with NO stretch: any
+% "plus" component is stretchable glue sitting at every Thai word boundary, and
+% justification pulls it open into visible gaps in the middle of Thai text,
+% which has no inter-word spaces to begin with.  Word does this correctly with
+% Thai Distribute (set in reference.docx); XeTeX cannot, so the preview is left
+% slightly ragged rather than wrongly spaced.
+\XeTeXlinebreaklocale "th"
+\XeTeXlinebreakskip = 0pt plus 0.3pt
+% Let TeX try much harder before it resorts to a badly stretched line.  Without
+% this it hits a bad break, then has to open the few available gaps very wide -
+% which is what produced the visible holes inside Thai text.
+\tolerance = 4000
+\emergencystretch = 3em
+
+\usepackage{amsmath}
+
+% --- ตาราง ------------------------------------------------------------------
+% pandoc แปลงทุกตารางเป็น longtable ซึ่งใช้ในโหมดสองคอลัมน์ไม่ได้ (LaTeX แจ้ง
+% "longtable not in 1-column mode") ตารางกว้างในบทความสองคอลัมน์ควรวางเป็น
+% float เต็มความกว้างหน้าอยู่แล้ว จึงเปลี่ยนเส้นทาง longtable ไปเป็น table*
+% พร้อม tabular ธรรมดา และปิดคำสั่งหัว/ท้ายที่มีเฉพาะใน longtable
+% pandoc วาง \bottomrule ไว้ในตำแหน่งของ "foot" คือก่อนแถวข้อมูล ซึ่งถูกต้อง
+% สำหรับ longtable แต่ผิดตำแหน่งใน tabular จึงปิดมันไว้ระหว่างตารางแล้วค่อย
+% ออกเส้นล่างเองตอนจบ environment
+\usepackage{array,booktabs}
+\let\origbottomrule\bottomrule
+\newenvironment{pandoclongtable}[2][]
+  {\begin{table*}[tbp]\centering\def\bottomrule\noalign##1{}\begin{tabular}{#2}}
+  {\origbottomrule\end{tabular}\end{table*}}
+\let\longtable\pandoclongtable
+\let\endlongtable\endpandoclongtable
+\let\endhead\relax
+\let\endfirsthead\relax
+\let\endfoot\relax
+\let\endlastfoot\relax
+
+% --- ย่อหน้า ---------------------------------------------------------------
+% The drafts open every paragraph with &emsp;.  preview.ps1 strips that entity
+% (XeLaTeX has no glyph for U+2003 in TH Sarabun New) and the indent comes from
+% here instead; indentfirst extends it to the first paragraph after a heading,
+% which is what the drafts do.
+\setlength{\parindent}{1.5em}
+\usepackage{indentfirst}
+\setlength{\parskip}{0pt}
+
+% --- s.3  ขนาดและรูปแบบหัวข้อ ----------------------------------------------
+% All heading levels sit at body size (14 pt); main and sub headings are bold,
+% sub-sub headings are regular.
+% --- s.5  เว้น 1 บรรทัดก่อนหัวข้อหลักและหัวข้อรอง (หัวข้อย่อยไม่ต้องเว้น) ---
+% pandoc maps markdown ## -> \subsection, ### -> \subsubsection,
+% #### -> \paragraph for the article class, so the levels are shifted by one
+% relative to the names in FORMAT_GUIDE.md.
+\usepackage{titlesec}
+\titleformat{\section}{\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\bfseries}{}{0pt}{}
+\titleformat{\subsubsection}{\normalfont}{}{0pt}{}
+\titleformat{\paragraph}[block]{\normalfont}{}{0pt}{}
+\titlespacing*{\section}{0pt}{1\baselineskip}{0pt}
+\titlespacing*{\subsection}{0pt}{1\baselineskip}{0pt}
+\titlespacing*{\subsubsection}{0pt}{0pt}{0pt}
+\titlespacing*{\paragraph}{0pt}{0pt}{0pt}
+
+% หัวข้อถูกใส่เลขไว้ในต้นฉบับเองแล้ว (2.1, 2.2.3, ...) — อย่าให้ LaTeX ใส่ซ้ำ
+\setcounter{secnumdepth}{0}

@@ -14,6 +14,7 @@
 | `templates/examples-references-2026.docx/.pdf` | ตัวอย่างการอ้างอิง IEEE ทุกประเภท | `Examples References (New2026)` |
 | `templates/example-manuscript.pdf` | ตัวอย่างบทความที่จัดรูปแบบแล้ว | `Example Template.pdf` |
 | `templates/reference.docx` | **สไตล์สำหรับ pandoc** ใช้โดย `paper/build.ps1` | สร้างเอง (ดูด้านล่าง) |
+| `templates/preview-header.tex` | **สไตล์สำหรับ XeLaTeX** ใช้โดย `paper/preview.ps1` — คู่แฝดฝั่ง PDF ของ `reference.docx` | สร้างเอง |
 
 ไฟล์ต้นฉบับชุดเต็มอยู่ที่ `C:\Users\mteer\OneDrive\Education\Documents\Thesis\Paper\Templates\`
 

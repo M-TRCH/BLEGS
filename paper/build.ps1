@@ -40,6 +40,12 @@ $drafts = @(
 
 $out = Join-Path $paperDir "manuscript\submission\manuscript.docx"
 
+# Build the resource path into a variable first.  Written inline as
+# --resource-path=(Join-Path ...), PowerShell splits it into TWO arguments -
+# an empty --resource-path= plus a bare path that pandoc then treats as an
+# input file and fails on ("withBinaryFile: permission denied").
+$resourcePath = (Join-Path $paperDir "figures\export") + ";" + (Join-Path $paperDir "tables\export")
+
 # Warn about <mark> placeholders: pandoc drops raw HTML silently in docx
 # output, so unresolved figure/value placeholders would vanish without trace.
 $marks = Select-String -Path $drafts -Pattern "<mark>" -SimpleMatch
@@ -50,7 +56,14 @@ if ($marks) {
 
 & $pandoc @drafts `
     --reference-doc=$reference `
-    --resource-path=(Join-Path $paperDir "figures\export") `
+    --resource-path=$resourcePath `
     -o $out
 if ($LASTEXITCODE -ne 0) { Write-Error "pandoc failed ($LASTEXITCODE)" }
+
+# Without this, Word wraps the Thai text at spaces only and hard-breaks
+# mid-word at the margin (see the header of patch-thai-docx.py): the patch
+# adds the run tags and settings flags that native Word documents carry, so
+# the submission lays out correctly on any Word with Thai proofing installed.
+& python (Join-Path $paperDir "patch-thai-docx.py") $out
+if ($LASTEXITCODE -ne 0) { Write-Error "patch-thai-docx failed ($LASTEXITCODE)" }
 Write-Host "Wrote $out"

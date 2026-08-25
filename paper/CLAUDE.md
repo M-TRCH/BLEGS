@@ -4,7 +4,7 @@ Paper-layer guidance. Repo-wide architecture, build commands, and robot facts li
 
 ## What this is
 
-The manuscript for a TCI Tier 1 journal paper (The Journal of KMUTNB) about the BLEGS quadruped and its data-driven leg-error compensation. Everything here is writing and submission material; the code that produced the data is `../python/paper_testing/` (test_2 = single-leg + ML models, test_3 = whole-robot walking) — **there is no code copy under paper/ by design**, so never "fix" analysis scripts here.
+The manuscript for a TCI Tier 1 journal paper (The Journal of KMUTNB) about the BLEGS quadruped and its data-driven leg-error compensation. **Two versions live side by side**: `manuscript/drafts/` is the journal version, cut to fit the hard 9-page limit, and is what `build.ps1` / `preview.ps1` read; `manuscript/drafts-full/` keeps the uncut thesis-scale text for reference and is read by nothing. Edits go to `drafts/` unless you are deliberately updating the thesis copy. Everything here is writing and submission material; the code that produced the data is `../python/paper_testing/` (test_2 = single-leg + ML models, test_3 = whole-robot walking) — **there is no code copy under paper/ by design**, so never "fix" analysis scripts here.
 
 ## Writing conventions (match the existing text exactly)
 
@@ -31,7 +31,41 @@ Full set: `journal/FORMAT_GUIDE.md` and the official docs in `journal/instructio
 
 ## Build pipeline
 
-`build.ps1` = pandoc over `manuscript/drafts/00_*.md … 06_*.md` with `journal/templates/reference.docx`. What pandoc cannot do (finish in Word): equation numbers flush right, per-section column layout, caption placement. reference.docx rules — incl. the Thai-font trap (`w:cs`/`w:szCs`) — are in `journal/README.md`.
+Two paths over the same drafts:
+
+- **`build.ps1`** → `manuscript/submission/manuscript.docx` — the submission. pandoc with `journal/templates/reference.docx`. What pandoc cannot do (finish in Word): equation numbers flush right, per-section column layout, caption placement. reference.docx rules — incl. the Thai-font trap (`w:cs`/`w:szCs`) — are in `journal/README.md`.
+- **`preview.ps1`** → `manuscript/preview.pdf` — journal-formatted PDF for judging length and looks while writing. pandoc → XeLaTeX with `journal/templates/preview-header.tex`; **no Word needed**, so cutting can be done entirely in Markdown. Prints the page count against the 9-page limit.
+
+**`preview-word.ps1` renders the true two-column layout through Word** (pandoc -> Word COM
+-> SaveAs2 PDF, ~5 s) and its page count is the authoritative one, because Word is the only
+engine here that justifies Thai correctly (Thai Distribute). The script's header carries the
+full debugging history - the short version: it is a verbatim copy of the one variant that
+ran reliably; every "improved" rewrite hung inside Word at the PDF-export step (pagination
+itself always instant) even though the Word calls were semantically identical, and the cause
+was never isolated beyond the script text itself. Two rules are certain: `SaveAs2(…, 17)`
+works where `ExportAsFixedFormat` hangs, and Word gets a fresh dir under local `%TEMP%` per
+run. Treat the script as sealed: change as little as possible and test immediately after any
+edit. If a run is killed mid-way, stray WINWORD.EXE processes must be killed before the next
+run.
+
+**Thai line breaking in Word needs two things, and both are handled.** (1) Office Thai
+proofing must be installed on the machine (the free Thai Language Accessory Pack; done here
+2026-08-23 - without it even the journal's own template renders with space-only breaks).
+(2) The .docx itself must carry what native Word documents always carry: `<w:cs/>` +
+`<w:lang w:bidi="th-TH"/>` on Thai runs, plus `<w:applyBreakingRules/>` and a
+compatibilityMode-15 `<w:compat>` block in settings.xml. pandoc emits none of these (its
+output even opens in compatibility mode 12), and no single item is enough - the full set
+was isolated by A/B on rendered PDFs. `patch-thai-docx.py` applies them and both `build.ps1`
+and `preview-word.ps1` run it right after pandoc, so the submission .docx lays out correctly
+on any Thai-capable Word. Related permanent fixes in reference.docx: complex-script language
+`ar-SA` (pandoc default) -> `th-TH`, and body justification matches the journal template's
+plain `both` instead of `thaiDistribute`.
+
+The two disagree by ~2 pages (Word pads OMML equations and applies widow/orphan control). Use the PDF for the picture, the .docx for the verdict on page count.
+
+Both drop `<mark>` placeholders silently — each script warns about how many remain.
+
+Watch the heading syntax: an ATX heading with **no blank line above it** is not parsed as a heading, and the whole section title silently disappears into the previous paragraph in both outputs (this bit §2.2.2 in `02_methods.md`). Levels must stay consistent too — §2.1/§2.2/§2.3 are siblings and all belong at `###`.
 
 ## Measurement facts for §2.3 (verified from the four walk videos)
 

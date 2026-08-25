@@ -60,3 +60,14 @@ ehthumbs.db
 *.swp
 *.swo
 *~
+
+# =========================
+# Paper build artifacts
+# =========================
+.preview/
+# raw pandoc output, rebuilt by build.ps1 every run; the hand-finished
+# submission file gets saved under its own name (see action-plan.md)
+manuscript/submission/manuscript.docx
+manuscript/preview.pdf
+manuscript/preview-word.pdf
+manuscript/preview-word.docx

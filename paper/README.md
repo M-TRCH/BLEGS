@@ -19,22 +19,32 @@
 ```
 paper/
 ├── manuscript/
-│   ├── drafts/            ต้นฉบับ (Markdown) 00_frontmatter → 06_references
+│   ├── drafts/            ต้นฉบับฉบับวารสาร (ย่อให้เข้าเพดาน 9 หน้า) — build อ่านจากที่นี่
+│   ├── drafts-full/       ฉบับเต็มสำหรับวิทยานิพนธ์ — ไม่เข้ากระบวนการ build
 │   └── submission/        ไฟล์ .docx ที่ส่งจริง + SUBMISSION_CHECKLIST.md
 ├── figures/  src/ export/  ต้นฉบับรูปที่แก้ได้ / .jpg สำหรับส่ง (วารสารบังคับ)
 ├── tables/   src/ export/  ตารางก็ต้องส่งเป็น .jpg เช่นกัน
 ├── data/     real/ vision/ ข้อมูลที่ใช้สร้างรูปและตาราง
 ├── references/            ไฟล์อ้างอิง / .bib / PDF ที่อ้างถึง
 ├── journal/               ข้อกำหนดวารสาร เทมเพลต และ reference.docx ของ pandoc
-└── build.ps1              แปลง drafts → manuscript.docx
+├── build.ps1              แปลง drafts → manuscript.docx (ไฟล์ที่ส่งจริง)
+├── preview.ps1            แปลง drafts → preview.pdf ผ่าน XeLaTeX (เร็ว ไม่ต้องมี Word)
+└── preview-word.ps1       แปลง drafts → preview-word.pdf ผ่าน Word — Thai Distribute
+                           ของจริง สองคอลัมน์จริง จำนวนหน้าตัวนี้คือตัวตัดสิน
 ```
 
 ## วิธีทำงาน
 
 1. เขียน/แก้ต้นฉบับใน `manuscript/drafts/` (ธรรมเนียมการเขียนดู [`CLAUDE.md`](CLAUDE.md))
+   — **มีสองฉบับ**: `drafts/` คือฉบับวารสารที่ถูกย่อให้เข้าเพดาน 9 หน้า ส่วน `drafts-full/`
+   คือฉบับเต็มระดับวิทยานิพนธ์ที่เก็บไว้อ้างอิง ไม่มีสคริปต์ไหนอ่าน `drafts-full/`
 2. รูปและตาราง: ไฟล์ต้นฉบับไว้ `*/src/` — ส่งออก .jpg ไว้ `*/export/`
-3. แปลงเป็น .docx: `powershell -File paper/build.ps1` (ต้องมี pandoc และ `journal/templates/reference.docx` — ดู [`journal/README.md`](journal/README.md))
-4. เก็บงานขั้นสุดท้ายใน Word ตาม [`manuscript/submission/SUBMISSION_CHECKLIST.md`](manuscript/submission/SUBMISSION_CHECKLIST.md) แล้วส่งผ่าน ThaiJO
+3. ดูหน้าตาและความยาวระหว่างเขียน: `powershell -File paper/preview.ps1` → `manuscript/preview.pdf`
+   (XeLaTeX — เร็ว ไม่ต้องมี Word แต่การตัดบรรทัดไทยเป็นค่าประมาณ) หรือ
+   `powershell -File paper/preview-word.ps1` → `manuscript/preview-word.pdf`
+   (ผ่าน Word จริง — Thai Distribute ถูกต้อง **จำนวนหน้าจากตัวนี้คือตัวตัดสิน**)
+4. แปลงเป็น .docx สำหรับเก็บงานส่งจริง: `powershell -File paper/build.ps1` (ดู [`journal/README.md`](journal/README.md))
+5. เก็บงานขั้นสุดท้ายใน Word ตาม [`manuscript/submission/SUBMISSION_CHECKLIST.md`](manuscript/submission/SUBMISSION_CHECKLIST.md) แล้วส่งผ่าน ThaiJO
 
 ## สถานะและแผน
 
