@@ -133,7 +133,13 @@ ENABLE_LOGGING = True
 # Store logs under the test_3 output folder
 LOG_FILE_PATH = os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output', 'log'))
-LOG_RATE = 10
+LOG_RATE = 1        # log every control cycle -> 50 Hz
+# Was 10 (5 Hz), too coarse to integrate energy: the gait cycle runs at ~1.8 Hz,
+# so 5 Hz leaves ~3 samples per stride and the current peak during push-off is
+# missed.  Paper 2.3.3 states 50 Hz logging.
+LOG_FLUSH_EVERY = 10   # flush once per N logged ticks, not every tick: at 50 Hz
+                       # a flush inside the control loop costs real time, and
+                       # this keeps the flush rate the same as it was before.
 
 SIMULATION_MODE = False
 
@@ -1673,7 +1679,8 @@ def log_control_step(phase: str) -> None:
             f"{elapsed:.4f},{phase},{leg_id},"
             f"{sp1:.3f},{act1:.3f},{sp2:.3f},{act2:.3f},"
             f"{cur_A},{cur_B}\n")
-    log_file.flush()
+    if (log_counter // LOG_RATE) % LOG_FLUSH_EVERY == 0:
+        log_file.flush()
 
 
 def close_logging() -> None:

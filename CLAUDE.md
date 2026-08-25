@@ -54,6 +54,8 @@ python python/control/test_quadruped_control.py       # oldest demo; doubles as 
 
 **ML compensation pipeline** (paper experiment 2): `test_2/single_leg_xy_control.py` grid sweep + ArUco capture → `test_2/output/data/grid_log.csv` → `train_compensation_model.py` → models in `test_2/output/models/` → consumed cross-folder by walk_test.py's `[M]` toggle (default `model_poly4`; `.json` poly models are dependency-free, `.pkl` needs sklearn+joblib). Sign convention everywhere: command = target − predicted_error.
 
+The two consumers apply that prediction very differently, and the difference is load-bearing for the paper. `single_leg_xy_control.py` uses it **raw at full gain** with no filtering; its default `circle` path also feeds the *median training currents* instead of live ones, so only the `circle rt` variant is load-adaptive (the §2.2 videos were recorded with `rt`). `walk_test.py` instead conditions it hard before use: `ML_COMPENSATION_GAIN=0.10`, EMA `ALPHA=0.05` (τ ≈ 0.4 s at 50 Hz), per-tick slew `MAX_DELTA_MM=0.2`, absolute clamp `MAX_ABS_MM=5.0` — so walking applies roughly a tenth of the predicted correction. Never compare correction magnitudes between the two tests without accounting for this.
+
 ## Conventions that will bite you
 
 - **Copy-paste is the architecture.** `BinaryMotorController` exists in 5+ files, `calculate_crc16` in 6, the five-bar IK in ~8. This is deliberate (walk_test.py's docstring says so). A fix to shared logic must be replicated per file — grep the function name across `python/` before calling a fix complete.
