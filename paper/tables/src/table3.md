@@ -1,15 +1,22 @@
-<!-- Transposed relative to the first draft.  As 9 columns this could not fit a
-     journal column (7.5 cm / 9 = 0.86 cm per column), and forcing it there is
-     what made Word grind for minutes when applying the two-column layout.
-     With the four test conditions across and the metrics down the side it is
-     5 columns and fits.  tables/export/table3.jpg is rendered from this. -->
+<!-- Cross-condition model comparison.  Every value from
+     ../../python/paper_testing/test_2/output/data/dynamic_eval.csv
+     (dynamic_model_evaluation.py) - do not hand-edit, re-run the script.
 
-| Metric | No-load off | No-load on | 3 kg off | 3 kg on |
-|---|---|---|---|---|
-| $D$ (m) | 1.67 | 1.68 | 1.19 | 1.41 |
-| $d_{end}$ (cm) | 15.54 | −1.72 | −51.49 | 12.27 |
-| $d_{RMS}$ (cm) | 8.91 | 2.20 | 33.46 | 7.50 |
-| $d_{max}$ (cm) | 15.61 | 3.76 | 51.74 | 12.37 |
-| $\delta$ (cm/m) | 9.31 | −1.03 | −43.25 | 8.73 |
-| $\varphi_{end}$ (deg) | −10.50 | −0.64 | 41.10 | −4.32 |
-| Speed (cm/s) | 7.79 | 8.18 | 5.18 | 6.55 |
+     This is deliberately NOT the table in output/models/training_summary.txt.
+     That one is in-sample (train_compensation_model.py fits and predicts on
+     the same 608 rows) and ranks Random Forest first at 0.40 mm / R2 0.97,
+     which is overfitting, not accuracy.  What is tabulated here is the error
+     still left at the foot while each model runs inside the control loop, on
+     continuous circular motion the models never saw during training.
+
+     The finding is that the five models are indistinguishable: 0.30 mm
+     separates best from worst, against the 6.64 mm each of them removes. -->
+
+| Model | No-load | 1 kg | 2 kg | 3 kg | Mean |
+|---|---|---|---|---|---|
+| None (off) | 8.70 | 11.92 | 13.32 | 14.54 | 12.12 |
+| POLY3 | 3.63 | 5.17 | 6.06 | 7.03 | 5.47 |
+| MLP | 3.27 | 5.94 | 6.06 | 6.88 | 5.54 |
+| RF | 3.57 | 5.55 | 5.96 | 7.14 | 5.56 |
+| POLY4 | 3.56 | 5.95 | 5.90 | 7.21 | 5.66 |
+| SVR | 3.78 | 5.78 | 5.78 | 7.78 | 5.78 |

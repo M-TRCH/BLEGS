@@ -109,7 +109,12 @@ RC_TURN_K = 0.5            # [I]/[K] turn strength (fraction of step length)
 RC_TURN_K_MAX = 1.5        # k > 1.0 drives the inner legs backwards (tighter arc)
 RC_TURN_SLEW = 1.5         # turn-k units per second
 RC_TURN_BASE_MIN = 12.0    # mm floor on the step length used to scale the turn
-RC_STEP_OUTER_MULT = 1.5   # per-leg step ceiling as a multiple of the step cap
+RC_STEP_OUTER_MULT = 2.8   # per-leg step ceiling as a multiple of the step cap.
+                           # 2.8 (=70 mm at the 25 mm cap) so that S(1+k) stays
+                           # unclipped up to k=1.5: at v>=45 mm/s the base step is
+                           # pinned at max_step=25, and 25*(1+1.5)=62.5 < 70.  At
+                           # the old 1.5 (=37.5 mm) eq. (8) of the paper only held
+                           # for k<=0.5 at walking speed - see action-plan item 1.7.
 RC_INVERT_TURN_ON_REVERSE = False  # True: [A] always yaws the nose left, even reversing
 
 BALANCE_ENABLED = False
@@ -1146,6 +1151,11 @@ ml_compensation_state = {
 log_file = None
 log_counter = 0
 _log_start_time = 0.0
+# Operator command as actually applied on the current tick, mirrored into the
+# log so the steering-effort index (mean |k|) of the physical-limits test can
+# be computed from the log alone.  NaN in any mode that does not set them.
+log_v_cmd = float('nan')
+log_turn_cmd = float('nan')
 _compensation_model_cache: Optional[dict] = None
 _compensation_model_cache_name: Optional[str] = None
 
@@ -1637,6 +1647,7 @@ def init_logging(target_distance: float) -> bool:
             'theta1_setpoint_deg', 'theta1_actual_deg',
             'theta2_setpoint_deg', 'theta2_actual_deg',
             'current_A_mA', 'current_B_mA',
+            'v_cmd_mm_s', 'turn_k_cmd',
         ]
         log_file.write(','.join(cols) + '\n')
         log_counter = 0
@@ -1678,7 +1689,7 @@ def log_control_step(phase: str) -> None:
         log_file.write(
             f"{elapsed:.4f},{phase},{leg_id},"
             f"{sp1:.3f},{act1:.3f},{sp2:.3f},{act2:.3f},"
-            f"{cur_A},{cur_B}\n")
+            f"{cur_A},{cur_B},{log_v_cmd:.2f},{log_turn_cmd:.3f}\n")
     if (log_counter // LOG_RATE) % LOG_FLUSH_EVERY == 0:
         log_file.flush()
 
@@ -2045,6 +2056,7 @@ def rc_drive_mode() -> bool:
     """Realtime keyboard drive with live gait tuning; march in place when idle."""
     global state_estimator, idle_marching, march_thread
     global march_step_indices, balance_controller, control_paused
+    global log_v_cmd, log_turn_cmd
 
     if sys.platform != 'win32':
         print("\n  RC drive mode requires Windows (msvcrt keyboard input)")
@@ -2352,6 +2364,7 @@ def rc_drive_mode() -> bool:
                     step_indices[leg_id] + 1) % gait['steps']
 
             state_estimator.update(v_smooth * VELOCITY_CALIBRATION, t_now)
+            log_v_cmd, log_turn_cmd = v_smooth, turn_cmd
             log_control_step("RC")
 
             if t_now - last_status_time >= 0.5:

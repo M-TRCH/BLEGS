@@ -36,7 +36,10 @@ import csv
 
 VIDEO_PATH    = r"C:\Users\mteer\OneDrive\Desktop\grid_49point.MOV"
 GRID_LOG_CSV  = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'grid_log.csv')
-CALIB_PATH    = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'calibration_olympus25mm.npz')
+# ชี้ไปไฟล์เดียวกับที่ camera_calibration.py เขียน — เดิมชี้ `calibration_olympus25mm.npz`
+# ข้าง ๆ สคริปต์ซึ่งไม่มีอยู่จริง load_calibration จึงคืน None แล้วข้ามการแก้ความผิดเพี้ยนเลนส์
+CALIB_PATH    = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             'output', 'params', 'calibration_olympus25f1.2.npz')
 OUTPUT_VIDEO  = os.path.join(os.path.dirname(os.path.abspath(VIDEO_PATH)), 'video_tracked.mp4')
 
 # Fixed motor positions in leg frame (mm)

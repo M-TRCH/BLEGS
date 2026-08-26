@@ -78,7 +78,7 @@ OUT_PLOT   = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 OUT_W            = 720       # output width  (px) — เปลี่ยนได้ตาม resolution
 OUT_H            = 720       # output height (px) — 1:1
 CROP_CENTER_MM   = np.array([0.0, -100.0])  # จุดกึ่งกลาง crop ในระนาบ world (mm)
-                              #   (0, 0) = กึ่งกลาง id0-id1,  (0,-175) = ศูนย์กลางวงโคจร
+                              #   (0, 0) = กึ่งกลาง id0-id1,  (0,-170) = ศูนย์กลางวงโคจร
 STAB_ALPHA       = 0.15      # EMA smoothing (0 = นิ่งสนิท, 1 = ไม่ smooth)
 CROP_ZOOM        = 3.0       # zoom-out factor: crop พื้นที่ใหญ่ขึ้น N เท่า แล้ว resize
                               #   1.0 = ไม่ zoom out,  2.0 = เห็นกว้างขึ้น 2x,  3.0 = 3x

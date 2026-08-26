@@ -101,8 +101,12 @@ CAPTURE_TIMEOUT_S = 20.0    # (ไม่ใช้แล้ว — เก็บ�
 CAMERA_INDEX      = 1       # index กล้อง: 0 = built-in, 1 = HDMI capture card
 CAMERA_WIDTH      = 3840    # ความกว้างภาพที่ต้องการ (px); 0 = default
 CAMERA_HEIGHT     = 2160    # ความสูงภาพ
+# ไฟล์สอบเทียบกล้องที่ camera_calibration.py สร้างไว้ — ชื่อ/ตำแหน่งเดิมในไฟล์นี้ชี้ผิด
+# (`calibration_olympus25mm.npz` ข้าง ๆ สคริปต์) _load_calib จึงคืน None เงียบ ๆ แล้วรันต่อ
+# แปลว่า grid_log.csv ที่เก็บไว้เดิมไม่ได้ผ่านการแก้ความผิดเพี้ยนเลนส์
 CALIB_NPZ         = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  'calibration_olympus25mm.npz')
+                                  'output', 'params',
+                                  'calibration_olympus25f1.2.npz')
 ARUCO_E_ID        = 4       # ArUco marker ID ของ end-effector E
 ARUCO_A_ID        = 0       # ArUco marker ID ของ Motor A
 ARUCO_B_ID        = 1       # ArUco marker ID ของ Motor B

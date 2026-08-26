@@ -13,7 +13,7 @@ The manuscript is Thai academic prose; English in parentheses on first use of a 
 - Paragraphs open with `&emsp;`.
 - Headings use decimal numbering (`### 2.3.1`, `#### 2.3.3.1` where a 4th level was unavoidable).
 - Display equations are `$$...$$`, introduced by `ตามสมการที่ (N)`; variables defined after in a `โดยที่:` bullet list.
-- **Equation numbers are sequential and maintained by hand** — inserting one renumbers every later one plus its cross-references. Grep `สมการที่ (` and fix all. Currently 26 equations, all in 02_methods.md.
+- **Equation numbers are sequential and maintained by hand** — inserting or deleting one renumbers every later one plus its cross-references. Grep `สมการที่ (` and fix all; the references live in `02_methods.md` and `03_results.md`. The journal version carries **9 equations**, all displayed in `02_methods.md` (the thesis copy in `drafts-full/` still has 26).
 - Figure/table placeholders: `<mark>[แทรก รูปที่ N: caption]</mark>`; undecided values: `<mark>[รอกำหนด...]</mark>`. **pandoc silently drops `<mark>` (raw HTML) in docx output** — `build.ps1` warns about remaining ones.
 - Captions must not use the word "แสดง" (journal rule).
 
@@ -23,8 +23,8 @@ The manuscript is Thai academic prose; English in parentheses on first use of a 
 
 Full set: `journal/FORMAT_GUIDE.md` and the official docs in `journal/instructions/`. The ones that bite:
 
-- **≤ 9 A4 pages total**, two columns, TH Sarabun New. Chapter 2 alone is long — check page count before writing chapters 1/3/4 at full length.
-- **Every figure AND table must also be submitted as a separate .jpg** → `figures/export/`, `tables/export/`.
+- **≤ 9 A4 pages total** on paper, two columns, TH Sarabun New — but the author has confirmed up to **12** is acceptable. As of 2026-08-26 the Word build measures **12**, i.e. the ceiling, with §3.4 still unwritten. Anything added from here needs something else cut.
+- **Every figure AND table must also be submitted as a separate .jpg** → `figures/export/`, `tables/export/`. Tables are authored as pipe-tables in `tables/src/*.md` and rendered by **`render-tables.py`** (the only writer of `tables/export/`); the manuscript embeds the same .jpg, so a table can never drift from its picture. Tables are English-only — Thai text renders as empty boxes in DejaVu Sans.
 - Abstract ≤ 250 words, stand-alone, no citations; keywords must not repeat title words; conclusion 1–2 paragraphs, must not restate the abstract.
 - References: IEEE, English only, Thai sources get `(in Thai)`; every entry cited in text.
 - Double-blind review by 3 external reviewers — an anonymized copy may be needed.
@@ -73,13 +73,19 @@ Watch the heading syntax: an ATX heading with **no blank line above it** is not 
 - Robot back tags: **19.9 × 46.6 cm** tape-measured (`ROBOT_TAG_LOCAL_POINTS_CM`).
 - **Parallax**: runway markers lie on the floor, robot tags ride ~31 cm above it → homography magnifies distances by m ≈ 1.21–1.22 (consistent across all four videos; camera ≈ 1.8 m). Divide distances by m; angles unaffected. §2.3.1 eq. (16)–(17). Raising runway markers to tag height removes the effect for future recordings.
 - Robot walks ~2 m but the grid covers 120 cm → about half of each track is extrapolated (tag-rectangle self-check shows the mapping holds; report the proportion).
-- §2.3.2 has **one recorded run per condition**; §2.1/§2.2.5 used 5 repeats.
+- §2.3.2 has **one recorded run per condition** — the weakest evidence in the paper, and limitation 1 in chapter 4. §2.1 is the mean of 5 gauge trials (individual readings were never written down, so no SD). §2.2.4's "5 repeats" means **5 consecutive laps inside one continuous clip**, not 5 separate trials — verified 2026-08-26 by unwrapping the tracked angle: all 24 clips contain 5.00 ± 0.03 laps.
 
-## Known text-vs-code gaps still to resolve (details + file:line in `action-plan.md`)
+## Known text-vs-code gaps (details + file:line in `action-plan.md`)
 
-1. §2.2.5 circle: text r=35 mm, analysis scripts use 30 mm and disagree on centre (−170 vs −175).
-2. §2.2.3 counts: text 180 points/720 samples; files hold 152/608.
-3. §2.2.1 undistortion: capture ran without it (stale calibration filename), contrary to the text.
-4. §2.2.4 validation: `training_summary.txt` is in-sample; do NOT present it as model accuracy.
-5. §2.1 moment arm: r=0.105 m described as axis→foot, but 105 mm is the crank length.
-6. Physical runway has a duplicate ID-6 tag standing in for ID 7 (`--duplicate-id6-mode`).
+Still open:
+
+1. **The §2.3.3 experiment itself** — §3.4 is empty and the paper promises a capability matrix. This is the only thing still blocking submission on the data side.
+2. Physical runway has a duplicate ID-6 tag standing in for ID 7 (`--duplicate-id6-mode`).
+3. §2.3.3's remaining `<mark>`: test distance $L$, ramp-angle steps, and the compliant/rough surface specs. $L$ is constrained by the power tether — see action-plan item 3.1.ข.
+
+Closed (kept here because the reasoning is easy to re-break):
+
+- §2.2 circle geometry — r = 30 mm and centre (0, −170), both proved from the video by unconstrained circle fitting, not assumed. Text, `calibration_coverage_check.py`, and `vision_based_trajectory_eval.py` all agree now.
+- §2.2.2 counts are 152 points / 608 samples (`workspace_grid.csv` is a 19 × 8 grid at 10 mm pitch).
+- §2.2.1 undistortion — the static grid capture really did run without it (the calibration filename was stale; both paths are fixed now, but the source video is gone so it cannot be re-processed). Measured from the calibration parameters over the real grid, the omission is worth 0.38 mm mean / 0.54 mm max, of which all but **0.12 mm RMS** is a common-mode shift that cancels in every difference the paper reports. Stated as a bounded limitation in §2.2.1 — do not "fix" it by re-training.
+- §2.2.3 validation — `output/models/training_summary.txt` is in-sample and must never be presented as model accuracy. The real cross-condition numbers come from `../python/paper_testing/test_2/dynamic_model_evaluation.py` → `output/data/dynamic_eval.csv`, which measures the error still left at the foot with each model running in the loop across all 24 clips. The five models sit within 0.30 mm of each other, so POLY4 is deployed for engineering reasons, not accuracy.
