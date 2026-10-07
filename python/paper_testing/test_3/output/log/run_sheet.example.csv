@@ -1,0 +1,6 @@
+log_file,surface,payload_kg,run,ramp_deg,success,distance_m,note
+movement_+0mm_20260826_194325.csv,flat,0,1,,1,1.10,EXAMPLE ONLY - 26 Aug stand/ground shakedown logs reused as fake runs
+movement_+0mm_20260826_191919.csv,flat,0,2,,1,0.00,marching in place; distance 0 so no speed/CoT
+movement_+0mm_20260826_180927.csv,ramp,0,1,10,1,1.00,stand test reused
+movement_+0mm_20260826_175314.csv,ramp,0,1,15,0,0.60,stand test reused
+movement_+0mm_20260826_174558.csv,rough,3,1,,1,0.90,stand test reused
