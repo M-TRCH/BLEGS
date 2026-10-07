@@ -38,6 +38,12 @@
 
 \usepackage{amsmath}
 
+% --- mock content (see journal/templates/mock.lua) --------------------------
+% Placeholder text is set in this colour so a reviewer copy can never pass as
+% final.  Grep the drafts for ".mock" / "::: mock" to list what is left.
+\usepackage{xcolor}
+\definecolor{mock}{RGB}{190,30,30}
+
 % --- ตาราง ------------------------------------------------------------------
 % pandoc แปลงทุกตารางเป็น longtable ซึ่งใช้ในโหมดสองคอลัมน์ไม่ได้ (LaTeX แจ้ง
 % "longtable not in 1-column mode") ตารางกว้างในบทความสองคอลัมน์ควรวางเป็น

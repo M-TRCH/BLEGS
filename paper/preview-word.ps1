@@ -33,7 +33,7 @@ $work = Join-Path $env:TEMP ("blegs-word-{0:yyyyMMdd-HHmmss}" -f (Get-Date))
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 
 $names = @("00_frontmatter.md","01_introduction.md","02_methods.md","03_results.md",
-           "04_discussion.md","05_acknowledgement.md","06_references.md")
+           "04_discussion.md","06_references.md")
 $enc = New-Object System.Text.UTF8Encoding $false
 [System.IO.File]::WriteAllText("$work\_marker.md", "BODYSTARTMARKER`n", $enc)
 $inputs = @()
@@ -45,6 +45,7 @@ $resourcePath = (Join-Path $paperDir "figures\export") + ";" + (Join-Path $paper
 
 Step "pandoc..."
 & pandoc @inputs --reference-doc="$paperDir\journal\templates\reference.docx" `
+    --lua-filter="$paperDir\journal\templates\mock.lua" `
     --resource-path=$resourcePath -o "$work\preview.docx"
 if ($LASTEXITCODE -ne 0) { throw "pandoc failed" }
 

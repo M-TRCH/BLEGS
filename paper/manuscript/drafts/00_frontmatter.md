@@ -14,9 +14,17 @@
 
 Data-Driven Compensation of Mechanical Deflection in a Lightweight Quadruped Robot with a High Torque-to-Weight Ratio
 
-## ผู้นิพนธ์ / Authors
+## ผู้นิพนธ์
 
-<mark>[รอกำหนด: ชื่อ-นามสกุล ไทยและอังกฤษ, สังกัด, ที่อยู่หน่วยงาน, อีเมลและโทรศัพท์ของ Corresponding Author]</mark>
+ธีรโชติ เมืองจำนงค์
+
+[ภาควิชา/คณะ — รอยืนยัน]{.mock} มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ · ผู้นิพนธ์ประสานงาน: m.teerachot@outlook.com
+
+## Authors
+
+[Teerachot Muangchamnong]{.mock}
+
+[Department/Faculty — to confirm]{.mock}, King Mongkut's University of Technology North Bangkok · Corresponding author: m.teerachot@outlook.com
 
 ## บทคัดย่อ (ภาษาไทย)
 

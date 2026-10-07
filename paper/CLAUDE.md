@@ -14,7 +14,7 @@ The manuscript is Thai academic prose; English in parentheses on first use of a 
 - Headings use decimal numbering (`### 2.3.1`, `#### 2.3.3.1` where a 4th level was unavoidable).
 - Display equations are `$$...$$`, introduced by `ตามสมการที่ (N)`; variables defined after in a `โดยที่:` bullet list.
 - **Equation numbers are sequential and maintained by hand** — inserting or deleting one renumbers every later one plus its cross-references. Grep `สมการที่ (` and fix all; the references live in `02_methods.md` and `03_results.md`. The journal version carries **9 equations**, all displayed in `02_methods.md` (the thesis copy in `drafts-full/` still has 26).
-- Figure/table placeholders: `<mark>[แทรก รูปที่ N: caption]</mark>`; undecided values: `<mark>[รอกำหนด...]</mark>`. **pandoc silently drops `<mark>` (raw HTML) in docx output** — `build.ps1` warns about remaining ones.
+- **Placeholder content is marked `[...]{.mock}` (inline) or `::: mock` (block), never `<mark>`.** `journal/templates/mock.lua` renders it red in the PDF and bold with a ⟦จำลอง⟧ prefix in .docx, so nothing is silently dropped; `grep -n mock manuscript/drafts/*.md` lists what still has to be replaced. A table whose source carries `<!-- MOCK -->` gets a MOCK DATA watermark from `render-tables.py`. (`<mark>` was the old convention: pandoc drops raw HTML, so it vanished from both outputs.)
 - Captions must not use the word "แสดง" (journal rule).
 
 **Chapter 2 is methods**: it defines procedures and metrics but must not report measured values or conclusions. Defer numbers with "รายงานในบทผลการทดลอง" / "นำเสนอในบทถัดไป" as §2.2.1 and §2.3.2 already do. Equipment specs (marker sizes, camera resolution) are fine in methods; results are not.
@@ -24,8 +24,8 @@ The manuscript is Thai academic prose; English in parentheses on first use of a 
 Full set: `journal/FORMAT_GUIDE.md` and the official docs in `journal/instructions/`. The ones that bite:
 
 - **≤ 9 A4 pages total** on paper, two columns, TH Sarabun New — but the author has confirmed up to **12** is acceptable. As of 2026-08-26 the Word build measures **12**, i.e. the ceiling, with §3.4 still unwritten. Anything added from here needs something else cut.
-- **Every figure AND table must also be submitted as a separate .jpg** → `figures/export/`, `tables/export/`. Tables are authored as pipe-tables in `tables/src/*.md` and rendered by **`render-tables.py`** (the only writer of `tables/export/`); the manuscript embeds the same .jpg, so a table can never drift from its picture. Tables are English-only — Thai text renders as empty boxes in DejaVu Sans.
-- Abstract ≤ 250 words, stand-alone, no citations; keywords must not repeat title words; conclusion 1–2 paragraphs, must not restate the abstract.
+- **Every figure AND table must also be submitted as a separate .jpg** → `figures/export/`, `tables/export/`. Figures are drawn by **`make-figures.py`** (schematics from the geometry constants, plots from the measurement files; fig4 reads `figures/src/fig4_tracks.npz`), so regenerate rather than hand-edit. Tables are authored as pipe-tables in `tables/src/*.md` and rendered by **`render-tables.py`** (the only writer of `tables/export/`); the manuscript embeds the same .jpg, so a table can never drift from its picture. Tables are English-only — Thai text renders as empty boxes in DejaVu Sans.
+- Abstract ≤ 250 words, stand-alone, no citations; keywords must not repeat title words; conclusion 1–2 paragraphs, must not restate the abstract. There is no acknowledgement section (no funding source) — the build scripts list six draft files.
 - References: IEEE, English only, Thai sources get `(in Thai)`; every entry cited in text.
 - Double-blind review by 3 external reviewers — an anonymized copy may be needed.
 

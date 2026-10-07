@@ -51,10 +51,12 @@ if (-not $xelatex) {
 
 $header = Join-Path $paperDir "journal\templates\preview-header.tex"
 if (-not (Test-Path $header)) { Write-Error "preview-header.tex not found at $header" }
+# Placeholder ("mock") spans/divs are coloured rather than dropped - see mock.lua.
+$mockFilter = Join-Path $paperDir "journal\templates\mock.lua"
 
 $names = @(
     "00_frontmatter.md", "01_introduction.md", "02_methods.md",
-    "03_results.md", "04_discussion.md", "05_acknowledgement.md",
+    "03_results.md", "04_discussion.md",
     "06_references.md"
 )
 $drafts = $names | ForEach-Object { Join-Path $paperDir "manuscript\drafts\$_" }
@@ -103,6 +105,7 @@ $tex = Join-Path $work "preview.tex"
     --standalone `
     --to=latex `
     -H $header `
+    --lua-filter=$mockFilter `
     -V documentclass=article `
     -V classoption=twocolumn `
     -V classoption=12pt `

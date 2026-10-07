@@ -91,6 +91,14 @@ def render(name):
         else:
             cell.set_facecolor('white')
 
+    # A source file carrying the line `<!-- MOCK -->` holds placeholder numbers:
+    # stamp the picture so it can never be mistaken for a measurement.
+    src_text = open(os.path.join(SRC, name + '.md'), encoding='utf-8').read()
+    if re.search(r'<!--\s*MOCK\s*-->', src_text):
+        ax.text(0.5, 0.5, 'MOCK DATA', transform=ax.transAxes, ha='center',
+                va='center', fontsize=44, fontweight='bold', color='#BE1E1E',
+                alpha=0.28, rotation=22, zorder=10)
+
     out = os.path.join(EXPORT, name + '.jpg')
     os.makedirs(EXPORT, exist_ok=True)
     fig.savefig(out, dpi=150, bbox_inches='tight', pad_inches=0.02,

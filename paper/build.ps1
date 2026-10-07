@@ -34,7 +34,7 @@ if (-not (Test-Path $reference)) {
 
 $drafts = @(
     "00_frontmatter.md", "01_introduction.md", "02_methods.md",
-    "03_results.md", "04_discussion.md", "05_acknowledgement.md",
+    "03_results.md", "04_discussion.md",
     "06_references.md"
 ) | ForEach-Object { Join-Path $paperDir "manuscript\drafts\$_" }
 
@@ -54,8 +54,10 @@ if ($marks) {
     $marks | Group-Object Path | ForEach-Object { Write-Warning ("  {0}: {1}" -f (Split-Path -Leaf $_.Name), $_.Count) }
 }
 
+$mockFilter = Join-Path $paperDir "journal\templates\mock.lua"
 & $pandoc @drafts `
     --reference-doc=$reference `
+    --lua-filter=$mockFilter `
     --resource-path=$resourcePath `
     -o $out
 if ($LASTEXITCODE -ne 0) { Write-Error "pandoc failed ($LASTEXITCODE)" }
