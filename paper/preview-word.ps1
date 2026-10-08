@@ -46,6 +46,7 @@ $resourcePath = (Join-Path $paperDir "figures\export") + ";" + (Join-Path $paper
 Step "pandoc..."
 & pandoc @inputs --reference-doc="$paperDir\journal\templates\reference.docx" `
     --lua-filter="$paperDir\journal\templates\mock.lua" `
+    --lua-filter="$paperDir\journal\templates\anonymize.lua" -M anonymous=false `
     --resource-path=$resourcePath -o "$work\preview.docx"
 if ($LASTEXITCODE -ne 0) { throw "pandoc failed" }
 

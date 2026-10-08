@@ -12,6 +12,7 @@
 #
 # Format rules live in journal/templates/preview-header.tex, all traceable to
 # journal/FORMAT_GUIDE.md.
+param([switch]$Anonymous)   # -Anonymous: drop the author block (double-blind copy)
 $ErrorActionPreference = "Stop"
 $paperDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -53,6 +54,8 @@ $header = Join-Path $paperDir "journal\templates\preview-header.tex"
 if (-not (Test-Path $header)) { Write-Error "preview-header.tex not found at $header" }
 # Placeholder ("mock") spans/divs are coloured rather than dropped - see mock.lua.
 $mockFilter = Join-Path $paperDir "journal\templates\mock.lua"
+$anonFilter = Join-Path $paperDir "journal\templates\anonymize.lua"
+$anonMeta = if ($Anonymous) { "anonymous=true" } else { "anonymous=false" }
 
 $names = @(
     "00_frontmatter.md", "01_introduction.md", "02_methods.md",
@@ -106,6 +109,7 @@ $tex = Join-Path $work "preview.tex"
     --to=latex `
     -H $header `
     --lua-filter=$mockFilter `
+    --lua-filter=$anonFilter -M $anonMeta `
     -V documentclass=article `
     -V classoption=twocolumn `
     -V classoption=12pt `

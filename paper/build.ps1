@@ -7,6 +7,7 @@
 #   - the two-column body layout (front matter stays single-column,
 #     so columns are applied per-section in Word, not in reference.docx)
 #   - table captions above tables / figure captions below figures
+param([switch]$Anonymous)   # -Anonymous: drop the author block (double-blind copy)
 $ErrorActionPreference = "Stop"
 $paperDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -55,9 +56,12 @@ if ($marks) {
 }
 
 $mockFilter = Join-Path $paperDir "journal\templates\mock.lua"
+$anonFilter = Join-Path $paperDir "journal\templates\anonymize.lua"
+$anonMeta = if ($Anonymous) { "anonymous=true" } else { "anonymous=false" }
 & $pandoc @drafts `
     --reference-doc=$reference `
     --lua-filter=$mockFilter `
+    --lua-filter=$anonFilter -M $anonMeta `
     --resource-path=$resourcePath `
     -o $out
 if ($LASTEXITCODE -ne 0) { Write-Error "pandoc failed ($LASTEXITCODE)" }
