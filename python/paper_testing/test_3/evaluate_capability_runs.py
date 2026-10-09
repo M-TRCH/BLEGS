@@ -3,7 +3,8 @@
 Inputs
 ------
 1. A run sheet the operator fills in, one row per run (default
-   output/log/run_sheet.csv; see run_sheet.example.csv for the format):
+   output/log/run_sheet.csv - pre-filled with the 2.3.3 matrix, rows whose
+   log_file is blank are skipped; run_sheet.example.csv shows filled rows):
 
        log_file, surface, payload_kg, run, ramp_deg, success, distance_m, note
 
@@ -32,6 +33,7 @@ mass + payload, d the tape-measured distance.
     python evaluate_capability_runs.py                       # dry run, prints only
     python evaluate_capability_runs.py --write-table
     python evaluate_capability_runs.py --sheet output/log/run_sheet.example.csv --simulate-pzem
+    python evaluate_capability_runs.py --list-logs       # every robot log with its start time, to fill the sheet
 """
 import argparse
 import csv
@@ -106,6 +108,27 @@ def energy_from_pzem(pz: pd.DataFrame, t0: float, t1: float):
     return e, float(w.v_V.mean()), float(w.i_A.mean()), int(len(w))
 
 
+def list_logs(log_dir: str, pzem_dir: str):
+    """Print every robot log with its wall-clock start, so the operator can match
+    the runs written on the sheet to file names after the session."""
+    pz = load_pzem(pzem_dir)
+    print('%-36s %-19s %7s %6s %6s %4s' % ('log_file', 'start', 'move_s', 'k_bar', 'Hz', 'pzem'))
+    for f in sorted(glob.glob(os.path.join(log_dir, 'movement_*.csv'))):
+        start = log_start_epoch(f)
+        clock = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start))
+        try:
+            m = analyse_log(f)
+        except ValueError:
+            print('%-36s %-19s (no walking ticks)' % (os.path.basename(f), clock)); continue
+        except KeyError:
+            print('%-36s %-19s (old log without v_cmd_mm_s/turn_k_cmd)' % (os.path.basename(f), clock)); continue
+        t0, t1 = start + m['t_first'], start + m['t_last']
+        covered = int(((pz.t_unix >= t0 - 1.0) & (pz.t_unix <= t1 + 1.0)).sum()) if len(pz) else 0
+        print('%-36s %-19s %7.1f %6.3f %6.1f %4s' % (
+            os.path.basename(f), clock, m['t_move'], m['k_bar'], m['rate_hz'],
+            'yes' if covered >= 2 else 'no'))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--sheet', default=os.path.join(LOG_DIR, 'run_sheet.csv'))
@@ -114,7 +137,11 @@ def main():
     ap.add_argument('--write-table', action='store_true', help='rewrite paper/tables/src/table5.md')
     ap.add_argument('--simulate-pzem', action='store_true',
                     help='no meter data: assume %.1f V x %.1f A (output is flagged SIMULATED)' % (SIM_V, SIM_I))
+    ap.add_argument('--list-logs', action='store_true',
+                    help='print every robot log in --log-dir with its start time and exit (to fill the sheet)')
     args = ap.parse_args()
+    if args.list_logs:
+        list_logs(args.log_dir, args.pzem_dir); return
 
     sheet = pd.read_csv(args.sheet, dtype=str, keep_default_na=False)
     pz = load_pzem(args.pzem_dir)
@@ -128,7 +155,7 @@ def main():
             print('  !! missing log %s - row skipped' % r['log_file']); continue
         try:
             m = analyse_log(path)
-        except ValueError as exc:
+        except (ValueError, KeyError) as exc:
             print('  !! %s - row skipped (nothing to measure)' % exc); continue
         start = log_start_epoch(path)
         t0, t1 = start + m['t_first'], start + m['t_last']

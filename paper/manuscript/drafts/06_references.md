@@ -46,4 +46,4 @@ DOI ของ [1] และ [5] ไม่ได้ระบุเพราะห
 
 [18] F. Grimminger, A. Meduri, M. Khadiv, J. Viereck, M. Wüthrich, M. Naveau, V. Berenz, S. Heim, F. Widmaier, T. Flayols, J. Fiene, A. Badri-Spröwitz, and L. Righetti, "An open torque-controlled modular robot architecture for legged locomotion research," *IEEE Robot. Autom. Lett.*, vol. 5, no. 2, pp. 3650–3657, Apr. 2020, doi: 10.1109/LRA.2020.2976639.
 
-[19] Unitree Robotics. (2024). *Go2 quadruped robot — specifications*. [Online]. Available: https://www.unitree.com/go2
+[19] Unitree Robotics, "Go2 quadruped robot — specifications," Unitree. Accessed: Oct. 9, 2026. [Online]. Available: https://www.unitree.com/go2
