@@ -38,7 +38,8 @@ $enc = New-Object System.Text.UTF8Encoding $false
 [System.IO.File]::WriteAllText("$work\_marker.md", "BODYSTARTMARKER`n", $enc)
 $inputs = @()
 foreach ($n in $names) {
-    if ($n -eq "02_methods.md") { $inputs += "$work\_marker.md" }
+    # two-column body starts at "1. บทนำ" (journal FORMAT_GUIDE section 4); pages 1-2 stay single-column
+    if ($n -eq "01_introduction.md") { $inputs += "$work\_marker.md" }
     $inputs += (Join-Path $paperDir "manuscript\drafts\$n")
 }
 $resourcePath = (Join-Path $paperDir "figures\export") + ";" + (Join-Path $paperDir "tables\export")

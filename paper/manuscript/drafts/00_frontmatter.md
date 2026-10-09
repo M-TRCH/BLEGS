@@ -1,6 +1,8 @@
 <!-- หน้า 1: ภาษาไทย | หน้า 2: ภาษาอังกฤษ ตามโครงสร้างบังคับของวารสาร (FORMAT_GUIDE.md ข้อ 4)
      หัวข้อ ## แรกของแต่ละหน้าคือชื่อเรื่องเอง ไม่มีป้ายกำกับ "ชื่อเรื่อง/ผู้นิพนธ์" เพราะ
      บทความจริงไม่มีป้ายเหล่านั้น — Word ตอนเก็บงานแค่เปลี่ยนสไตล์ชื่อเรื่องเป็น 18 pt
+     ตัวแบ่งหน้าก่อนชื่อเรื่องอังกฤษเป็น raw block (openxml สำหรับ .docx, latex สำหรับ preview.pdf)
+     ให้หน้า 2 เริ่มที่ Title ตามคู่มือ — pandoc ทิ้ง raw block ที่ไม่ตรงรูปแบบปลายทางเอง
 
      บล็อกผู้นิพนธ์อยู่ใน ::: author ... ::: เพื่อให้ build -Anonymous ตัดออกได้ทั้งก้อน
      (double-blind review) — journal/templates/anonymize.lua
@@ -16,7 +18,7 @@
 ::: author
 ธีรโชติ เมืองจำนงค์
 
-[ภาควิชา/คณะ — รอยืนยัน]{.mock} มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ · ผู้นิพนธ์ประสานงาน: m.teerachot@outlook.com
+วิทยาลัยเทคโนโลยีอุตสาหกรรม มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ · ผู้นิพนธ์ประสานงาน: m.teerachot@outlook.com
 :::
 
 ## บทคัดย่อ
@@ -25,12 +27,20 @@
 
 **คำสำคัญ:** กลไกห้าชิ้นส่วน การเรียนรู้ของเครื่อง เครื่องหมายอ้างอิงเชิงภาพ ภาระโหลด
 
+```{=openxml}
+<w:p><w:r><w:br w:type="page"/></w:r></w:p>
+```
+
+```{=latex}
+\newpage
+```
+
 ## Data-Driven Compensation of Mechanical Deflection in a Lightweight Quadruped Robot with a High Torque-to-Weight Ratio
 
 ::: author
-[Teerachot Muangchamnong]{.mock}
+Teerachot Mueangchamnong
 
-[Department/Faculty — to confirm]{.mock}, King Mongkut's University of Technology North Bangkok · Corresponding author: m.teerachot@outlook.com
+College of Industrial Technology, King Mongkut's University of Technology North Bangkok · Corresponding author: m.teerachot@outlook.com
 :::
 
 ## Abstract
