@@ -92,6 +92,20 @@ class Pzem:
         frame = self.ser.read(3 + 16 + 2)
         return parse_response(frame, self.addr)
 
+    def configured_address(self):
+        """Ask the meter (on the 0xF8 general address) which slave address it holds.
+
+        Holding registers 0x0000..0x0003: high-V alarm, low-V alarm, slave
+        address, current-range code.  The unit on this bench shipped as address 2.
+        """
+        body = struct.pack('>BBHH', 0xF8, 0x03, 0x0000, 0x0004)
+        self.ser.reset_input_buffer()
+        self.ser.write(body + struct.pack('<H', crc16(body)))
+        frame = self.ser.read(3 + 8 + 2)
+        if len(frame) < 13 or frame[1] != 0x03 or struct.unpack('<H', frame[-2:])[0] != crc16(frame[:-2]):
+            raise ValueError('no valid reply to the address query')
+        return struct.unpack('>4H', frame[3:11])[2]
+
     def close(self):
         self.ser.close()
 
@@ -129,9 +143,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--port', help='serial port of the USB-TTL/RS485 adapter, e.g. COM5')
     ap.add_argument('--baud', type=int, default=9600)
-    ap.add_argument('--addr', type=int, default=1)
+    ap.add_argument('--addr', type=int, default=0,
+                    help='Modbus slave address; default 0 = auto (try 1, then the 0xF8 general '
+                         'address, which every PZEM answers when it is alone on the bus)')
     ap.add_argument('--interval', type=float, default=0.5,
                     help='poll period in seconds (default 0.5; the meter refreshes ~1 Hz)')
+    ap.add_argument('--seconds', type=float, default=0.0,
+                    help='stop after this many seconds (default 0 = run until Ctrl-C)')
     ap.add_argument('--out', help='CSV path (default output/log/pzem_<timestamp>.csv)')
     ap.add_argument('--simulate', action='store_true', help='no hardware: synthetic readings')
     ap.add_argument('--sim-seconds', type=float, default=60.0)
@@ -140,6 +158,8 @@ def main():
 
     if not args.simulate and not args.port:
         ap.error('--port is required (or use --simulate)')
+    if args.simulate and not args.seconds:
+        args.seconds = args.sim_seconds
 
     os.makedirs(LOG_DIR, exist_ok=True)
     stamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -156,9 +176,17 @@ def main():
         print('SIMULATED meter -> %s' % out)
     else:
         offset = 0.0
-        meter = Pzem(args.port, args.baud, args.addr)
-        print('PZEM-003 on %s (%d 8N2, addr %d) -> %s' % (args.port, args.baud, args.addr, out))
-    print('Ctrl-C to stop.')
+        meter = Pzem(args.port, args.baud, args.addr or 1)
+        if not args.addr:
+            # Auto: try 1; if silent, ask on the 0xF8 general address which slave
+            # address the meter really holds (this unit shipped as 2) and use it.
+            try:
+                meter.read()
+            except Exception:
+                meter.addr = meter.configured_address()
+                meter.read()                     # raises if the meter is really absent
+        print('PZEM-003 on %s (%d 8N2, addr 0x%02X) -> %s' % (args.port, args.baud, meter.addr, out))
+    print('Ctrl-C to stop.' if not args.seconds else 'running for %.0f s' % args.seconds)
 
     n_polls = n_changed = n_err = 0
     prev = None
@@ -192,7 +220,7 @@ def main():
                 fh.flush()
                 print('\r  %7.2f V  %5.2f A  %6.1f W   polls %d  changed %d  errors %d'
                       % (v, i, p, n_polls, n_changed, n_err), end='', flush=True)
-                if args.simulate and (t_poll - t_start) >= args.sim_seconds:
+                if args.seconds and (t_poll - t_start) >= args.seconds:
                     break
                 time.sleep(max(0.0, args.interval - (time.time() - t_poll)))
     except KeyboardInterrupt:
