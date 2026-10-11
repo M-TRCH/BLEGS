@@ -190,7 +190,8 @@ def fig2():
     fig = new_fig(6.5); ax = fig.add_subplot(111); ax.set_aspect('equal')
     for p, q in ((pa, c), (c, pe), (pb, d), (d, pe)):
         ax.plot([p[0], q[0]], [p[1], q[1]], color='k', lw=1.6)
-    ax.plot([pa[0], pb[0]], [pa[1], pb[1]], color='0.4', lw=1.0, ls='--')
+    # +x reference through both motor axes, extended past them so each angle has a datum
+    ax.plot([pa[0] - 40, pb[0] + 40], [0, 0], color='0.4', lw=0.8, ls='--')
     for p in (pa, pb, c, d):
         ax.add_patch(Circle(p, 4, fc='w', ec='k', lw=0.8, zorder=5))
     ax.add_patch(Circle(pe, 4, fc='k', ec='k', zorder=5))
@@ -210,7 +211,8 @@ def fig2():
         ang = np.degrees(np.arctan2(q[1] - p[1], q[0] - p[0]))
         th = np.radians(np.linspace(min(0, ang), max(0, ang), 30))
         ax.plot(p[0] + 22 * np.cos(th), p[1] + 22 * np.sin(th), color='0.3', lw=0.6)
-        ax.text(p[0] + sgn * 30, p[1] - 22, name, ha='center', fontsize=8)
+        mid = np.radians(ang / 2)                                  # label on the arc's bisector
+        ax.text(p[0] + 36 * np.cos(mid), p[1] + 36 * np.sin(mid), name, ha='center', va='center', fontsize=8)
     ax.set_xlabel('x (mm)'); ax.set_ylabel('y (mm)')
     ax.set_xlim(-150, 150); ax.set_ylim(-250, 30)
     save(fig, 'fig2', svg=True)
