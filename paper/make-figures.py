@@ -251,14 +251,14 @@ def fig3():
     for i, (name, off) in enumerate(legs):
         y = len(legs) - 1 - i
         for s0 in (off - 1, off, off + 1):
-            ax.add_patch(Rectangle((s0, y - 0.3), STANCE_RATIO, 0.6, fc='k', ec='none'))
+            ax.add_patch(Rectangle((s0, y - 0.3), STANCE_RATIO, 0.6, fc='k', ec='k', lw=0.5))
             ax.add_patch(Rectangle((s0 + STANCE_RATIO, y - 0.3), 1 - STANCE_RATIO, 0.6,
                                    fc='w', ec='k', lw=0.5))
         ax.text(-0.05, y, name, ha='right', va='center', fontsize=7)
     ax.set_xlim(0, 2); ax.set_ylim(-0.6, len(legs) + 0.7)
     ax.set_yticks([]); ax.set_xticks([0, 0.5, 1, 1.5, 2])
     ax.set_xlabel('gait cycle', labelpad=1)
-    ax.add_patch(Rectangle((0.02, 4.0), 0.12, 0.3, fc='k', clip_on=False))
+    ax.add_patch(Rectangle((0.02, 4.0), 0.12, 0.3, fc='k', ec='k', lw=0.5, clip_on=False))
     ax.text(0.18, 4.15, 'stance', va='center', fontsize=7)
     ax.add_patch(Rectangle((1.25, 4.0), 0.12, 0.3, fc='w', ec='k', lw=0.5, clip_on=False))
     ax.text(1.41, 4.15, 'swing', va='center', fontsize=7)
@@ -277,14 +277,8 @@ def fig3():
                 arrowprops=dict(arrowstyle='-|>', lw=0.6, color='k', mutation_scale=7))
     ax.text(0, HOME[1] - 11, 'stance', ha='center', va='top', fontsize=7)
     ax.text(0, apex + 3, 'swing', ha='center', va='bottom', fontsize=7)
-    ax.annotate('', xy=(-STEP - 12, apex + 10), xytext=(-STEP - 52, apex + 10),
-                arrowprops=dict(arrowstyle='-|>', lw=0.6, color='k', mutation_scale=7))
-    ax.text(-STEP - 32, apex + 14, 'body', ha='center', va='bottom', fontsize=7)
-    ax.annotate('', xy=(STEP + 9, apex), xytext=(STEP + 9, HOME[1]),
-                arrowprops=dict(arrowstyle='<|-|>', lw=0.6, color='k', mutation_scale=6))
-    ax.text(STEP + 13, (apex + HOME[1]) / 2, '%.1f mm' % lift, va='center', fontsize=7)
     ax.set_xlabel('x (mm)'); ax.set_ylabel('y (mm)')
-    ax.set_xlim(-STEP - 56, STEP + 42); ax.set_ylim(HOME[1] - 26, apex + 26)
+    ax.set_xlim(-STEP - 40, STEP + 40); ax.set_ylim(HOME[1] - 24, apex + 20)
     ax.text(-0.3, 1.0, '(b)', fontsize=9, fontweight='bold', transform=ax.transAxes)
     save(fig, 'fig3', svg=True)
 
