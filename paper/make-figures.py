@@ -199,7 +199,7 @@ def fig2():
     ax.text(pb[0] + 6, pb[1] + 9, r'$P_B$', ha='left', **lab)
     ax.text(c[0] - 8, c[1], r'$C$', ha='right', va='center', **lab)
     ax.text(d[0] + 8, d[1], r'$D$', ha='left', va='center', **lab)
-    ax.text(pe[0], pe[1] - 14, r'$P_E$ (foot), home pose (0, $-$220) mm', ha='center', fontsize=7)
+    ax.text(pe[0], pe[1] - 14, r'$P_E$ (0, $-$220)', ha='center', fontsize=8)
     ax.text((pa[0] + c[0]) / 2 - 14, (pa[1] + c[1]) / 2, r'$L_{AC}$', ha='right', fontsize=7)
     ax.text((pb[0] + d[0]) / 2 + 14, (pb[1] + d[1]) / 2, r'$L_{BD}$', ha='left', fontsize=7)
     ax.text((c[0] + pe[0]) / 2 - 12, (c[1] + pe[1]) / 2, r'$L_{CE}$', ha='right', fontsize=7)
@@ -213,7 +213,7 @@ def fig2():
         ax.text(p[0] + sgn * 30, p[1] - 22, name, ha='center', fontsize=8)
     ax.set_xlabel('x (mm)'); ax.set_ylabel('y (mm)')
     ax.set_xlim(-150, 150); ax.set_ylim(-250, 30)
-    save(fig, 'fig2')
+    save(fig, 'fig2', svg=True)
 
 
 # ---------------------------------------------------------------- fig3 ----
