@@ -115,6 +115,11 @@ def fig1():
     def tagbox(ax, x, y, s, z=6):
         ax.add_patch(Rectangle((x - s / 2, y - s / 2), s, s, fc='white', ec=INK, lw=0.5, zorder=z))
 
+    def camera(ax, x_lens, y, w):
+        """One camera glyph for both panels: body w x 0.78w with the lens tip at (x_lens, y), looking +x."""
+        ax.add_patch(Rectangle((x_lens - 0.3 * w - w, y - 0.39 * w), w, 0.78 * w, fc=LIGHT, ec=INK, lw=0.5))
+        ax.add_patch(Rectangle((x_lens - 0.3 * w, y - 0.2 * w), 0.3 * w, 0.4 * w, fc=LIGHT, ec=INK, lw=0.5))
+
     # (a) left: the leg as the camera sees it, in real mm; the payload hangs from the foot
     ax = fig.add_subplot(gs[0, 0]); ax.set_aspect('equal'); ax.axis('off')
     ax.set_xlim(-125, 125); ax.set_ylim(-308, 52)
@@ -138,9 +143,9 @@ def fig1():
     ax.text(-122, 50, '(a)', fontsize=9, fontweight='bold', va='top', color=INK)
 
     # (a) right: the camera stands 1.2 m in front of that plane, axis normal to it
-    ax = fig.add_subplot(gs[0, 1]); ax.axis('off'); ax.set_xlim(0, 1); ax.set_ylim(0, 1)
-    ax.add_patch(Rectangle((0.10, 0.49), 0.16, 0.12, fc=LIGHT, ec=INK, lw=0.5))   # camera
-    ax.add_patch(Rectangle((0.26, 0.52), 0.045, 0.06, fc=LIGHT, ec=INK, lw=0.5))
+    ax = fig.add_subplot(gs[0, 1]); ax.axis('off'); ax.set_aspect('equal')
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+    camera(ax, 0.305, 0.55, 0.16)
     ax.plot([0.305, 0.82], [0.55, 0.55], color=INK, lw=0.5, ls='--')               # sight line, lens to plane
     ax.plot([0.82, 0.82], [0.30, 0.80], color=INK, lw=2.0)                         # leg plane, edge-on
     ax.text((0.305 + 0.82) / 2, 0.55, '%.1f m' % CAMERA_M, **lab, **onl)
@@ -171,10 +176,10 @@ def fig1():
             fontsize=7, color=MID)
     ax.annotate('', xy=(rx + 48, ry), xytext=(rx + 30, ry),
                 arrowprops=dict(arrowstyle='-|>', lw=1.0, color=INK, mutation_scale=7))
-    ax.add_patch(Rectangle((-48, ry - 3.5), 9, 7, fc=LIGHT, ec=INK, lw=0.5))       # camera
+    camera(ax, -39, ry, 9)
     ax.plot([-39, -3.5], [ry, ry], color=INK, lw=0.5, ls='--')                     # camera to the first tag row
     ax.text((-39 - 3.5) / 2, ry, '1.8 m', **lab, **onl)
-    ax.text(-43.5, ry + 6, 'camera', ha='center', va='bottom', **lab)
+    ax.text(-45, ry + 6, 'camera', ha='center', va='bottom', **lab)
     ax.text(-56, 94, '(b)', fontsize=9, fontweight='bold', va='top', color=INK)
     save(fig, 'fig1', svg=True)
 
