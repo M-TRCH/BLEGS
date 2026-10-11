@@ -20,21 +20,26 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# DejaVu Sans has no Thai glyphs, and table1 still carries Thai placeholders.
-matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Leelawadee UI',
-                                          'Tahoma', 'Arial']
+# Journal look (template-example.pdf and the published TCI1 papers): TH Sarabun New,
+# thin black grid on every cell, bold header row, no shading, first column left,
+# numbers centred.  Maths symbols fall back to DejaVu because Sarabun has no Greek.
+matplotlib.rcParams.update({
+    'font.family': 'TH Sarabun New', 'mathtext.fontset': 'custom',
+    'mathtext.rm': 'TH Sarabun New', 'mathtext.it': 'TH Sarabun New:italic',
+    'mathtext.bf': 'TH Sarabun New:bold', 'mathtext.fallback': 'stixsans',
+})
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(_DIR, 'tables', 'src')
 EXPORT = os.path.join(_DIR, 'tables', 'export')
 
-HEADER_BG = '#E8E8E8'
-GRID = '#B4B4B4'
-FONT_PT = 13
-ROW_PT = 34            # row height in points
-PAD_PT = 18            # horizontal padding per cell
-CHAR_PT = 7.6          # approximate advance width per character at FONT_PT
-BOLD_K = 1.10          # the header row is bold, so it runs wider
+GRID = 'black'
+GRID_PT = 0.6
+FONT_PT = 16           # Sarabun runs small: 16 pt here reads like 12 pt in the column
+ROW_PT = 30            # row height in points
+PAD_PT = 14            # horizontal padding per cell
+CHAR_PT = 6.4          # approximate advance width per character at FONT_PT
+BOLD_K = 1.08          # the header row is bold, so it runs wider
 
 
 def parse(path):
@@ -81,15 +86,16 @@ def render(name):
     tbl.auto_set_font_size(False)
     tbl.set_fontsize(FONT_PT)
 
-    for (row, _col), cell in tbl.get_celld().items():
+    for (row, col), cell in tbl.get_celld().items():
         cell.set_edgecolor(GRID)
-        cell.set_linewidth(0.8)
+        cell.set_linewidth(GRID_PT)
         cell.set_height(1.0 / len(rows))
+        cell.set_facecolor('white')
         if row == 0:
-            cell.set_facecolor(HEADER_BG)
             cell.set_text_props(fontweight='bold')
-        else:
-            cell.set_facecolor('white')
+        elif col == 0:                              # row labels read left-aligned
+            cell.get_text().set_ha('left')
+            cell.PAD = PAD_PT / 2 / widths_pt[0]
 
     # A source file carrying the line `<!-- MOCK -->` holds placeholder numbers:
     # stamp the picture so it can never be mistaken for a measurement.
