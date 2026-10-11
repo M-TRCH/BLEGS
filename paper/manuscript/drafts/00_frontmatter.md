@@ -1,25 +1,36 @@
-<!-- หน้า 1: ภาษาไทย | หน้า 2: ภาษาอังกฤษ ตามโครงสร้างบังคับของวารสาร (FORMAT_GUIDE.md ข้อ 4)
-     หัวข้อ ## แรกของแต่ละหน้าคือชื่อเรื่องเอง ไม่มีป้ายกำกับ "ชื่อเรื่อง/ผู้นิพนธ์" เพราะ
-     บทความจริงไม่มีป้ายเหล่านั้น — Word ตอนเก็บงานแค่เปลี่ยนสไตล์ชื่อเรื่องเป็น 18 pt
+<!-- หน้า 1: ภาษาไทย | หน้า 2: ภาษาอังกฤษ ตามโครงสร้างบังคับของวารสาร (Template.pdf / FORMAT_GUIDE.md ข้อ 4)
+     ชื่อเรื่อง ผู้นิพนธ์ สังกัด และบรรทัดผู้นิพนธ์ประสานงานอยู่ใน fenced div ที่ระบุ custom-style
+     ซึ่งตรงกับสไตล์ใน journal/templates/reference.docx (Title 18 pt หนา ชิดซ้าย · Author 14 ·
+     Affiliation/Corresponding 12) — journal/templates/journal.lua ทำแบบเดียวกันให้ preview.pdf
+
+     บล็อกผู้นิพนธ์อยู่ใน :::: author ... :::: เพื่อให้ build -Anonymous ตัดออกได้ทั้งก้อน
+     (double-blind review) — journal/templates/anonymize.lua
      ตัวแบ่งหน้าก่อนชื่อเรื่องอังกฤษเป็น raw block (openxml สำหรับ .docx, latex สำหรับ preview.pdf)
      ให้หน้า 2 เริ่มที่ Title ตามคู่มือ — pandoc ทิ้ง raw block ที่ไม่ตรงรูปแบบปลายทางเอง
-
-     บล็อกผู้นิพนธ์อยู่ใน ::: author ... ::: เพื่อให้ build -Anonymous ตัดออกได้ทั้งก้อน
-     (double-blind review) — journal/templates/anonymize.lua
 
      ค่าที่ยังไม่ยืนยันเขียนเป็น [...]{.mock} (สีแดงใน PDF) ก่อนส่งต้องไม่เหลือสักจุด
      ตรวจด้วย: grep -n mock manuscript/drafts/*.md
 
      บทคัดย่อ: ≤ 250 คำ ตามที่ Word นับ (ไทยใช้ตัวตัดคำของ Word) · 1 ย่อหน้า · ห้ามอ้างอิง
-     คำสำคัญ 3–5 คำ ห้ามซ้ำคำในชื่อเรื่อง — สคริปต์ตรวจแล้ว 8 ต.ค. 2026 -->
+     คำสำคัญ 3–5 คำ ห้ามซ้ำคำในชื่อเรื่อง · ไทยคั่นด้วยเว้นวรรค อังกฤษคั่นด้วยจุลภาค — สคริปต์ตรวจแล้ว 8 ต.ค. 2026 -->
 
-## การชดเชยความคลาดเคลื่อนเชิงกลด้วยแนวทางเชิงข้อมูลสำหรับหุ่นยนต์สี่ขาน้ำหนักเบาที่มีอัตราส่วนแรงบิดต่อน้ำหนักสูง
-
-::: author
-ธีรโชติ เมืองจำนงค์
-
-วิทยาลัยเทคโนโลยีอุตสาหกรรม มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ · ผู้นิพนธ์ประสานงาน: m.teerachot@outlook.com
+::: {custom-style="Title"}
+การชดเชยความคลาดเคลื่อนเชิงกลด้วยแนวทางเชิงข้อมูลสำหรับหุ่นยนต์สี่ขาน้ำหนักเบาที่มีอัตราส่วนแรงบิดต่อน้ำหนักสูง
 :::
+
+:::: author
+::: {custom-style="Author"}
+ธีรโชติ เมืองจำนงค์\*
+:::
+
+::: {custom-style="Affiliation"}
+วิทยาลัยเทคโนโลยีอุตสาหกรรม มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ กรุงเทพมหานคร
+:::
+
+::: {custom-style="Corresponding"}
+\* ผู้นิพนธ์ประสานงาน โทรศัพท์ [รอหมายเลข]{.mock} อีเมล: m.teerachot@outlook.com
+:::
+::::
 
 ## บทคัดย่อ
 
@@ -35,13 +46,23 @@
 \newpage
 ```
 
-## Data-Driven Compensation of Mechanical Deflection in a Lightweight Quadruped Robot with a High Torque-to-Weight Ratio
-
-::: author
-Teerachot Mueangchamnong
-
-College of Industrial Technology, King Mongkut's University of Technology North Bangkok · Corresponding author: m.teerachot@outlook.com
+::: {custom-style="Title"}
+Data-Driven Compensation of Mechanical Deflection in a Lightweight Quadruped Robot with a High Torque-to-Weight Ratio
 :::
+
+:::: author
+::: {custom-style="Author"}
+Teerachot Mueangchamnong\*
+:::
+
+::: {custom-style="Affiliation"}
+College of Industrial Technology, King Mongkut's University of Technology North Bangkok, Bangkok, Thailand
+:::
+
+::: {custom-style="Corresponding"}
+\* Corresponding Author, Tel. [pending]{.mock}, E-mail: m.teerachot@outlook.com
+:::
+::::
 
 ## Abstract
 

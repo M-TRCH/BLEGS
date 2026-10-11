@@ -56,10 +56,12 @@ if ($marks) {
 }
 
 $mockFilter = Join-Path $paperDir "journal\templates\mock.lua"
+$journalFilter = Join-Path $paperDir "journal\templates\journal.lua"
 $anonFilter = Join-Path $paperDir "journal\templates\anonymize.lua"
 $anonMeta = if ($Anonymous) { "anonymous=true" } else { "anonymous=false" }
 & $pandoc @drafts `
     --reference-doc=$reference `
+    --lua-filter=$journalFilter `
     --lua-filter=$mockFilter `
     --lua-filter=$anonFilter -M $anonMeta `
     --resource-path=$resourcePath `

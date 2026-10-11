@@ -53,6 +53,22 @@ def patch_document(xml: str) -> str:
 
     out = re.sub(r'<w:r(?: [^>]*)?>.*?</w:r>', tag_run, xml, flags=re.S)
     print(f'  document.xml: {tagged[0]} Thai runs tagged cs + th-TH')
+
+    # the journal sets equations at 10 pt: give every OMML run an explicit size
+    sz = '<w:sz w:val="20"/><w:szCs w:val="20"/>'
+
+    def size_math(m):
+        run = m.group(0)
+        if '<w:sz ' in run:
+            return run
+        if '<w:rPr>' in run:
+            return run.replace('<w:rPr>', '<w:rPr>' + sz, 1)
+        if '</m:rPr>' in run:
+            return run.replace('</m:rPr>', '</m:rPr><w:rPr>' + sz + '</w:rPr>', 1)
+        return run.replace('<m:r>', '<m:r><w:rPr>' + sz + '</w:rPr>', 1)
+
+    out, n = re.subn(r'<m:r>.*?</m:r>', size_math, out, flags=re.S)
+    print(f'  document.xml: {n} maths runs set to 10 pt')
     return out
 
 

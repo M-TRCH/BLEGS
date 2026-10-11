@@ -46,6 +46,7 @@ $resourcePath = (Join-Path $paperDir "figures\export") + ";" + (Join-Path $paper
 
 Step "pandoc..."
 & pandoc @inputs --reference-doc="$paperDir\journal\templates\reference.docx" `
+    --lua-filter="$paperDir\journal\templates\journal.lua" `
     --lua-filter="$paperDir\journal\templates\mock.lua" `
     --lua-filter="$paperDir\journal\templates\anonymize.lua" -M anonymous=false `
     --resource-path=$resourcePath -o "$work\preview.docx"
@@ -73,8 +74,9 @@ try {
 
     foreach ($s in $doc.Sections) {
         $ps = $s.PageSetup
-        $ps.TopMargin = 3.0*$CM; $ps.BottomMargin = 3.0*$CM
-        $ps.LeftMargin = 2.5*$CM; $ps.RightMargin = 2.5*$CM
+        # Template.pdf table 1: top 3.5, bottom 3, left 3, right 2.5 cm
+        $ps.TopMargin = 3.5*$CM; $ps.BottomMargin = 3.0*$CM
+        $ps.LeftMargin = 3.0*$CM; $ps.RightMargin = 2.5*$CM
     }
     Step "margins set"
 

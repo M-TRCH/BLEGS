@@ -54,6 +54,7 @@ $header = Join-Path $paperDir "journal\templates\preview-header.tex"
 if (-not (Test-Path $header)) { Write-Error "preview-header.tex not found at $header" }
 # Placeholder ("mock") spans/divs are coloured rather than dropped - see mock.lua.
 $mockFilter = Join-Path $paperDir "journal\templates\mock.lua"
+$journalFilter = Join-Path $paperDir "journal\templates\journal.lua"
 $anonFilter = Join-Path $paperDir "journal\templates\anonymize.lua"
 $anonMeta = if ($Anonymous) { "anonymous=true" } else { "anonymous=false" }
 
@@ -108,6 +109,7 @@ $tex = Join-Path $work "preview.tex"
     --standalone `
     --to=latex `
     -H $header `
+    --lua-filter=$journalFilter `
     --lua-filter=$mockFilter `
     --lua-filter=$anonFilter -M $anonMeta `
     -V documentclass=article `

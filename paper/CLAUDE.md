@@ -34,7 +34,7 @@ Full set: `journal/FORMAT_GUIDE.md` and the official docs in `journal/instructio
 
 Two paths over the same drafts:
 
-- **`build.ps1`** → `manuscript/submission/manuscript.docx` — the submission. pandoc with `journal/templates/reference.docx`. What pandoc cannot do (finish in Word): equation numbers flush right, per-section column layout, caption placement. reference.docx rules — incl. the Thai-font trap (`w:cs`/`w:szCs`) — are in `journal/README.md`.
+- **`build.ps1`** → `manuscript/submission/manuscript.docx` — the submission. pandoc with `journal/templates/reference.docx`. `journal/templates/journal.lua` (first filter in all three scripts) numbers the equations flush right (tab stops of the Equation style), styles table/figure captions, inserts the template's blank lines and maps the front-matter divs to the Title/Author/Affiliation/Corresponding styles; `patch-thai-docx.py` sets OMML runs to 10 pt. Left for Word: moving figures next to their first reference and page-by-page checks. Margins 3.5/3/3/2.5 cm per `journal/instructions/template-example.pdf`.
 - **`preview.ps1`** → `manuscript/preview.pdf` — journal-formatted PDF for judging length and looks while writing. pandoc → XeLaTeX with `journal/templates/preview-header.tex`; **no Word needed**, so cutting can be done entirely in Markdown. Prints the page count against the 9-page limit.
 
 **`preview-word.ps1` renders the true two-column layout through Word** (pandoc -> Word COM
