@@ -301,12 +301,11 @@ def fig4(tracks=FIG4_TRACKS):
         ax.plot(on[:, 0], on[:, 1], '.', color='k', ms=1.2, label='POLY4 on')
         ax.set_title(title, fontsize=8, pad=3)
         ax.set_xlabel('x (mm)'); ax.set_xlim(-48, 48); ax.set_ylim(-232, -128)
-        ax.grid(True, lw=0.3, alpha=0.5)
     axes[0].set_ylabel('y (mm)')
     h, l = axes[0].get_legend_handles_labels()
     fig.legend(h, l, loc='lower center', ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.06),
                markerscale=5, handlelength=1.6)
-    save(fig, 'fig4')
+    save(fig, 'fig4', svg=True)
 
 
 # ---------------------------------------------------------------- fig5 ----
@@ -331,8 +330,7 @@ def fig5():
     ax.set_ylabel('distance along the runway (cm)')
     ax.set_xlim(-60, 25); ax.set_ylim(-5, 175)
     ax.legend(loc='lower left', frameon=False)
-    ax.grid(True, lw=0.3, alpha=0.5)
-    save(fig, 'fig5')
+    save(fig, 'fig5', svg=True)
 
 
 if __name__ == '__main__':
