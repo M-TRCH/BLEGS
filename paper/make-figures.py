@@ -51,11 +51,17 @@ CAMERA_M, LENS_MM, FPS = 1.2, 25, 60
 # 19.9 x 46.6 cm frame 31 cm above the floor, camera behind the robot 1.8 m high
 GRID_W, GRID_L, TAG_FRAME = 80.0, 120.0, (19.9, 46.6)
 
+# MATLAB look: Helvetica/Arial everywhere (maths included), a box of thin black axes
+# with the ticks pointing inwards on all four sides, no grid, black on white.
 plt.rcParams.update({
-    # TH Sarabun New = the journal's text font; it runs small, so sizes are ~1.3x DejaVu's
-    'font.family': 'TH Sarabun New', 'font.size': 10, 'mathtext.fontset': 'dejavusans', 'axes.linewidth': 0.6,
-    'xtick.labelsize': 7, 'ytick.labelsize': 7, 'legend.fontsize': 7,
-    'axes.labelsize': 8, 'lines.linewidth': 1.0,
+    'font.family': 'Arial', 'font.size': 8,
+    'mathtext.fontset': 'custom', 'mathtext.rm': 'Arial', 'mathtext.it': 'Arial:italic',
+    'mathtext.bf': 'Arial:bold',
+    'axes.linewidth': 0.5, 'axes.edgecolor': 'black', 'axes.labelcolor': 'black',
+    'xtick.direction': 'in', 'ytick.direction': 'in', 'xtick.top': True, 'ytick.right': True,
+    'xtick.major.width': 0.5, 'ytick.major.width': 0.5, 'xtick.major.size': 3, 'ytick.major.size': 3,
+    'xtick.labelsize': 7, 'ytick.labelsize': 7, 'legend.fontsize': 7, 'axes.labelsize': 8,
+    'axes.grid': False, 'lines.linewidth': 1.0, 'legend.frameon': False,
 })
 
 
@@ -99,25 +105,23 @@ def _linkage_points():
 def fig1():
     """(a) the single-leg rig as the camera sees it, plus a top view of where the
     camera stands; (b) the walking runway from above, robot walking to the right."""
-    INK, MID, LIGHT = '#222222', '#8c8c8c', '#e4e4e4'
+    INK, MID, LIGHT = 'black', '#808080', '#e6e6e6'
     fig = new_fig(10.0)
     gs = fig.add_gridspec(2, 2, width_ratios=[0.56, 0.44], height_ratios=[1.12, 1.0],
                           hspace=0.12, wspace=0.0, left=0.01, right=0.99, top=0.99, bottom=0.01)
-    lab = dict(fontsize=9, color=INK)
+    lab = dict(fontsize=7, color=INK)
     onl = dict(ha='center', va='center', bbox=dict(fc='white', ec='none', pad=1.0))   # text sitting on a line
 
     def tagbox(ax, x, y, s, z=6):
-        ax.add_patch(FancyBboxPatch((x - s / 2, y - s / 2), s, s, boxstyle='round,pad=0,rounding_size=%g' % (s * 0.18),
-                                    fc='white', ec=INK, lw=0.7, zorder=z))
+        ax.add_patch(Rectangle((x - s / 2, y - s / 2), s, s, fc='white', ec=INK, lw=0.5, zorder=z))
 
     # (a) left: the leg as the camera sees it, in real mm; the payload hangs from the foot
     ax = fig.add_subplot(gs[0, 0]); ax.set_aspect('equal'); ax.axis('off')
     ax.set_xlim(-125, 125); ax.set_ylim(-308, 52)
     pa, pb, c, d, pe = _linkage_points()
-    ax.add_patch(FancyBboxPatch((-68, -14), 136, 32, boxstyle='round,pad=0,rounding_size=5',
-                                fc=LIGHT, ec='none'))                             # motor block
+    ax.add_patch(Rectangle((-68, -14), 136, 32, fc=LIGHT, ec=INK, lw=0.5))        # motor block
     for p, q in ((pa, c), (c, pe), (pb, d), (d, pe)):
-        ax.plot([p[0], q[0]], [p[1], q[1]], color=INK, lw=1.5, solid_capstyle='round', zorder=3)
+        ax.plot([p[0], q[0]], [p[1], q[1]], color=INK, lw=1.2, solid_capstyle='round', zorder=3)
     for p in (pa, pb, c, d, pe):                                # id0, id1 on the motor axes,
         tagbox(ax, p[0], p[1], 20)                              # id2, id3 on the elbows, id4 on the foot
     ax.text(pa[0], 22, 'id0', ha='center', va='bottom', **lab)
@@ -125,29 +129,27 @@ def fig1():
     ax.text(c[0] - 15, c[1], 'id2', ha='right', va='center', **lab)
     ax.text(d[0] + 15, d[1], 'id3', ha='left', va='center', **lab)
     ax.text(pe[0] + 15, pe[1], 'id4', va='center', **lab)
-    ax.plot([0, 0], [pe[1] - 10, -256], color=INK, lw=0.7)                        # cord
-    ax.add_patch(FancyBboxPatch((-18, -284), 36, 28, boxstyle='round,pad=0,rounding_size=3',
-                                fc=MID, ec='none'))
+    ax.plot([0, 0], [pe[1] - 10, -256], color=INK, lw=0.5)                        # cord
+    ax.add_patch(Rectangle((-18, -284), 36, 28, fc=LIGHT, ec=INK, lw=0.5))
     ax.text(24, -270, '0-3 kg', va='center', **lab)
     ax.annotate('', xy=(96, -300), xytext=(96, -250),
                 arrowprops=dict(arrowstyle='-|>', lw=0.7, color=MID))             # gravity
-    ax.text(102, -275, 'g', va='center', fontsize=9, color=MID, style='italic')
-    ax.text(-122, 50, '(a)', fontsize=11, fontweight='bold', va='top', color=INK)
+    ax.text(102, -275, 'g', va='center', fontsize=7, color=MID, style='italic')
+    ax.text(-122, 50, '(a)', fontsize=9, fontweight='bold', va='top', color=INK)
 
     # (a) right: the camera stands 1.2 m in front of that plane, axis normal to it
     ax = fig.add_subplot(gs[0, 1]); ax.axis('off'); ax.set_xlim(0, 1); ax.set_ylim(0, 1)
-    ax.add_patch(FancyBboxPatch((0.10, 0.49), 0.16, 0.12, boxstyle='round,pad=0,rounding_size=0.02',
-                                fc=INK, ec='none'))                               # camera
-    ax.add_patch(Rectangle((0.26, 0.52), 0.045, 0.06, fc=INK, ec='none'))
-    ax.plot([0.33, 0.78], [0.55, 0.55], color=MID, lw=0.7, ls=(0, (3, 2)))         # sight line
-    ax.plot([0.82, 0.82], [0.30, 0.80], color=INK, lw=2.4, solid_capstyle='round')  # leg plane, edge-on
+    ax.add_patch(Rectangle((0.10, 0.49), 0.16, 0.12, fc=LIGHT, ec=INK, lw=0.5))   # camera
+    ax.add_patch(Rectangle((0.26, 0.52), 0.045, 0.06, fc=LIGHT, ec=INK, lw=0.5))
+    ax.plot([0.33, 0.78], [0.55, 0.55], color=INK, lw=0.5, ls='--')                # sight line
+    ax.plot([0.82, 0.82], [0.30, 0.80], color=INK, lw=2.0)                         # leg plane, edge-on
     ax.text(0.555, 0.55, '%.1f m' % CAMERA_M, **lab, **onl)
     ax.text(0.18, 0.64, 'camera', ha='center', va='bottom', **lab)
 
     # (b) the runway from above, robot walking to the right, camera behind it
     ax = fig.add_subplot(gs[1, :]); ax.set_aspect('equal'); ax.axis('off')
     ax.set_xlim(-58, 148); ax.set_ylim(-30, 94)
-    ax.add_patch(Rectangle((0, 0), GRID_L, GRID_W, fc='none', ec=MID, lw=0.6, ls=(0, (1.5, 2.5))))
+    ax.add_patch(Rectangle((0, 0), GRID_L, GRID_W, fc='none', ec=INK, lw=0.5, ls=':'))
     # runway ids (apriltag_runway_tilt_check.py): left side 4/6/8/10, right side 5/7/9/11,
     # rows every 40 cm from the camera end; drawn with the walk direction to the right,
     # so the robot's left side is the top edge
@@ -155,27 +157,25 @@ def fig1():
         for y, tid in ((GRID_W, 4 + 2 * row), (0, 5 + 2 * row)):
             tagbox(ax, x, y, 7)
             ax.text(x, y + (7 if y else -7), str(tid), ha='center', va='bottom' if y else 'top',
-                    fontsize=8, color=INK)
+                    fontsize=7, color=INK)
     ax.text(GRID_L / 2, -17, '%.0f x %.0f cm' % (GRID_L, GRID_W), ha='center', va='top', **lab)
     rx, ry = 34, GRID_W / 2                                 # robot body
-    ax.add_patch(FancyBboxPatch((rx - 26, ry - 12), 52, 24, boxstyle='round,pad=0,rounding_size=3',
-                                fc=LIGHT, ec='none'))
+    ax.add_patch(Rectangle((rx - 26, ry - 12), 52, 24, fc=LIGHT, ec=INK, lw=0.5))
     hx, hy = TAG_FRAME[1] / 2, TAG_FRAME[0] / 2
     # back tags: 0/1 rear, 2/3 front; 0/2 on the robot's left (top edge here)
     for tid, (ddx, ddy) in enumerate(((-hx, hy), (-hx, -hy), (hx, hy), (hx, -hy))):
         tagbox(ax, rx + ddx, ry + ddy, 5.5)
         ax.text(rx + ddx + (6 if ddx > 0 else -6), ry + ddy, str(tid), ha='left' if ddx > 0 else 'right',
-                va='center', fontsize=8, color=INK)
+                va='center', fontsize=7, color=INK)
     ax.text(rx, ry - 15, '%.1f x %.1f cm' % (TAG_FRAME[1], TAG_FRAME[0]), ha='center', va='top',
-            fontsize=8, color=MID)
+            fontsize=7, color=MID)
     ax.annotate('', xy=(rx + 48, ry), xytext=(rx + 30, ry),
                 arrowprops=dict(arrowstyle='-|>', lw=1.0, color=INK, mutation_scale=7))
-    ax.add_patch(FancyBboxPatch((-48, ry - 3.5), 9, 7, boxstyle='round,pad=0,rounding_size=1',
-                                fc=INK, ec='none'))                               # camera
-    ax.plot([-38, -6], [ry, ry], color=MID, lw=0.7, ls=(0, (3, 2)))
+    ax.add_patch(Rectangle((-48, ry - 3.5), 9, 7, fc=LIGHT, ec=INK, lw=0.5))       # camera
+    ax.plot([-38, -6], [ry, ry], color=INK, lw=0.5, ls='--')
     ax.text(-22, ry, '1.8 m', **lab, **onl)
     ax.text(-43.5, ry + 6, 'camera', ha='center', va='bottom', **lab)
-    ax.text(-56, 94, '(b)', fontsize=11, fontweight='bold', va='top', color=INK)
+    ax.text(-56, 94, '(b)', fontsize=9, fontweight='bold', va='top', color=INK)
     save(fig, 'fig1', svg=True)
 
 
