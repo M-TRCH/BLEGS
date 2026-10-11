@@ -28,7 +28,7 @@
 :::
 
 ::: {custom-style="Corresponding"}
-\* ผู้นิพนธ์ประสานงาน โทรศัพท์ [รอหมายเลข]{.mock} อีเมล: m.teerachot@outlook.com
+\* ผู้นิพนธ์ประสานงาน โทรศัพท์ 08 4556 0911 อีเมล: m.teerachot@outlook.com
 :::
 ::::
 
@@ -60,7 +60,7 @@ College of Industrial Technology, King Mongkut's University of Technology North 
 :::
 
 ::: {custom-style="Corresponding"}
-\* Corresponding Author, Tel. [pending]{.mock}, E-mail: m.teerachot@outlook.com
+\* Corresponding Author, Tel. 08 4556 0911, E-mail: m.teerachot@outlook.com
 :::
 ::::
 

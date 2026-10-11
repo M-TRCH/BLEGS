@@ -321,7 +321,7 @@ def fig5():
         if not os.path.exists(path):
             print('fig5: missing', path); continue
         rows = [r for r in csv.DictReader(open(path, encoding='utf-8')) if r['is_held'] == '0']
-        m = float(rows[0]['scale_est'])
+        m = float(np.median([float(r['scale_est']) for r in rows]))   # equation (5): median over frames
         x = np.array([float(r['x_cm']) for r in rows]) / m
         y = np.array([float(r['y_cm']) for r in rows]) / m
         ax.plot(x - x[0], y - y[0], color=col, ls=ls, lw=1.2, label=lab)
