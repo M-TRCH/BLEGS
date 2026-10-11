@@ -110,7 +110,7 @@ def fig1():
     gs = fig.add_gridspec(2, 2, width_ratios=[0.56, 0.44], height_ratios=[1.12, 1.0],
                           hspace=0.12, wspace=0.0, left=0.01, right=0.99, top=0.99, bottom=0.01)
     lab = dict(fontsize=7, color=INK)
-    onl = dict(ha='center', va='center', bbox=dict(fc='white', ec='none', pad=1.0))   # text sitting on a line
+    onl = dict(ha='center', va='center_baseline', bbox=dict(fc='white', ec='none', pad=1.0))   # text sitting on a line
 
     def tagbox(ax, x, y, s, z=6):
         ax.add_patch(Rectangle((x - s / 2, y - s / 2), s, s, fc='white', ec=INK, lw=0.5, zorder=z))
@@ -141,9 +141,9 @@ def fig1():
     ax = fig.add_subplot(gs[0, 1]); ax.axis('off'); ax.set_xlim(0, 1); ax.set_ylim(0, 1)
     ax.add_patch(Rectangle((0.10, 0.49), 0.16, 0.12, fc=LIGHT, ec=INK, lw=0.5))   # camera
     ax.add_patch(Rectangle((0.26, 0.52), 0.045, 0.06, fc=LIGHT, ec=INK, lw=0.5))
-    ax.plot([0.33, 0.78], [0.55, 0.55], color=INK, lw=0.5, ls='--')                # sight line
+    ax.plot([0.305, 0.82], [0.55, 0.55], color=INK, lw=0.5, ls='--')               # sight line, lens to plane
     ax.plot([0.82, 0.82], [0.30, 0.80], color=INK, lw=2.0)                         # leg plane, edge-on
-    ax.text(0.555, 0.55, '%.1f m' % CAMERA_M, **lab, **onl)
+    ax.text((0.305 + 0.82) / 2, 0.55, '%.1f m' % CAMERA_M, **lab, **onl)
     ax.text(0.18, 0.64, 'camera', ha='center', va='bottom', **lab)
 
     # (b) the runway from above, robot walking to the right, camera behind it
@@ -172,8 +172,8 @@ def fig1():
     ax.annotate('', xy=(rx + 48, ry), xytext=(rx + 30, ry),
                 arrowprops=dict(arrowstyle='-|>', lw=1.0, color=INK, mutation_scale=7))
     ax.add_patch(Rectangle((-48, ry - 3.5), 9, 7, fc=LIGHT, ec=INK, lw=0.5))       # camera
-    ax.plot([-38, -6], [ry, ry], color=INK, lw=0.5, ls='--')
-    ax.text(-22, ry, '1.8 m', **lab, **onl)
+    ax.plot([-39, -3.5], [ry, ry], color=INK, lw=0.5, ls='--')                     # camera to the first tag row
+    ax.text((-39 - 3.5) / 2, ry, '1.8 m', **lab, **onl)
     ax.text(-43.5, ry + 6, 'camera', ha='center', va='bottom', **lab)
     ax.text(-56, 94, '(b)', fontsize=9, fontweight='bold', va='top', color=INK)
     save(fig, 'fig1', svg=True)
