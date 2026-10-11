@@ -24,7 +24,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, FancyBboxPatch, Circle
+from matplotlib.patches import Rectangle, FancyBboxPatch, Circle, Arc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 EXPORT = os.path.join(HERE, 'figures', 'export')
@@ -209,10 +209,11 @@ def fig2():
     # joint angles measured from +x at each motor, as in equation (3)
     for p, q, name, sgn in ((pa, c, r'$\theta_A$', 1), (pb, d, r'$\theta_B$', -1)):
         ang = np.degrees(np.arctan2(q[1] - p[1], q[0] - p[0]))
-        th = np.radians(np.linspace(min(0, ang), max(0, ang), 30))
-        ax.plot(p[0] + 22 * np.cos(th), p[1] + 22 * np.sin(th), color='0.3', lw=0.6)
+        R_ARC = 24.0                                               # same radius for both arcs
+        ax.add_patch(Arc(p, 2 * R_ARC, 2 * R_ARC, theta1=min(0, ang), theta2=max(0, ang),
+                         color='0.3', lw=0.6, zorder=4))
         mid = np.radians(ang / 2)                                  # label on the arc's bisector
-        ax.text(p[0] + 36 * np.cos(mid), p[1] + 36 * np.sin(mid), name, ha='center', va='center', fontsize=8)
+        ax.text(p[0] + 38 * np.cos(mid), p[1] + 38 * np.sin(mid), name, ha='center', va='center', fontsize=8)
     ax.set_xlabel('x (mm)'); ax.set_ylabel('y (mm)')
     ax.set_xlim(-150, 150); ax.set_ylim(-250, 30)
     save(fig, 'fig2', svg=True)
