@@ -259,12 +259,11 @@ def fig3():
     ax.set_yticks([]); ax.set_xticks([0, 0.5, 1, 1.5, 2])
     ax.set_xlabel('gait cycle', labelpad=1)
     ax.add_patch(Rectangle((0.02, 4.0), 0.12, 0.3, fc='k', clip_on=False))
-    ax.text(0.18, 4.15, 'stance, %.0f%% of the cycle' % (100 * STANCE_RATIO),
-            va='center', fontsize=6)
+    ax.text(0.18, 4.15, 'stance', va='center', fontsize=7)
     ax.add_patch(Rectangle((1.25, 4.0), 0.12, 0.3, fc='w', ec='k', lw=0.5, clip_on=False))
-    ax.text(1.41, 4.15, 'swing', va='center', fontsize=6)
-    for s in ('top', 'right'): ax.spines[s].set_visible(False)
-    ax.text(-0.16, 1.0, '(a)', fontsize=8, fontweight='bold', transform=ax.transAxes)
+    ax.text(1.41, 4.15, 'swing', va='center', fontsize=7)
+    ax.tick_params(axis='x', top=False)                       # the legend sits on the top edge
+    ax.text(-0.16, 1.0, '(a)', fontsize=9, fontweight='bold', transform=ax.transAxes)
 
     # (b) the foot path in the leg frame: the foot pushes back along the ground
     # during stance, so the body advances the other way.  Dashed = the Bezier curve,
@@ -275,21 +274,19 @@ def fig3():
     ax.plot(st[:, 0], st[:, 1], 'k-', lw=1.4); ax.plot(curve[:, 0], curve[:, 1], 'k--', lw=1.0)
     ax.plot(st[:, 0], st[:, 1], 'k.', ms=3); ax.plot(sw[:, 0], sw[:, 1], 'k.', ms=3)
     ax.annotate('', xy=(-STEP + 3, HOME[1] - 7), xytext=(STEP - 3, HOME[1] - 7),
-                arrowprops=dict(arrowstyle='-|>', lw=0.7, color='k'))
-    ax.text(0, HOME[1] - 11, 'stance: foot pushes back', ha='center', va='top', fontsize=6)
-    ax.text(0, apex + 3, 'swing', ha='center', va='bottom', fontsize=6)
+                arrowprops=dict(arrowstyle='-|>', lw=0.6, color='k', mutation_scale=7))
+    ax.text(0, HOME[1] - 11, 'stance', ha='center', va='top', fontsize=7)
+    ax.text(0, apex + 3, 'swing', ha='center', va='bottom', fontsize=7)
     ax.annotate('', xy=(-STEP - 12, apex + 10), xytext=(-STEP - 52, apex + 10),
-                arrowprops=dict(arrowstyle='-|>', lw=0.8, color='0.4'))
-    ax.text(-STEP - 32, apex + 14, 'body', ha='center', va='bottom', fontsize=6, color='0.4')
+                arrowprops=dict(arrowstyle='-|>', lw=0.6, color='k', mutation_scale=7))
+    ax.text(-STEP - 32, apex + 14, 'body', ha='center', va='bottom', fontsize=7)
     ax.annotate('', xy=(STEP + 9, apex), xytext=(STEP + 9, HOME[1]),
-                arrowprops=dict(arrowstyle='<->', lw=0.6, color='k'))
-    ax.text(STEP + 13, (apex + HOME[1]) / 2, '%.1f mm' % lift, va='center', fontsize=6)
-    ax.text(STEP + 40, apex + 24, '%d points\nper cycle' % STEPS, ha='right', va='top',
-            fontsize=5.5, color='0.4')
+                arrowprops=dict(arrowstyle='<|-|>', lw=0.6, color='k', mutation_scale=6))
+    ax.text(STEP + 13, (apex + HOME[1]) / 2, '%.1f mm' % lift, va='center', fontsize=7)
     ax.set_xlabel('x (mm)'); ax.set_ylabel('y (mm)')
     ax.set_xlim(-STEP - 56, STEP + 42); ax.set_ylim(HOME[1] - 26, apex + 26)
-    ax.text(-0.3, 1.0, '(b)', fontsize=8, fontweight='bold', transform=ax.transAxes)
-    save(fig, 'fig3')
+    ax.text(-0.3, 1.0, '(b)', fontsize=9, fontweight='bold', transform=ax.transAxes)
+    save(fig, 'fig3', svg=True)
 
 
 # ---------------------------------------------------------------- fig4 ----
