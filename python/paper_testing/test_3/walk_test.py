@@ -2075,7 +2075,7 @@ def rc_drive_mode() -> bool:
     print("\n" + "=" * 70)
     print(f"  RC DRIVE MODE  [{('SIM' if SIMULATION_MODE else 'HW')}]")
     print("  Hold [W]/[S] drive | [A]/[D] steer while driving, pivot on their own")
-    print("  [E] EMERGENCY STOP | [Q] exit | [SPACE] pause | [+]/[-] speed")
+    print("  [E] EMERGENCY STOP | [Q] exit | [SPACE] pause = settle to a four-foot stand | [+]/[-] speed")
     print("  Tune: [T/G] lift | [R/F] step cap | [Y/H] cadence | [U/J] height")
     print("        [I/K] turn strength | [N/M] stance ratio | [P] print | [0] reset")
     print(f"  Idle = march in place | speed = {RC_V_DEFAULT:.0f} mm/s")
@@ -2129,6 +2129,7 @@ def rc_drive_mode() -> bool:
     prev_heading_hold = False
     exiting = False
     exit_deadline = 0.0
+    pausing = False       # [SPACE] pressed: decelerating, stand follows once v and k are 0
     dt_nom = 1.0 / UPDATE_RATE
 
     control_paused = False
@@ -2157,8 +2158,21 @@ def rc_drive_mode() -> bool:
                     rc_v_cmd = max(rc_v_cmd - RC_V_STEP, RC_V_MIN)
                     print(f"\n  Speed: {rc_v_cmd:.0f} mm/s")
                 elif k == b' ':
-                    control_paused = not control_paused
-                    print("\n  PAUSED" if control_paused else "\n  RESUMED")
+                    # Freezing the gait mid-cycle left swing feet in the air and
+                    # tipped the robot (12 Oct 2026).  Pause now decelerates like
+                    # [Q] and then parks all four feet at the stance point; resume
+                    # restarts the cycle at the trot phase offsets, which is the
+                    # same all-feet-down state RC starts from.
+                    if control_paused:
+                        control_paused = False
+                        pausing = False
+                        step_indices = {
+                            leg_id: int(get_gait_phase_offset(leg_id, 'trot') * gait['steps'])
+                            for leg_id in ('FR', 'FL', 'RR', 'RL')}
+                        print("\n  RESUMED - marching")
+                    elif not pausing and not exiting:
+                        pausing = True
+                        print("\n  PAUSING - decelerating to a stand...")
                 elif k in (b'e', b'x'):
                     print("\n  EMERGENCY STOP!")
                     emergency_stop_all()
@@ -2266,7 +2280,7 @@ def rc_drive_mode() -> bool:
                     elif t_now - held_since[k] > RC_STICKY_MAX_S:
                         held[k] = False
 
-            if exiting:
+            if exiting or pausing:
                 w_held = s_held = a_held = d_held = False
             else:
                 w_held, s_held = held[b'w'], held[b's']
@@ -2297,6 +2311,21 @@ def rc_drive_mode() -> bool:
             if not walking:
                 v_smooth = 0.0
                 turn_cmd = 0.0
+            n_stance = int(gait['steps'] * gait['ratio'])
+            if (pausing and not walking
+                    and all(idx < n_stance for idx in step_indices.values())):
+                # Park only on a tick where every leg is in its stance phase (the
+                # trot has such windows every half cycle), so no foot is dropped
+                # from mid-swing.  The stand is the same one [Q] ends in.
+                stand_pos = (DEFAULT_STANCE_OFFSET_X, gait['height'])
+                for leg_id in ('FR', 'FL', 'RR', 'RL'):
+                    update_leg_position(leg_id, stand_pos, rc_flat_offsets[leg_id])
+                log_v_cmd, log_turn_cmd = 0.0, 0.0
+                log_control_step("RC")
+                pausing = False
+                control_paused = True
+                print("\n  PAUSED - standing on four feet; [SPACE] resumes, [Q] exits")
+                continue
             # Pivot: the sides step equal and opposite, so the body spins about
             # its centre (radius 0).  Latched, so that a turn left over from an
             # arc does not spin the robot as the drive keys are released.
