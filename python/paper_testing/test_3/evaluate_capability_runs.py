@@ -8,7 +8,9 @@ Inputs
 
        log_file, surface, payload_kg, run, ramp_deg, success, distance_m, note
 
-   log_file   name of the robot log walk_test.py wrote for that run
+   log_file   name of the robot log walk_test.py wrote for that run; a file that
+              holds several runs walked back to back (>= 15 s without a drive
+              command between them) is addressed as  name.csv#2  for its 2nd run
    surface    flat | ramp | compliant | rough   (free text is fine, it is grouped as-is)
    payload_kg 0 or 3
    ramp_deg   blank except for ramp runs
@@ -74,13 +76,39 @@ def load_pzem(pzem_dir: str) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True).sort_values('t_unix')
 
 
-def analyse_log(path: str):
+SPLIT_GAP_S = 15.0   # no drive command for this long = the robot was carried back to the start
+
+
+def split_log(path: str):
+    """A log may hold several runs walked back to back (walk, carry back, walk again).
+    Returns (name, segments): the robot log name and a list of (t_first, t_last)
+    walking windows separated by >= SPLIT_GAP_S without any drive command."""
+    d = pd.read_csv(path)
+    tick = d.groupby('time').agg(v=('v_cmd_mm_s', 'first'), k=('turn_k_cmd', 'first'))
+    t = tick.index.to_numpy()
+    moving = ((tick.v.abs() > 1.0) | (tick.k.abs() > 0.05)).to_numpy()
+    tm = t[moving]
+    if len(tm) == 0:
+        raise ValueError('no walking ticks in %s' % os.path.basename(path))
+    cuts = np.where(np.diff(tm) >= SPLIT_GAP_S)[0]
+    bounds = [0] + list(cuts + 1) + [len(tm)]
+    return [(float(tm[a]), float(tm[b - 1])) for a, b in zip(bounds[:-1], bounds[1:])]
+
+
+def analyse_log(path: str, segment: int = 0):
+    """segment = 1-based run inside the file (0 = treat the whole file as one run)."""
     d = pd.read_csv(path)
     tick = d.groupby('time').agg(v=('v_cmd_mm_s', 'first'), k=('turn_k_cmd', 'first'))
     t = tick.index.to_numpy()
     moving = (tick.v.abs() > 1.0) | (tick.k.abs() > 0.05)
     if not moving.any():
         raise ValueError('no walking ticks in %s' % os.path.basename(path))
+    if segment:
+        segs = split_log(path)
+        if segment > len(segs):
+            raise ValueError('%s has only %d run(s), #%d asked' % (os.path.basename(path), len(segs), segment))
+        a, b = segs[segment - 1]
+        moving &= (tick.index >= a) & (tick.index <= b)
     tm = t[moving.to_numpy()]
     dt = np.diff(t)
     return dict(
@@ -92,6 +120,15 @@ def analyse_log(path: str):
         sum_i_motor_A=float((d.groupby('time')[['current_A_mA', 'current_B_mA']]
                              .sum().sum(axis=1) / 1000.0)[moving.to_numpy()].mean()),
     )
+
+
+def parse_log_ref(ref: str):
+    """'movement_x.csv' -> (file, 0); 'movement_x.csv#3' -> (file, 3) = third run in it."""
+    ref = ref.strip()
+    if '#' in ref:
+        f, n = ref.rsplit('#', 1)
+        return f.strip(), int(n)
+    return ref, 0
 
 
 def energy_from_pzem(pz: pd.DataFrame, t0: float, t1: float):
@@ -117,16 +154,20 @@ def list_logs(log_dir: str, pzem_dir: str):
         start = log_start_epoch(f)
         clock = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start))
         try:
-            m = analyse_log(f)
+            segs = split_log(f)
         except ValueError:
             print('%-36s %-19s (no walking ticks)' % (os.path.basename(f), clock)); continue
         except KeyError:
             print('%-36s %-19s (old log without v_cmd_mm_s/turn_k_cmd)' % (os.path.basename(f), clock)); continue
-        t0, t1 = start + m['t_first'], start + m['t_last']
-        covered = int(((pz.t_unix >= t0 - 1.0) & (pz.t_unix <= t1 + 1.0)).sum()) if len(pz) else 0
-        print('%-36s %-19s %7.1f %6.3f %6.1f %4s' % (
-            os.path.basename(f), clock, m['t_move'], m['k_bar'], m['rate_hz'],
-            'yes' if covered >= 2 else 'no'))
+        # one line per run inside the file; a single-run file keeps its plain name
+        for n in range(1, len(segs) + 1):
+            m = analyse_log(f, n if len(segs) > 1 else 0)
+            t0, t1 = start + m['t_first'], start + m['t_last']
+            covered = int(((pz.t_unix >= t0 - 1.0) & (pz.t_unix <= t1 + 1.0)).sum()) if len(pz) else 0
+            name = os.path.basename(f) + ('#%d' % n if len(segs) > 1 else '')
+            print('%-36s %-19s %7.1f %6.3f %6.1f %4s' % (
+                name, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t0)), m['t_move'], m['k_bar'],
+                m['rate_hz'], 'yes' if covered >= 2 else 'no'))
 
 
 def main():
@@ -150,11 +191,12 @@ def main():
     for _, r in sheet.iterrows():
         if not r['log_file'].strip():
             continue
-        path = os.path.join(args.log_dir, r['log_file'].strip())
+        fname, seg = parse_log_ref(r['log_file'])
+        path = os.path.join(args.log_dir, fname)
         if not os.path.exists(path):
             print('  !! missing log %s - row skipped' % r['log_file']); continue
         try:
-            m = analyse_log(path)
+            m = analyse_log(path, seg)
         except (ValueError, KeyError) as exc:
             print('  !! %s - row skipped (nothing to measure)' % exc); continue
         start = log_start_epoch(path)
