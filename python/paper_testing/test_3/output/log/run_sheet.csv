@@ -1,8 +1,8 @@
 log_file,surface,payload_kg,run,ramp_deg,success,distance_m,note
-,Flat (reference),0,1,,,,pre-filled 9 Oct 2026 - fill log_file (evaluate_capability_runs.py --list-logs) success 1/0 and distance_m (tape; along the surface); blank log_file = row skipped
-,Flat (reference),0,2,,,,
-,Flat (reference),0,3,,,,
-,Flat (reference),0,4,,,,
+movement_+0mm_20261012_184851.csv,Flat (reference),0,1,,1,2.40,flat no-load run 1; 12 Oct; separate file
+movement_+0mm_20261012_191341.csv#1,Flat (reference),0,2,,1,2.40,flat no-load run 2; 12 Oct; first run in the file
+movement_+0mm_20261012_191341.csv#2,Flat (reference),0,3,,1,2.40,run 3
+movement_+0mm_20261012_191341.csv#3,Flat (reference),0,4,,1,2.40,run 4 (the robot tipped AFTER this run during the old freeze-pause - data unaffected)
 ,Flat (reference),0,5,,,,
 ,Flat (reference),3,1,,,,
 ,Flat (reference),3,2,,,,
