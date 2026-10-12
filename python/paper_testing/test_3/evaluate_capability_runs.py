@@ -76,7 +76,8 @@ def load_pzem(pzem_dir: str) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True).sort_values('t_unix')
 
 
-SPLIT_GAP_S = 15.0   # no drive command for this long = the robot was carried back to the start
+SPLIT_GAP_S = 10.0   # no drive command for this long = the robot was carried back to the start
+                     # (12 Oct: carry-backs took 14-24 s, steering pauses inside a run <= 7 s)
 
 
 def split_log(path: str):

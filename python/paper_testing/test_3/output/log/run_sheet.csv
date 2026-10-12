@@ -1,9 +1,13 @@
 log_file,surface,payload_kg,run,ramp_deg,success,distance_m,note
-movement_+0mm_20261012_184851.csv,Flat (reference),0,1,,1,2.40,flat no-load run 1; 12 Oct; separate file
-movement_+0mm_20261012_191341.csv#1,Flat (reference),0,2,,1,2.40,flat no-load run 2; 12 Oct; first run in the file
-movement_+0mm_20261012_191341.csv#2,Flat (reference),0,3,,1,2.40,run 3
-movement_+0mm_20261012_191341.csv#3,Flat (reference),0,4,,1,2.40,run 4 (the robot tipped AFTER this run during the old freeze-pause - data unaffected)
-,Flat (reference),0,5,,,,
+movement_+0mm_20261012_193611.csv#1,Flat (reference),0,1,,1,2.40,12 Oct second set; pause-to-stand between runs
+movement_+0mm_20261012_193611.csv#2,Flat (reference),0,2,,1,2.40,12 Oct second set; pause-to-stand between runs
+movement_+0mm_20261012_193611.csv#3,Flat (reference),0,3,,1,2.40,12 Oct second set; pause-to-stand between runs
+movement_+0mm_20261012_193611.csv#4,Flat (reference),0,4,,1,2.40,12 Oct second set; pause-to-stand between runs
+movement_+0mm_20261012_193611.csv#5,Flat (reference),0,5,,1,2.40,12 Oct second set; pause-to-stand between runs
+movement_+0mm_20261012_184851.csv,Flat (reference) shakedown,0,1,,1,2.40,flat no-load run 1; 12 Oct; separate file
+movement_+0mm_20261012_191341.csv#1,Flat (reference) shakedown,0,2,,1,2.40,flat no-load run 2; 12 Oct; first run in the file
+movement_+0mm_20261012_191341.csv#2,Flat (reference) shakedown,0,3,,1,2.40,run 3
+movement_+0mm_20261012_191341.csv#3,Flat (reference) shakedown,0,4,,1,2.40,run 4 (the robot tipped AFTER this run during the old freeze-pause - data unaffected)
 ,Flat (reference),3,1,,,,
 ,Flat (reference),3,2,,,,
 ,Flat (reference),3,3,,,,
