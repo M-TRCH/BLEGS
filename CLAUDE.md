@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Continuing the paper work in a new session or account? Read [`HANDOFF.md`](HANDOFF.md) first, then `paper/action-plan.md`.** HANDOFF.md holds what the previous session's memory knew but the repo did not (machine toolchain, robot facts that are easy to get wrong, the proven field procedure, results so far, what is left).
+
 ## What this is
 
 **BLEGS** (Bio-inspired LEGged System) — the whole quadruped-robot project in one repo, three tiers. This repo was renamed from `BLEGS_Actuator-Unit` when the paper moved in; never create a new repo under the old name or GitHub's redirect breaks.
