@@ -79,11 +79,11 @@ movement_+0mm_20261014_163121.csv#5,Flat (reference),3,5,,1,2.40,14 Oct; out-and
 ,Compliant (foam),3,3,,,,
 ,Compliant (foam),3,4,,,,
 ,Compliant (foam),3,5,,,,
-,Rough (gravel),0,1,,,,
-,Rough (gravel),0,2,,,,
-,Rough (gravel),0,3,,,,
-,Rough (gravel),0,4,,,,
-,Rough (gravel),0,5,,,,
+movement_+0mm_20261021_120234.csv#1,Rough (gravel),0,1,,1,2.40,21 Oct; out-and-back alternating direction; gravel (file 12:01 was a 3 s trial)
+movement_+0mm_20261021_120234.csv#2,Rough (gravel),0,2,,1,2.40,21 Oct; out-and-back alternating direction; gravel (file 12:01 was a 3 s trial)
+movement_+0mm_20261021_120234.csv#3,Rough (gravel),0,3,,1,2.40,21 Oct; out-and-back alternating direction; gravel (file 12:01 was a 3 s trial)
+movement_+0mm_20261021_120234.csv#4,Rough (gravel),0,4,,1,2.40,21 Oct; out-and-back alternating direction; gravel (file 12:01 was a 3 s trial)
+movement_+0mm_20261021_120234.csv#5,Rough (gravel),0,5,,1,2.40,21 Oct; out-and-back alternating direction; gravel (file 12:01 was a 3 s trial)
 ,Rough (gravel),3,1,,,,
 ,Rough (gravel),3,2,,,,
 ,Rough (gravel),3,3,,,,
