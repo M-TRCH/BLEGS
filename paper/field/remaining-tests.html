@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>การทดสอบที่เหลือ §2.3.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 12mm 13mm; }
+  * { box-sizing: border-box; }
+  :root { --ink:#1b1f24; --mute:#5b6470; --line:#d5dae0; --low:#2f7d4f; --mid:#b7791f; --high:#c0392b; --tint:#f4f6f8; }
+  html, body { margin:0; background:#fff; }
+  body { font-family:'IBM Plex Sans Thai', sans-serif; color:var(--ink); font-size:9.6pt; line-height:1.42; }
+  h1 { font-size:15pt; font-weight:700; margin:0; }
+  .sub { color:var(--mute); font-size:8.8pt; margin:1mm 0 3mm; }
+  h2 { font-size:10.6pt; font-weight:600; margin:3.2mm 0 1.4mm; padding-bottom:0.8mm; border-bottom:1.2px solid var(--ink); }
+  p { margin:0 0 1.4mm; }
+  table { width:100%; border-collapse:collapse; font-size:9pt; }
+  th, td { text-align:left; vertical-align:top; padding:1.1mm 1.6mm; border-bottom:1px solid var(--line); }
+  th { font-weight:600; background:var(--tint); }
+  td.n { width:6mm; font-weight:600; text-align:center; }
+  .tag { display:inline-block; font-size:8pt; font-weight:600; padding:0 1.6mm; border-radius:2mm; color:#fff; white-space:nowrap; }
+  .low{background:var(--low)} .mid{background:var(--mid)} .high{background:var(--high)}
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:5mm; }
+  ul { margin:0; padding-left:4.2mm; }
+  li { margin-bottom:0.9mm; }
+  .box { border:1.4px solid var(--high); border-radius:1.5mm; padding:1.8mm 2.4mm; margin-top:2mm; }
+  .box b { color:var(--high); }
+  .todo { background:var(--tint); border-radius:1.5mm; padding:1.8mm 2.4mm; }
+  code { font-family:'IBM Plex Sans Thai', monospace; font-size:8.6pt; background:var(--tint); padding:0 1mm; border-radius:1mm; }
+  .foot { color:var(--mute); font-size:8pt; margin-top:2.5mm; }
+</style>
+</head>
+<body>
+
+<h1>การทดสอบที่เหลือ — §2.3.3 ขีดจำกัดทางกายภาพ (หุ่นยนต์ BLEGS)</h1>
+<div class="sub">ฉบับ 21 ต.ค. 2026 · เรียงจากความเสี่ยงต่อฮาร์ดแวร์ต่ำไปสูง · ทุกรอบเปิดการชดเชย POLY4 · โหมด RC บังคับด้วยแป้นพิมพ์</div>
+
+<h2>สิ่งที่ได้แล้ว</h2>
+<p>พื้นราบ 2.4 m ครบทั้งสองโหลด (14 ต.ค.) — <b>ไม่มีโหลด</b> 6/6 รอบ 7.3 cm/s กระแสบัส 1.86 A CoT 5.9 · <b>3 กก.</b> 5/5 รอบ 6.1 cm/s 3.13 A CoT 8.2</p>
+
+<h2>ลำดับการทดสอบ</h2>
+<table>
+  <tr><th></th><th>การทดสอบ</th><th>รอบ</th><th>ความเสี่ยง</th><th>สิ่งที่ต้องระวัง</th></tr>
+  <tr><td class="n">1</td><td>เดินตรงวงเปิด §2.3.2 ซ้ำ (ไม่บังคับ) เปิด/ปิดชดเชย × 2 โหลด</td><td>5 ต่อเงื่อนไข</td><td><span class="tag low">ต่ำมาก</span></td><td>พื้นเดิมที่ผ่านมาแล้ว 11/11 รอบ · ช่วยแก้จุดอ่อน n = 1 ของเปเปอร์</td></tr>
+  <tr><td class="n">2</td><td>โฟม EVA ไม่มีโหลด + วัดการยุบตัวตอนยืนนิ่ง</td><td>5</td><td><span class="tag low">ต่ำ</span></td><td>เท้าจม ออกแรงมากขึ้นเล็กน้อย · ล้มก็มีโฟมรับ</td></tr>
+  <tr><td class="n">3</td><td>โฟม EVA 3 กก.</td><td>5</td><td><span class="tag mid">ต่ำ–กลาง</span></td><td>พื้นราบก็ดึง 3.13 A อยู่แล้ว ระยะห่างถึงฟิวส์ 5 A แคบลง</td></tr>
+  <tr><td class="n">4</td><td>กรวด 20–40 mm ไม่มีโหลด</td><td>5</td><td><span class="tag mid">กลาง</span></td><td>เท้าลื่น/ติดหิน หินขัดกลไก ล้มบนพื้นแข็ง</td></tr>
+  <tr><td class="n">5</td><td>กรวด 3 กก.</td><td>5</td><td><span class="tag high">กลาง–สูง</span></td><td>เหมือนข้อ 4 แต่แรงกระแทกและกระแสสูงกว่า</td></tr>
+  <tr><td class="n">6</td><td>ทางลาด ไม่มีโหลด ไล่ 5° → 10° → 15° → 20° → 25°</td><td>≤ 5 ต่อมุม</td><td><span class="tag high">สูง</span></td><td>ตั้งใจดันจนล้มเหลว · มอเตอร์ค้างแบกแรงบิดนาน · ไถลลงทางลาด</td></tr>
+  <tr><td class="n">7</td><td>ทางลาด 3 กก. ไม่เกินมุมที่ข้อ 6 ไม่ผ่าน</td><td>≤ 5 ต่อมุม</td><td><span class="tag high">สูงสุด</span></td><td>ทำท้ายสุด ถ้าฮาร์ดแวร์เสียหาย ข้อมูลข้อ 1–5 ก็ได้ครบแล้ว</td></tr>
+</table>
+
+<div class="cols">
+<div>
+<h2>ทางลาด: หามุมชันสูงสุด ไม่ใช่เก็บทุกมุม</h2>
+<ul>
+  <li>เปเปอร์ต้องการ <b>มุมวิกฤต</b> ต่อโหลด ไม่ใช่ข้อมูลทุกความชัน</li>
+  <li>แต่ละมุมเดินได้ไม่เกิน 5 รอบ <b>หยุดมุมนั้นทันทีที่ไม่ผ่าน 1 รอบ</b> และไม่ขึ้นมุมถัดไป</li>
+  <li>มุมวิกฤต = มุมสูงสุดที่ผ่าน 5/5 <i>(ข้อเสนอ รอยืนยัน)</i></li>
+  <li>ความเร็ว, k̄, CoT รายงานที่มุมเดียวกันที่ทั้งสองโหลดผ่าน เช่น 10° <i>(ข้อเสนอ)</i></li>
+  <li>ออกตัวบนทางลาดทั้งตัว · ระยะ ≥ 1.2 m <i>(รอกำหนด)</i></li>
+</ul>
+<h2>เกณฑ์ผ่านต่อรอบ</h2>
+<p>เดินครบระยะ (2.4 m บนโฟม/กรวด) โดยไม่ล้ม ไม่ค้าง ไม่มีคนจับช่วย — การแก้ทิศด้วยคำสั่งเลี้ยวไม่นับเป็นการช่วย</p>
+</div>
+<div>
+<h2>ขั้นตอนเก็บข้อมูล (เหมือน 14 ต.ค.)</h2>
+<ul>
+  <li>หน้าต่าง 1 ตลอดเซสชัน: <code>pzem_logger.py --port COM30 --interval 0.25</code></li>
+  <li>หน้าต่าง 2 ชุดละครั้ง: <code>walk_test.py</code> → <b>R</b> → <b>W</b> ค้างถึงเส้นชัย → <b>SPACE</b> → หมุนหุ่น 180° → รอ ≥ 12 s → <b>SPACE</b> → <b>W</b> … → <b>Q</b> จบชุด</li>
+  <li>จดพื้นผิว/โหลด/ผ่าน-ไม่ผ่าน/ระยะตลับเมตรทุกรอบ ลง <code>run_sheet.csv</code></li>
+  <li>พักให้มอเตอร์เย็นระหว่างชุด โดยเฉพาะ 3 กก.</li>
+</ul>
+<div class="box"><b>ความปลอดภัย — ปุ่ม E ไม่หยุดมอเตอร์จริง</b>
+<ul>
+  <li>มีคน <b>ประจำสวิตช์ตัดไฟ</b> ตลอดเวลา (ฟิวส์ 5 A คือตัวป้องกันเดียว)</li>
+  <li>หุ่นไม่ขยับไปข้างหน้า ~3 s = <b>ไม่ผ่าน</b> → SPACE ทันที ไม่ลงท่ายืน → ตัดไฟ</li>
+  <li>กระแสบัสบน PZEM ค้าง &gt; 4 A → หยุด</li>
+  <li>ทางลาด: คนยืนรับด้านล่าง + โฟมรองปลายทาง · กรวด: ตรวจหินในกลไกทุกรอบ</li>
+</ul></div>
+</div>
+</div>
+
+<h2>รอตัดสินใจก่อนลงสนาม</h2>
+<div class="todo">① ระยะทดสอบทางลาด (เสนอ ≥ 1.2 m) · ② นิยามมุมวิกฤต 5/5 หรือ ≥ 4/5 · ③ มุมที่ใช้รายงาน CoT บนทางลาด · ④ ทำข้อ 1 (§2.3.2 ซ้ำ) หรือไม่ · อุปกรณ์: โฟม 25 mm × 20 แผ่น (ปู 2 ชั้น 1.2 × 3.0 m), ถาดกรวดหนา 60 mm, ทางลาดปรับมุม</div>
+
+<div class="foot">หลังเก็บครบ: <code>evaluate_capability_runs.py --write-table</code> → ตารางที่ 5 จริง → เขียน §3.4, ข้อจำกัดข้อ 4 และค่าออกแบบ §2.3.3 ใหม่</div>
+
+</body>
+</html>
