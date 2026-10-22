@@ -74,11 +74,11 @@ movement_+0mm_20261022_131350.csv#2,Compliant (foam),0,2,,1,2.40,22 Oct; out-and
 movement_+0mm_20261022_131350.csv#3,Compliant (foam),0,3,,1,2.40,22 Oct; out-and-back alternating direction; EVA foam (thickness and sink depth: see plan)
 movement_+0mm_20261022_131350.csv#4,Compliant (foam),0,4,,1,2.40,22 Oct; out-and-back alternating direction; EVA foam (thickness and sink depth: see plan)
 movement_+0mm_20261022_131350.csv#5,Compliant (foam),0,5,,1,2.40,22 Oct; out-and-back alternating direction; EVA foam (thickness and sink depth: see plan)
-,Compliant (foam),3,1,,,,
-,Compliant (foam),3,2,,,,
-,Compliant (foam),3,3,,,,
-,Compliant (foam),3,4,,,,
-,Compliant (foam),3,5,,,,
+movement_+0mm_20261022_132106.csv#2,Compliant (foam),3,1,,1,2.40,22 Oct; out-and-back alternating direction; EVA foam; 3 kg payload (block #1 of the file = 17 s trial before the meter started)
+movement_+0mm_20261022_132106.csv#3,Compliant (foam),3,2,,1,2.40,22 Oct; out-and-back alternating direction; EVA foam; 3 kg payload (block #1 of the file = 17 s trial before the meter started)
+movement_+0mm_20261022_132106.csv#4,Compliant (foam),3,3,,1,2.40,22 Oct; out-and-back alternating direction; EVA foam; 3 kg payload (block #1 of the file = 17 s trial before the meter started)
+movement_+0mm_20261022_132106.csv#5,Compliant (foam),3,4,,1,2.40,22 Oct; out-and-back alternating direction; EVA foam; 3 kg payload (block #1 of the file = 17 s trial before the meter started)
+movement_+0mm_20261022_132106.csv#6,Compliant (foam),3,5,,1,2.40,22 Oct; out-and-back alternating direction; EVA foam; 3 kg payload (block #1 of the file = 17 s trial before the meter started)
 movement_+0mm_20261021_120234.csv#1,Rough (gravel),0,1,,1,2.40,21 Oct; out-and-back alternating direction; gravel (file 12:01 was a 3 s trial)
 movement_+0mm_20261021_120234.csv#2,Rough (gravel),0,2,,1,2.40,21 Oct; out-and-back alternating direction; gravel (file 12:01 was a 3 s trial)
 movement_+0mm_20261021_120234.csv#3,Rough (gravel),0,3,,1,2.40,21 Oct; out-and-back alternating direction; gravel (file 12:01 was a 3 s trial)
