@@ -4,22 +4,28 @@ Successor to test_2/camera_calibration.py. What changed and why:
   * paths and board geometry come from the command line (one run per lens x mode)
   * corners are found with the sector-based detector (findChessboardCornersSB), which
     still finds the board where the classic detector gives up
-  * frames where the board is moving are dropped (the A7R II is a rolling-shutter
-    camera, so a moving board is a bent board), as are near-duplicate poses
-  * a share of the good frames is held out; the calibration never sees them and their
+  * a pose is accepted only if the board is (nearly) still. The A7R II is a
+    rolling-shutter camera, so a moving board is a bent board. Stillness is measured
+    where it matters: how far the corners move between two CONSECUTIVE frames (40 ms),
+    after a cheap first pass over every Nth frame picks the slow candidates
+  * near-duplicate poses are dropped
+  * a share of the good poses is held out; the calibration never sees them and their
     reprojection error is the honest accuracy figure
   * the .npz stores image size, RMS, hold-out RMS and the setup, so a 4K file cannot be
     mistaken for a 1080p one
   * a coverage picture shows which parts of the frame the board actually visited
+  * detections are cached next to the output (<out>_cache.pkl), so changing a threshold
+    re-runs in seconds instead of minutes
 
 Usage (one video = one lens, one recording mode, one focus setting):
     python camera_calibration_v2.py --video D:\\THESIS\\Camera-Calibration\\20mm_FF.MP4 \\
-        --out output/params/calib_20mm_FF.npz --square-mm 55
+        --out output/params/calib_20mm_FF.npz --square-mm 55 --step 8
 
 Needs numpy + opencv-python + matplotlib.
 """
 import argparse
 import os
+import pickle
 import sys
 import time
 
@@ -27,7 +33,6 @@ import cv2
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TERM = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 
 def parse_args():
@@ -36,14 +41,17 @@ def parse_args():
     ap.add_argument('--out', default=None, help='.npz to write (default: output/params/<video name>.npz)')
     ap.add_argument('--board', default='9x6', help='INNER corners, columns x rows (10x7 squares = 9x6)')
     ap.add_argument('--square-mm', type=float, default=31.25, help='printed square size; only sets the unit of the extrinsics')
-    ap.add_argument('--step', type=int, default=5, help='look at every Nth frame (25 fps video: 5 = 5 per second)')
-    ap.add_argument('--still-px', type=float, default=1.0,
-                    help='keep a frame only if its corners moved less than this (mean px) against both neighbouring samples')
+    ap.add_argument('--step', type=int, default=8, help='first pass looks at every Nth frame (25 fps video: 8 = ~3 per second)')
+    ap.add_argument('--coarse-px', type=float, default=12.0,
+                    help='first-pass filter: corner shift to both neighbouring samples (N frames apart) below this')
+    ap.add_argument('--still-px', type=float, default=0.6,
+                    help='second-pass filter: corner shift between two consecutive frames below this (mean px per 40 ms)')
     ap.add_argument('--min-move-px', type=float, default=15.0,
-                    help='skip a frame whose corners are within this mean distance of one already kept (near-duplicate pose)')
-    ap.add_argument('--holdout', type=float, default=0.25, help='share of kept frames held out for validation')
+                    help='skip a pose whose corners are within this mean distance of one already kept')
+    ap.add_argument('--holdout', type=float, default=0.25, help='share of kept poses held out for validation')
     ap.add_argument('--fix-k3', action='store_true', help='freeze k3 at 0 (use when the frame edges are poorly covered)')
-    ap.add_argument('--max-frames', type=int, default=80, help='stop collecting after this many kept frames')
+    ap.add_argument('--max-frames', type=int, default=80, help='stop after this many kept poses')
+    ap.add_argument('--no-cache', action='store_true')
     return ap.parse_args()
 
 
@@ -52,49 +60,100 @@ def find_corners(gray, board):
     return c[:, 0, :].astype(np.float32) if ok else None
 
 
-def collect(video, board, step, still_px, min_move_px, max_frames):
+def shift(a, b):
+    return float(np.linalg.norm(a - b, axis=1).mean())
+
+
+def collect(video, board, step, coarse_px, still_px, min_move_px, max_frames, cache_path, use_cache):
+    stat = os.stat(video)
+    meta = dict(video=os.path.basename(video), size=stat.st_size, step=step, board=board)
+    cache = {'meta': meta, 'samples': None, 'next': {}}
+    if use_cache and os.path.exists(cache_path):
+        old = pickle.load(open(cache_path, 'rb'))
+        if old.get('meta') == meta:
+            cache = old
+            print('using cached detections:', cache_path)
+
     cap = cv2.VideoCapture(video)
     if not cap.isOpened():
         sys.exit('cannot open ' + video)
     w, h = int(cap.get(3)), int(cap.get(4))
     fps = cap.get(5)
     n_total = int(cap.get(7))
-    samples = []                      # (frame_index, corners or None)
-    idx = 0
-    t0 = time.time()
-    while True:
-        ok, fr = cap.read()
-        if not ok:
-            break
-        if idx % step == 0:
-            g = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
-            samples.append((idx, find_corners(g, board)))
-        idx += 1
-    cap.release()
-    n_det = sum(c is not None for _, c in samples)
-    print('%s  %dx%d  %.2f fps  %d frames  | looked at %d, board found in %d  (%.0f s)'
-          % (os.path.basename(video), w, h, fps, n_total, len(samples), n_det, time.time() - t0))
 
-    def shift(a, b):
-        return float(np.linalg.norm(a - b, axis=1).mean())
+    # pass 1: every Nth frame
+    if cache['samples'] is None:
+        samples, idx, t0 = [], 0, time.time()
+        while True:
+            ok, fr = cap.read()
+            if not ok:
+                break
+            if idx % step == 0:
+                samples.append((idx, find_corners(cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY), board)))
+            idx += 1
+        cache['samples'] = samples
+        print('pass 1: looked at %d frames, board found in %d  (%.0f s)'
+              % (len(samples), sum(c is not None for _, c in samples), time.time() - t0))
+    samples = cache['samples']
+    print('%s  %dx%d  %.2f fps  %d frames' % (os.path.basename(video), w, h, fps, n_total))
 
-    kept = []
-    n_moving = n_dupe = 0
+    # coarse stillness: compare with both neighbouring samples
+    nb = []
+    cand = []
     for i, (fi, c) in enumerate(samples):
         if c is None:
             continue
-        nbrs = [samples[j][1] for j in (i - 1, i + 1) if 0 <= j < len(samples) and samples[j][1] is not None]
-        if not nbrs or max(shift(c, n) for n in nbrs) > still_px:
+        sh = [shift(c, samples[j][1]) for j in (i - 1, i + 1) if 0 <= j < len(samples) and samples[j][1] is not None]
+        if not sh:
+            continue
+        nb.append(max(sh))
+        if max(sh) <= coarse_px:
+            cand.append(i)
+    nb = np.array(nb)
+    if len(nb):
+        print('first-pass motion (worst neighbour shift per %d frames): median %.1f px, p10 %.1f, p25 %.1f -> %d candidates under %.0f px'
+              % (step, np.median(nb), np.percentile(nb, 10), np.percentile(nb, 25), len(cand), coarse_px))
+
+    # pass 2: next frame of each candidate -> true frame-to-frame motion
+    need = [samples[i][0] + 1 for i in cand if (samples[i][0] + 1) not in cache['next']]
+    if need:
+        want, t0 = set(need), time.time()
+        cap = cv2.VideoCapture(video)
+        idx, last = 0, max(need)
+        while idx <= last:
+            ok, fr = cap.read()
+            if not ok:
+                break
+            if idx in want:
+                cache['next'][idx] = find_corners(cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY), board)
+            idx += 1
+        print('pass 2: %d consecutive-frame checks  (%.0f s)' % (len(need), time.time() - t0))
+    cap.release()
+    if use_cache:
+        pickle.dump(cache, open(cache_path, 'wb'))
+
+    fr_sh = np.array([shift(samples[i][1], cache['next'][samples[i][0] + 1]) for i in cand
+                      if cache['next'].get(samples[i][0] + 1) is not None])
+    if len(fr_sh):
+        print('frame-to-frame motion of the %d candidates (px per 40 ms): min %.2f p25 %.2f median %.2f p75 %.2f max %.2f'
+              % (len(fr_sh), fr_sh.min(), np.percentile(fr_sh, 25), np.median(fr_sh), np.percentile(fr_sh, 75), fr_sh.max()))
+    kept, still, n_moving, n_dupe = [], [], 0, 0
+    for i in cand:
+        fi, c = samples[i]
+        n = cache['next'].get(fi + 1)
+        if n is None or shift(c, n) > still_px:
             n_moving += 1
             continue
+        still.append((fi, c))
+    for fi, c in still:
         if any(shift(c, k[1]) < min_move_px for k in kept):
             n_dupe += 1
             continue
         kept.append((fi, c))
         if len(kept) >= max_frames:
             break
-    print('kept %d poses  (dropped: %d moving, %d near-duplicate, %d without board)'
-          % (len(kept), n_moving, n_dupe, len(samples) - n_det))
+    print('kept %d poses  (dropped: %d moving at frame level, %d near-duplicate, %d not candidates)'
+          % (len(kept), n_moving, n_dupe, sum(c is not None for _, c in samples) - len(cand)))
     return (w, h), fps, kept
 
 
@@ -139,11 +198,14 @@ def main():
     cols, rows = (int(x) for x in a.board.lower().split('x'))
     board = (cols, rows)
     out = a.out or os.path.join(HERE, 'output', 'params', os.path.splitext(os.path.basename(a.video))[0] + '.npz')
-    os.makedirs(os.path.dirname(out), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
+    cache_path = os.path.splitext(out)[0] + '_cache.pkl'
 
-    size, fps, kept = collect(a.video, board, a.step, a.still_px, a.min_move_px, a.max_frames)
+    size, fps, kept = collect(a.video, board, a.step, a.coarse_px, a.still_px, a.min_move_px,
+                              a.max_frames, cache_path, not a.no_cache)
     if len(kept) < 12:
-        sys.exit('only %d usable poses - need 12+ (40-60 is the target). Move the board more, hold it still ~1 s per pose.' % len(kept))
+        sys.exit('only %d usable poses - need 12+ (40-60 is the target). '
+                 'Hold the board still ~2 s per pose; or loosen --coarse-px / --still-px.' % len(kept))
 
     objp = np.zeros((rows * cols, 3), np.float32)
     objp[:, :2] = np.mgrid[0:cols, 0:rows].T.reshape(-1, 2)
@@ -159,8 +221,7 @@ def main():
     flags = cv2.CALIB_FIX_K3 if a.fix_k3 else 0
 
     def calibrate(img_list):
-        rms, K, d, rv, tv = cv2.calibrateCamera([objp] * len(img_list), img_list, size, None, None, flags=flags)
-        return rms, K, d, rv, tv
+        return cv2.calibrateCamera([objp] * len(img_list), img_list, size, None, None, flags=flags)
 
     rms_tr, K, d, _, _ = calibrate(train)
     errs = []
