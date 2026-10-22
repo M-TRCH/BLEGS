@@ -165,7 +165,7 @@ def reproject_rms(obj, img, K, dist, rvec, tvec):
 def coverage(size, kept, board, out_png):
     w, h = size
     pts = np.concatenate([c for _, c in kept])
-    gx, gy = 4, 3
+    gx, gy = 8, 6
     H, _, _ = np.histogram2d(pts[:, 0], pts[:, 1], bins=[gx, gy], range=[[0, w], [0, h]])
     covered = (H > 0).sum()
     print('coverage: %d of %d regions (%dx%d grid) contain board corners' % (covered, gx * gy, gx, gy))
