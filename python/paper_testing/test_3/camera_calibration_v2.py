@@ -49,7 +49,10 @@ def parse_args():
     ap.add_argument('--min-move-px', type=float, default=15.0,
                     help='skip a pose whose corners are within this mean distance of one already kept')
     ap.add_argument('--holdout', type=float, default=0.25, help='share of kept poses held out for validation')
-    ap.add_argument('--fix-k3', action='store_true', help='freeze k3 at 0 (use when the frame edges are poorly covered)')
+    ap.add_argument('--model', choices=['k1', 'k2', 'k3'], default='k3',
+                    help='radial terms to fit: k1 only / k1+k2 / k1+k2+k3. Fewer terms when coverage is thin (high-order terms wiggle)')
+    ap.add_argument('--fix-pp', action='store_true', help='hold the principal point at the image centre')
+    ap.add_argument('--fix-k3', action='store_true', help='same as --model k2')
     ap.add_argument('--max-frames', type=int, default=80, help='stop after this many kept poses')
     ap.add_argument('--no-cache', action='store_true')
     return ap.parse_args()
@@ -218,10 +221,14 @@ def main():
     test_i = set(range(0, len(kept), k))
     train = [kept[i][1] for i in range(len(kept)) if i not in test_i]
     test = [kept[i][1] for i in range(len(kept)) if i in test_i]
-    flags = cv2.CALIB_FIX_K3 if a.fix_k3 else 0
+    model = 'k2' if (a.fix_k3 and a.model == 'k3') else a.model
+    flags = {'k1': cv2.CALIB_FIX_K2 | cv2.CALIB_FIX_K3, 'k2': cv2.CALIB_FIX_K3, 'k3': 0}[model]
+    if a.fix_pp:
+        flags |= cv2.CALIB_FIX_PRINCIPAL_POINT
 
     def calibrate(img_list):
-        return cv2.calibrateCamera([objp] * len(img_list), img_list, size, None, None, flags=flags)
+        K0 = np.array([[1.15 * size[0], 0, size[0] / 2], [0, 1.15 * size[0], size[1] / 2], [0, 0, 1]], np.float64)
+        return cv2.calibrateCamera([objp] * len(img_list), img_list, size, K0, None, flags=flags | cv2.CALIB_USE_INTRINSIC_GUESS)
 
     rms_tr, K, d, _, _ = calibrate(train)
     errs = []
@@ -237,6 +244,7 @@ def main():
     vfov = np.degrees(2 * np.arctan(size[1] / (2 * fy)))
 
     print('\n=== result (%s) ===' % os.path.basename(a.video))
+    print('model: radial terms %s%s' % (model, ', principal point fixed' if a.fix_pp else ''))
     print('poses used: %d  (train %d / hold-out %d)' % (len(kept), len(train), len(test)))
     print('RMS reprojection  all %.3f px | train %.3f px | HOLD-OUT %.3f px' % (rms_all, rms_tr, rms_ho))
     print('worst single pose %.3f px' % max(per))
@@ -262,7 +270,7 @@ def main():
 
     np.savez(out, camera_matrix=K, dist_coeffs=d, image_size=np.array(size), rms=rms_all, holdout_rms=rms_ho,
              n_poses=len(kept), board=np.array(board), square_mm=a.square_mm, fps=fps,
-             source=os.path.basename(a.video), fix_k3=bool(a.fix_k3), created=time.strftime('%Y-%m-%d %H:%M:%S'))
+             source=os.path.basename(a.video), model=model, fix_pp=bool(a.fix_pp), created=time.strftime('%Y-%m-%d %H:%M:%S'))
     print('saved', out)
 
 
