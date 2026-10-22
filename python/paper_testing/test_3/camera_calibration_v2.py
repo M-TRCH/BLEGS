@@ -37,7 +37,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 def parse_args():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--video', required=True)
+    ap.add_argument('--video', required=True, nargs='+',
+                    help='one or more clips of the SAME lens, mode and focus; their poses are pooled')
     ap.add_argument('--out', default=None, help='.npz to write (default: output/params/<video name>.npz)')
     ap.add_argument('--board', default='9x6', help='INNER corners, columns x rows (10x7 squares = 9x6)')
     ap.add_argument('--square-mm', type=float, default=31.25, help='printed square size; only sets the unit of the extrinsics')
@@ -200,12 +201,28 @@ def main():
     a = parse_args()
     cols, rows = (int(x) for x in a.board.lower().split('x'))
     board = (cols, rows)
-    out = a.out or os.path.join(HERE, 'output', 'params', os.path.splitext(os.path.basename(a.video))[0] + '.npz')
+    videos = a.video
+    out = a.out or os.path.join(HERE, 'output', 'params', os.path.splitext(os.path.basename(videos[0]))[0] + '.npz')
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
-    cache_path = os.path.splitext(out)[0] + '_cache.pkl'
 
-    size, fps, kept = collect(a.video, board, a.step, a.coarse_px, a.still_px, a.min_move_px,
-                              a.max_frames, cache_path, not a.no_cache)
+    kept, src, size, fps = [], [], None, None
+    for vi, v in enumerate(videos):
+        base = os.path.splitext(out)[0]
+        if len(videos) == 1:
+            cache_path = base + '_cache.pkl'
+        else:
+            cache_path = '%s_%s_cache.pkl' % (base, os.path.splitext(os.path.basename(v))[0])
+        sz, fps_v, kv = collect(v, board, a.step, a.coarse_px, a.still_px, a.min_move_px,
+                                a.max_frames, cache_path, not a.no_cache)
+        if size is not None and sz != size:
+            sys.exit('%s is %dx%d but the first clip is %dx%d - clips must share one recording mode'
+                     % (v, sz[0], sz[1], size[0], size[1]))
+        size, fps = sz, fps_v
+        kept += kv
+        src += [vi] * len(kv)
+    if len(videos) > 1:
+        print('pooled %d poses: %s' % (len(kept), ', '.join('%s=%d' % (os.path.basename(v), src.count(i))
+                                                            for i, v in enumerate(videos))))
     if len(kept) < 12:
         sys.exit('only %d usable poses - need 12+ (40-60 is the target). '
                  'Hold the board still ~2 s per pose; or loosen --coarse-px / --still-px.' % len(kept))
@@ -218,7 +235,10 @@ def main():
 
     # deterministic hold-out: every k-th pose
     k = max(2, int(round(1.0 / a.holdout)))
-    test_i = set(range(0, len(kept), k))
+    test_i = set()
+    for vi in range(len(videos)):                 # hold-out is taken inside each clip
+        mine = [i for i in range(len(kept)) if src[i] == vi]
+        test_i |= set(mine[::k])
     train = [kept[i][1] for i in range(len(kept)) if i not in test_i]
     test = [kept[i][1] for i in range(len(kept)) if i in test_i]
     model = 'k2' if (a.fix_k3 and a.model == 'k3') else a.model
@@ -243,7 +263,7 @@ def main():
     hfov = np.degrees(2 * np.arctan(size[0] / (2 * fx)))
     vfov = np.degrees(2 * np.arctan(size[1] / (2 * fy)))
 
-    print('\n=== result (%s) ===' % os.path.basename(a.video))
+    print('\n=== result (%s) ===' % ' + '.join(os.path.basename(v) for v in videos))
     print('model: radial terms %s%s' % (model, ', principal point fixed' if a.fix_pp else ''))
     print('poses used: %d  (train %d / hold-out %d)' % (len(kept), len(train), len(test)))
     print('RMS reprojection  all %.3f px | train %.3f px | HOLD-OUT %.3f px' % (rms_all, rms_tr, rms_ho))
@@ -251,6 +271,21 @@ def main():
     print('fx %.1f  fy %.1f  cx %.1f (centre %.1f)  cy %.1f (centre %.1f)' % (fx, fy, cx, size[0] / 2, cy, size[1] / 2))
     print('field of view  H %.1f deg  V %.1f deg' % (hfov, vfov))
     print('distortion k1 k2 p1 p2 k3 =', ' '.join('%.5f' % v for v in d.ravel()))
+
+    if len(videos) > 1:
+        print('cross-clip check (calibrate on the other clips, test on this one):')
+        for vi, v in enumerate(videos):
+            other = [kept[i][1] for i in range(len(kept)) if src[i] != vi]
+            mine = [kept[i][1] for i in range(len(kept)) if src[i] == vi]
+            if len(other) < 12 or not mine:
+                continue
+            _, Kx, dx, _, _ = calibrate(other)
+            ex = []
+            for c in mine:
+                ok, rvx, tvx = cv2.solvePnP(objp, c, Kx, dx, flags=cv2.SOLVEPNP_ITERATIVE)
+                ex.append(reproject_rms(objp, c, Kx, dx, rvx, tvx))
+            print('  %-42s %.3f px  (fx %.0f)' % (os.path.basename(v), np.mean(ex), Kx[0, 0]))
+        print('  -> close to the hold-out figure above = the clips agree; much larger = focus/setup changed between clips')
 
     warn = []
     if rms_ho > 0.5:
@@ -270,7 +305,7 @@ def main():
 
     np.savez(out, camera_matrix=K, dist_coeffs=d, image_size=np.array(size), rms=rms_all, holdout_rms=rms_ho,
              n_poses=len(kept), board=np.array(board), square_mm=a.square_mm, fps=fps,
-             source=os.path.basename(a.video), model=model, fix_pp=bool(a.fix_pp), created=time.strftime('%Y-%m-%d %H:%M:%S'))
+             source=';'.join(os.path.basename(v) for v in videos), model=model, fix_pp=bool(a.fix_pp), created=time.strftime('%Y-%m-%d %H:%M:%S'))
     print('saved', out)
 
 
