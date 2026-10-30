@@ -44,10 +44,10 @@ if sys.platform == 'win32':
 # ----------------------------------------------------------------------------
 # Which code is running?  CODE_VERSION is bumped by hand with every behavioural edit; the
 # fingerprint is a SHA-1 of this file's own text (line endings normalised), so two people
-# reading the same ID are running byte-identical code.  Printed at start-up, on the CONDITION
-# line of every run and written to the log (column code_id).
+# reading the same ID are running byte-identical code.  Printed once at start-up (under the
+# header) and written to the log (column code_id).
 # ----------------------------------------------------------------------------
-CODE_VERSION = '2026-10-30.r9'
+CODE_VERSION = '2026-10-30.r10'
 
 
 def _code_fingerprint() -> str:
@@ -1698,7 +1698,6 @@ def init_logging(target_distance: float) -> bool:
         log_counter = 0
         _log_start_time = time.time()
         print(f"  Logging to: {filename}")
-        print(f"  CODE {CODE_ID} | distance {target_distance:+.0f} mm")
         print(f"  CONDITION: ML {get_ml_status()} | right-leg mirroring {'ON' if ML_MIRROR_RIGHT_LEGS else 'OFF (old behaviour)'}"
               f" | static roll trim {STATIC_ROLL_TRIM_MM:+.1f} mm {'(applied: rides on ML)' if ML_COMPENSATION_ENABLED else '(not applied while ML is OFF)'}"
               f" | gain {ML_COMPENSATION_GAIN}"
