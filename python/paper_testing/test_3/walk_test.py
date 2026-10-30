@@ -136,7 +136,8 @@ GAIT_CYCLE_TIME = TRAJECTORY_STEPS / UPDATE_RATE
 
 # ------------------------- Test distances (editable) -----------------------
 # Change these values to adjust test distances for modes 7, 8, 9.
-MODE7_DISTANCE_MM = 2400.0
+MODE7_DISTANCE_MM = 3150.0   # NO-LOAD pilot value (31 Oct 2026). 2400 stopped at tag row ID 12/13 (~1.8 m travelled);
+                             # target ~2.3 m (centre y -17 -> ~215 cm). Odometry command, not metres: 3 kg needs its own pilot.
 MODE_TURN_DISTANCE_MM = 300.0
 
 ENABLE_LOGGING = True
