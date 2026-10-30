@@ -47,7 +47,7 @@ if sys.platform == 'win32':
 # reading the same ID are running byte-identical code.  Printed once at start-up (under the
 # header) and written to the log (column code_id).
 # ----------------------------------------------------------------------------
-CODE_VERSION = '2026-10-30.r10'
+CODE_VERSION = '2026-10-30.r11'
 
 
 def _code_fingerprint() -> str:
@@ -150,7 +150,7 @@ STATIC_ROLL_TRIM_MM = 0.0   # 0.0 = pure ML on/off comparison (set 30 Oct 2026).
 # Per-leg stance-height levelling (mm, added to the foot y; NEGATIVE = longer leg = that corner rises).
 # Applied in every mode with ML on AND off, so it cannot favour either condition.  Measure first:
 # put the robot on a flat table in the stand pose and find which foot floats / which corner is low.
-LEG_HEIGHT_TRIM_MM = {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': -8.0}   # RL stands 8 mm short (author, 30 Oct 2026)
+LEG_HEIGHT_TRIM_MM = {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': -4.0}   # RL levelling: -8 (30 Oct 17:53) -> -4 mm (author)
 
 GAIT_CYCLE_TIME = TRAJECTORY_STEPS / UPDATE_RATE
 
