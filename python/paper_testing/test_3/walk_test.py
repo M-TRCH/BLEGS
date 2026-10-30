@@ -1796,6 +1796,26 @@ def stop_idle_march() -> bool:
     print("  Idle march stopped")
     return True
 
+
+_abort_state = {'hard': False}      # set by [E] during a walk: then the legs are left alone
+
+
+def _safe_stop_after_abort() -> None:
+    """After an aborted or timed-out walk the legs sit wherever the gait stopped, usually with a
+    diagonal pair lifted.  Resume the gait phase in place for 1 s (the same march the normal run
+    ends with) and stand - never leave the robot frozen mid-step.  [E] opts out."""
+    if _abort_state['hard']:
+        _abort_state['hard'] = False
+        print("  E-stop requested: legs left as they are - cut the motor power")
+        return
+    if idle_marching:
+        stop_idle_march()
+        return
+    print("  Settling: marching in place for 1 s, then standing")
+    if start_idle_march(resume_from=march_step_indices):
+        time.sleep(1.0)
+        stop_idle_march()
+
 # ============================================================================
 # MOVE RELATIVE Y
 # ============================================================================
@@ -1858,15 +1878,15 @@ def move_relative_y(target_distance_mm: float, timeout_s: float = NAV_TIMEOUT,
 
             if sys.platform == 'win32' and msvcrt.kbhit():
                 key = msvcrt.getch()
-                if key == b' ':
-                    control_paused = not control_paused
-                    print("\n  PAUSED" if control_paused else "\n  RESUMED")
+                if key == b' ' or key.lower() == b'q':
+                    # a pause would freeze the legs mid-step with a diagonal pair in the air
+                    # (the 12 Oct fall); stop walking and settle to a stand instead
+                    print("\n  SAFE STOP: settling to a stand")
+                    return False
                 elif key.lower() == b'e':
                     print("\n  EMERGENCY STOP!")
+                    _abort_state['hard'] = True
                     emergency_stop_all()
-                    return False
-                elif key.lower() == b'q':
-                    print("\n  ABORTED by user")
                     return False
 
             if control_paused:
@@ -1931,6 +1951,7 @@ def move_relative_y(target_distance_mm: float, timeout_s: float = NAV_TIMEOUT,
         return False
     finally:
         stop_all_legs()
+        march_step_indices.update(step_indices)     # gait phase kept, so an abort can resume it
         if not log_was_open:
             close_logging()
 
@@ -1999,15 +2020,15 @@ def move_relative_y_with_turn(target_distance_mm: float, turn_bias: float,
 
             if sys.platform == 'win32' and msvcrt.kbhit():
                 key = msvcrt.getch()
-                if key == b' ':
-                    control_paused = not control_paused
-                    print("\n  PAUSED" if control_paused else "\n  RESUMED")
+                if key == b' ' or key.lower() == b'q':
+                    # a pause would freeze the legs mid-step with a diagonal pair in the air
+                    # (the 12 Oct fall); stop walking and settle to a stand instead
+                    print("\n  SAFE STOP: settling to a stand")
+                    return False
                 elif key.lower() == b'e':
                     print("\n  EMERGENCY STOP!")
+                    _abort_state['hard'] = True
                     emergency_stop_all()
-                    return False
-                elif key.lower() == b'q':
-                    print("\n  ABORTED by user")
                     return False
 
             if control_paused:
@@ -2074,6 +2095,7 @@ def move_relative_y_with_turn(target_distance_mm: float, turn_bias: float,
         nav_planner = SimpleNavigationPlanner(
             v_max=NAV_V_MAX, K_p=NAV_K_P, tolerance=NAV_TOLERANCE)
         stop_all_legs()
+        march_step_indices.update(step_indices)     # gait phase kept, so an abort can resume it
         if not log_was_open:
             close_logging()
 
@@ -2499,8 +2521,7 @@ def test_smooth_walk_600() -> bool:
         success = move_relative_y(+MODE7_DISTANCE_MM, timeout_s=60.0,
                       transition_to_march=True)
         if not success:
-            if idle_marching:
-                stop_idle_march()
+            _safe_stop_after_abort()
             return False
 
         print("\n  Step 3/4: Transitioning to idle march...")
@@ -2545,8 +2566,7 @@ def _test_turn(direction: str, turn_bias: float) -> bool:
         success = move_relative_y_with_turn(
             +MODE_TURN_DISTANCE_MM, turn_bias, timeout_s=60.0, transition_to_march=True)
         if not success:
-            if idle_marching:
-                stop_idle_march()
+            _safe_stop_after_abort()
             return False
 
         print("\n  Step 3/4: Transitioning to idle march...")
