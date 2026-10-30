@@ -47,7 +47,7 @@ if sys.platform == 'win32':
 # reading the same ID are running byte-identical code.  Printed once at start-up (under the
 # header) and written to the log (column code_id).
 # ----------------------------------------------------------------------------
-CODE_VERSION = '2026-10-30.r14'
+CODE_VERSION = '2026-10-30.r15'
 
 
 def _code_fingerprint() -> str:
@@ -150,7 +150,13 @@ STATIC_ROLL_TRIM_MM = 0.0   # 0.0 = pure ML on/off comparison (set 30 Oct 2026).
 # Per-leg stance-height levelling (mm, added to the foot y; NEGATIVE = longer leg = that corner rises).
 # Applied in every mode with ML on AND off, so it cannot favour either condition.  Measure first:
 # put the robot on a flat table in the stand pose and find which foot floats / which corner is low.
-LEG_HEIGHT_TRIM_MM = {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': -6.5}   # RL levelling: -8 (30 Oct 17:53) -> -4 -> -6.5 mm (author)
+LEG_HEIGHT_TRIM_MM = {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': 0.0}   # RL levelling: -8 (30 Oct) -> -4 -> -6.5 -> 0 (author)
+# Body roll, set live from the menu with the keys [ ] 0: the LEFT leg pair stands this many mm higher than
+# the RIGHT pair (negative = right higher).  Half is added to each side, with ML on and off, and it is
+# part of the logged static_trim_mm.
+ROLL_TILT_MM = 0.0
+ROLL_TILT_STEP_MM = 0.5
+ROLL_TILT_LIMIT_MM = 15.0
 
 GAIT_CYCLE_TIME = TRAJECTORY_STEPS / UPDATE_RATE
 
@@ -1640,8 +1646,25 @@ def get_static_roll_offsets() -> dict:
     flag) plus the per-leg levelling trim (always on, so ML on/off stay comparable)."""
     trim = STATIC_ROLL_TRIM_MM if ML_COMPENSATION_ENABLED else 0.0
     roll = {'FL': +trim, 'RL': +trim, 'FR': -trim, 'RR': -trim}
-    return {leg_id: roll[leg_id] + LEG_HEIGHT_TRIM_MM.get(leg_id, 0.0)
+    half = ROLL_TILT_MM / 2.0           # left higher: left legs longer (y more negative), right legs shorter
+    tilt = {'FL': -half, 'RL': -half, 'FR': +half, 'RR': +half}
+    return {leg_id: roll[leg_id] + LEG_HEIGHT_TRIM_MM.get(leg_id, 0.0) + tilt[leg_id]
             for leg_id in ('FR', 'FL', 'RR', 'RL')}
+
+
+def adjust_roll_tilt(delta_mm: float | None) -> float:
+    """Menu keys: [ raises the left side, ] raises the right side, 0 levels (delta None).  If the
+    robot is standing (not marching) the new stance is sent at once so the change can be seen."""
+    global ROLL_TILT_MM
+    if delta_mm is None:
+        ROLL_TILT_MM = 0.0
+    else:
+        ROLL_TILT_MM = _clamp(round(ROLL_TILT_MM + delta_mm, 3), -ROLL_TILT_LIMIT_MM, ROLL_TILT_LIMIT_MM)
+    side = 'level' if abs(ROLL_TILT_MM) < 1e-9 else ('LEFT higher' if ROLL_TILT_MM > 0 else 'RIGHT higher')
+    print(f"  Roll tilt {ROLL_TILT_MM:+.1f} mm ({side}) | static offsets {get_static_roll_offsets()}")
+    if not idle_marching:
+        move_to_stand_position()
+    return ROLL_TILT_MM
 
 
 def combine_balance_offsets(dynamic_offsets: dict = None) -> dict:
@@ -1702,7 +1725,8 @@ def init_logging(target_distance: float) -> bool:
         print(f"  CONDITION: ML {get_ml_status()} | right-leg mirroring {'ON' if ML_MIRROR_RIGHT_LEGS else 'OFF (old behaviour)'}"
               f" | static roll trim {STATIC_ROLL_TRIM_MM:+.1f} mm {'(applied: rides on ML)' if ML_COMPENSATION_ENABLED else '(not applied while ML is OFF)'}"
               f" | gain {ML_COMPENSATION_GAIN}"
-              f" | leg height trim {LEG_HEIGHT_TRIM_MM} mm")
+              f" | leg height trim {LEG_HEIGHT_TRIM_MM} mm"
+              f" | roll tilt {ROLL_TILT_MM:+.1f} mm (+ = left higher)")
         return True
     except Exception as e:
         print(f"  Logging init failed: {e}")
@@ -2646,13 +2670,16 @@ def print_menu():
     print("\n" + "=" * 70)
     print(f"  WALK TEST STANDALONE  [{('SIM' if SIMULATION_MODE else 'HW')}]  {march_status}")
     print(f"  IMU: {imu_status}")
-    print(f"  ML : {get_ml_status()}")
+    print(f"  ML : {get_ml_status()}   gain {ML_COMPENSATION_GAIN}")
+    tilt_txt = 'level' if abs(ROLL_TILT_MM) < 1e-9 else (f'LEFT higher by {ROLL_TILT_MM:.1f} mm' if ROLL_TILT_MM > 0 else f'RIGHT higher by {-ROLL_TILT_MM:.1f} mm')
+    print(f"  TILT: {tilt_txt}   leg trim {LEG_HEIGHT_TRIM_MM}")
     print("=" * 70)
     print(f"  [7] Smooth walk {MODE7_DISTANCE_MM:+.0f}mm (march -> walk -> march -> stand)")
     print(f"  [8] Turn LEFT {MODE_TURN_DISTANCE_MM:+.0f}mm   (march -> turn -> march -> stand)")
     print(f"  [9] Turn RIGHT {MODE_TURN_DISTANCE_MM:+.0f}mm  (march -> turn -> march -> stand)")
     print("  [R] RC drive (hold W/S/A/D + live gait tuning, Q exit)")
     print("  [M] Toggle ML compensation")
+    print(f"  [ / ]  raise the LEFT / RIGHT side {ROLL_TILT_STEP_MM} mm (body tilt)    [0] level")
     print("  [Q] Quit")
     print("=" * 70)
 
@@ -2679,6 +2706,12 @@ def interactive_mode():
                 rc_drive_mode()
             elif key.lower() == b'm':
                 toggle_ml_compensation()
+            elif key == b'[':
+                adjust_roll_tilt(+ROLL_TILT_STEP_MM)
+            elif key == b']':
+                adjust_roll_tilt(-ROLL_TILT_STEP_MM)
+            elif key == b'0':
+                adjust_roll_tilt(None)
             elif key.lower() == b'q':
                 print("\n  Goodbye!")
                 break
@@ -2696,6 +2729,12 @@ def interactive_mode():
                 rc_drive_mode()
             elif cmd.lower() == 'm':
                 toggle_ml_compensation()
+            elif cmd == '[':
+                adjust_roll_tilt(+ROLL_TILT_STEP_MM)
+            elif cmd == ']':
+                adjust_roll_tilt(-ROLL_TILT_STEP_MM)
+            elif cmd == '0':
+                adjust_roll_tilt(None)
             elif cmd.lower() == 'q':
                 print("\n  Goodbye!")
                 break
