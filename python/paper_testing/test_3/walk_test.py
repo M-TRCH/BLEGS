@@ -125,7 +125,8 @@ PITCH_K_D = 0.03
 MAX_HEIGHT_OFFSET = 20.0
 INVERT_ROLL = False
 INVERT_PITCH = True
-STATIC_ROLL_TRIM_MM = -2.0  # No-load:-2.0, 3kg=-7.0
+STATIC_ROLL_TRIM_MM = 0.0   # 0.0 = pure ML on/off comparison (set 30 Oct 2026). Old hand-tuned values, set while
+                            # the right-leg ML bug was present: No-load -2.0, 3kg -7.0. Rides on [M] ML.
 
 GAIT_CYCLE_TIME = TRAJECTORY_STEPS / UPDATE_RATE
 
