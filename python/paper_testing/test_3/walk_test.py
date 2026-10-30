@@ -47,7 +47,7 @@ if sys.platform == 'win32':
 # reading the same ID are running byte-identical code.  Printed once at start-up (under the
 # header) and written to the log (column code_id).
 # ----------------------------------------------------------------------------
-CODE_VERSION = '2026-10-30.r13'
+CODE_VERSION = '2026-10-30.r14'
 
 
 def _code_fingerprint() -> str:
@@ -180,8 +180,8 @@ ML_COMPENSATION_ENABLED = False
 COMPENSATION_MODEL_DIR = os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'test_2', 'output', 'models'))
 COMPENSATION_MODEL_NAME = 'model_poly4'
-ML_COMPENSATION_GAIN = 0.30   # 3x the 0.10 used until 30 Oct 2026 (author: ML had no visible effect). A different
-                              # condition from the 0.10 runs - never pool them; logged in column ml_gain.
+ML_COMPENSATION_GAIN = 0.60   # was 0.10 until 30 Oct 2026, then 0.30 (author: ML had no visible effect). Every gain is
+                              # a different condition - never pool runs of different gains; logged in column ml_gain.
 ML_COMPENSATION_ALPHA = 0.05
 ML_COMPENSATION_MAX_DELTA_MM = 0.2
 ML_COMPENSATION_MAX_ABS_MM = 5.0
