@@ -127,6 +127,10 @@ INVERT_ROLL = False
 INVERT_PITCH = True
 STATIC_ROLL_TRIM_MM = 0.0   # 0.0 = pure ML on/off comparison (set 30 Oct 2026). Old hand-tuned values, set while
                             # the right-leg ML bug was present: No-load -2.0, 3kg -7.0. Rides on [M] ML.
+# Per-leg stance-height levelling (mm, added to the foot y; NEGATIVE = longer leg = that corner rises).
+# Applied in every mode with ML on AND off, so it cannot favour either condition.  Measure first:
+# put the robot on a flat table in the stand pose and find which foot floats / which corner is low.
+LEG_HEIGHT_TRIM_MM = {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': 0.0}
 
 GAIT_CYCLE_TIME = TRAJECTORY_STEPS / UPDATE_RATE
 
@@ -1610,15 +1614,12 @@ def stop_all_legs():
 
 
 def get_static_roll_offsets() -> dict:
-    if not ML_COMPENSATION_ENABLED:
-        return {leg_id: 0.0 for leg_id in ('FR', 'FL', 'RR', 'RL')}
-    trim = STATIC_ROLL_TRIM_MM
-    return {
-        'FL': +trim,
-        'RL': +trim,
-        'FR': -trim,
-        'RR': -trim,
-    }
+    """Static y offset (mm) added to each leg's stance: the left/right roll trim (rides on the ML
+    flag) plus the per-leg levelling trim (always on, so ML on/off stay comparable)."""
+    trim = STATIC_ROLL_TRIM_MM if ML_COMPENSATION_ENABLED else 0.0
+    roll = {'FL': +trim, 'RL': +trim, 'FR': -trim, 'RR': -trim}
+    return {leg_id: roll[leg_id] + LEG_HEIGHT_TRIM_MM.get(leg_id, 0.0)
+            for leg_id in ('FR', 'FL', 'RR', 'RL')}
 
 
 def combine_balance_offsets(dynamic_offsets: dict = None) -> dict:
@@ -1672,7 +1673,8 @@ def init_logging(target_distance: float) -> bool:
         print(f"  Logging to: {filename}")
         print(f"  CONDITION: ML {get_ml_status()} | right-leg mirroring {'ON' if ML_MIRROR_RIGHT_LEGS else 'OFF (old behaviour)'}"
               f" | static roll trim {STATIC_ROLL_TRIM_MM:+.1f} mm {'(applied: rides on ML)' if ML_COMPENSATION_ENABLED else '(not applied while ML is OFF)'}"
-              f" | gain {ML_COMPENSATION_GAIN}")
+              f" | gain {ML_COMPENSATION_GAIN}"
+              f" | leg height trim {LEG_HEIGHT_TRIM_MM} mm")
         return True
     except Exception as e:
         print(f"  Logging init failed: {e}")
@@ -1706,12 +1708,12 @@ def log_control_step(phase: str) -> None:
         else:
             act1 = act2 = float('nan')
             cur_A = cur_B = float('nan')
+        trim = get_static_roll_offsets()[leg_id]        # roll trim (ML only) + per-leg levelling trim
         if ML_COMPENSATION_ENABLED:
             st = ml_compensation_state.get(leg_id, {})
             ml_dx, ml_dy = -st.get('err_x', 0.0), -st.get('err_y', 0.0)    # command = target - error
-            trim = get_static_roll_offsets()[leg_id]
         else:
-            ml_dx = ml_dy = trim = 0.0
+            ml_dx = ml_dy = 0.0
         log_file.write(
             f"{elapsed:.4f},{phase},{leg_id},"
             f"{sp1:.3f},{act1:.3f},{sp2:.3f},{act2:.3f},"
