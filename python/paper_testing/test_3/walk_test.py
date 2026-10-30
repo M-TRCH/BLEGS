@@ -47,7 +47,7 @@ if sys.platform == 'win32':
 # reading the same ID are running byte-identical code.  Printed once at start-up (under the
 # header) and written to the log (column code_id).
 # ----------------------------------------------------------------------------
-CODE_VERSION = '2026-10-30.r12'
+CODE_VERSION = '2026-10-30.r13'
 
 
 def _code_fingerprint() -> str:
@@ -180,7 +180,8 @@ ML_COMPENSATION_ENABLED = False
 COMPENSATION_MODEL_DIR = os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'test_2', 'output', 'models'))
 COMPENSATION_MODEL_NAME = 'model_poly4'
-ML_COMPENSATION_GAIN = 0.10
+ML_COMPENSATION_GAIN = 0.30   # 3x the 0.10 used until 30 Oct 2026 (author: ML had no visible effect). A different
+                              # condition from the 0.10 runs - never pool them; logged in column ml_gain.
 ML_COMPENSATION_ALPHA = 0.05
 ML_COMPENSATION_MAX_DELTA_MM = 0.2
 ML_COMPENSATION_MAX_ABS_MM = 5.0
@@ -1692,7 +1693,7 @@ def init_logging(target_distance: float) -> bool:
             'current_A_mA', 'current_B_mA',
             'v_cmd_mm_s', 'turn_k_cmd',
             # what was actually applied, so a log states its own condition
-            'ml_on', 'static_trim_mm', 'ml_dx_mm', 'ml_dy_mm', 'code_id',
+            'ml_on', 'static_trim_mm', 'ml_dx_mm', 'ml_dy_mm', 'code_id', 'ml_gain',
         ]
         log_file.write(','.join(cols) + '\n')
         log_counter = 0
@@ -1745,7 +1746,7 @@ def log_control_step(phase: str) -> None:
             f"{elapsed:.4f},{phase},{leg_id},"
             f"{sp1:.3f},{act1:.3f},{sp2:.3f},{act2:.3f},"
             f"{cur_A},{cur_B},{log_v_cmd:.2f},{log_turn_cmd:.3f},"
-            f"{1 if ML_COMPENSATION_ENABLED else 0},{trim:.1f},{ml_dx:.3f},{ml_dy:.3f},{CODE_ID}\n")
+            f"{1 if ML_COMPENSATION_ENABLED else 0},{trim:.1f},{ml_dx:.3f},{ml_dy:.3f},{CODE_ID},{ML_COMPENSATION_GAIN}\n")
     if (log_counter // LOG_RATE) % LOG_FLUSH_EVERY == 0:
         log_file.flush()
 
