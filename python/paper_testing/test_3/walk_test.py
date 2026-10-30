@@ -41,6 +41,26 @@ if sys.platform == 'win32':
     import msvcrt
     import ctypes
 
+# ----------------------------------------------------------------------------
+# Which code is running?  CODE_VERSION is bumped by hand with every behavioural edit; the
+# fingerprint is a SHA-1 of this file's own text (line endings normalised), so two people
+# reading the same ID are running byte-identical code.  Printed at start-up, on the CONDITION
+# line of every run and written to the log (column code_id).
+# ----------------------------------------------------------------------------
+CODE_VERSION = '2026-10-30.r9'
+
+
+def _code_fingerprint() -> str:
+    try:
+        import hashlib
+        with open(os.path.abspath(__file__), 'rb') as fh:
+            return hashlib.sha1(fh.read().replace(b'\r\n', b'\n')).hexdigest()[:8]
+    except Exception:
+        return 'unknown'
+
+
+CODE_ID = f"{CODE_VERSION}/{_code_fingerprint()}"
+
 # ============================================================================
 # ROBOT / GAIT CONFIGURATION
 # ============================================================================
@@ -1672,12 +1692,13 @@ def init_logging(target_distance: float) -> bool:
             'current_A_mA', 'current_B_mA',
             'v_cmd_mm_s', 'turn_k_cmd',
             # what was actually applied, so a log states its own condition
-            'ml_on', 'static_trim_mm', 'ml_dx_mm', 'ml_dy_mm',
+            'ml_on', 'static_trim_mm', 'ml_dx_mm', 'ml_dy_mm', 'code_id',
         ]
         log_file.write(','.join(cols) + '\n')
         log_counter = 0
         _log_start_time = time.time()
         print(f"  Logging to: {filename}")
+        print(f"  CODE {CODE_ID} | distance {target_distance:+.0f} mm")
         print(f"  CONDITION: ML {get_ml_status()} | right-leg mirroring {'ON' if ML_MIRROR_RIGHT_LEGS else 'OFF (old behaviour)'}"
               f" | static roll trim {STATIC_ROLL_TRIM_MM:+.1f} mm {'(applied: rides on ML)' if ML_COMPENSATION_ENABLED else '(not applied while ML is OFF)'}"
               f" | gain {ML_COMPENSATION_GAIN}"
@@ -1725,7 +1746,7 @@ def log_control_step(phase: str) -> None:
             f"{elapsed:.4f},{phase},{leg_id},"
             f"{sp1:.3f},{act1:.3f},{sp2:.3f},{act2:.3f},"
             f"{cur_A},{cur_B},{log_v_cmd:.2f},{log_turn_cmd:.3f},"
-            f"{1 if ML_COMPENSATION_ENABLED else 0},{trim:.1f},{ml_dx:.3f},{ml_dy:.3f}\n")
+            f"{1 if ML_COMPENSATION_ENABLED else 0},{trim:.1f},{ml_dx:.3f},{ml_dy:.3f},{CODE_ID}\n")
     if (log_counter // LOG_RATE) % LOG_FLUSH_EVERY == 0:
         log_file.flush()
 
@@ -2690,6 +2711,7 @@ def main():
 
     print("=" * 70)
     print("  BLEGS Walk Test - Standalone (Modes 7, 8, 9, R)")
+    print(f"  CODE {CODE_ID}")
     print("=" * 70)
     print(f"  ML compensation: {get_ml_status()}")
 
