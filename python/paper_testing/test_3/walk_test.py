@@ -47,7 +47,7 @@ if sys.platform == 'win32':
 # reading the same ID are running byte-identical code.  Printed once at start-up (under the
 # header) and written to the log (column code_id).
 # ----------------------------------------------------------------------------
-CODE_VERSION = '2026-10-30.r15'
+CODE_VERSION = '2026-10-30.r16'
 
 
 def _code_fingerprint() -> str:
@@ -150,7 +150,15 @@ STATIC_ROLL_TRIM_MM = 0.0   # 0.0 = pure ML on/off comparison (set 30 Oct 2026).
 # Per-leg stance-height levelling (mm, added to the foot y; NEGATIVE = longer leg = that corner rises).
 # Applied in every mode with ML on AND off, so it cannot favour either condition.  Measure first:
 # put the robot on a flat table in the stand pose and find which foot floats / which corner is low.
-LEG_HEIGHT_TRIM_MM = {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': 0.0}   # RL levelling: -8 (30 Oct) -> -4 -> -6.5 -> 0 (author)
+# One table per payload, chosen live with the menu key [P].  Measured body height at each corner in the
+# stand pose (author, 30 Oct 2026), 3 kg: RL 267, RR 270, FL 270, FR 273 mm -> level to their mean (270 mm):
+# RL 3 mm longer (-3), FR 3 mm shorter (+3).  No-load not measured yet.
+LEG_HEIGHT_TRIM_BY_PAYLOAD_MM = {
+    0: {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': 0.0},
+    3: {'FR': +3.0, 'FL': 0.0, 'RR': 0.0, 'RL': -3.0},
+}
+PAYLOAD_KG = 0
+LEG_HEIGHT_TRIM_MM = dict(LEG_HEIGHT_TRIM_BY_PAYLOAD_MM[PAYLOAD_KG])   # the ACTIVE table, edited in place by set_payload()
 # Body roll, set live from the menu with the keys [ ] 0: the LEFT leg pair stands this many mm higher than
 # the RIGHT pair (negative = right higher).  Half is added to each side, with ML on and off, and it is
 # part of the logged static_trim_mm.
@@ -1652,6 +1660,18 @@ def get_static_roll_offsets() -> dict:
             for leg_id in ('FR', 'FL', 'RR', 'RL')}
 
 
+def set_payload(kg: int) -> int:
+    """Menu key [P]: pick the payload (0 or 3 kg) and with it that payload's per-leg levelling table.
+    The weight itself is the operator's job - this only selects the matching trims (and logs it)."""
+    global PAYLOAD_KG
+    PAYLOAD_KG = kg
+    LEG_HEIGHT_TRIM_MM.update(LEG_HEIGHT_TRIM_BY_PAYLOAD_MM[kg])
+    print(f"  Payload {kg} kg | leg height trim {LEG_HEIGHT_TRIM_MM} | static offsets {get_static_roll_offsets()}")
+    if not idle_marching:
+        move_to_stand_position()
+    return PAYLOAD_KG
+
+
 def adjust_roll_tilt(delta_mm: float | None) -> float:
     """Menu keys: [ raises the left side, ] raises the right side, 0 levels (delta None).  If the
     robot is standing (not marching) the new stance is sent at once so the change can be seen."""
@@ -1716,13 +1736,13 @@ def init_logging(target_distance: float) -> bool:
             'current_A_mA', 'current_B_mA',
             'v_cmd_mm_s', 'turn_k_cmd',
             # what was actually applied, so a log states its own condition
-            'ml_on', 'static_trim_mm', 'ml_dx_mm', 'ml_dy_mm', 'code_id', 'ml_gain',
+            'ml_on', 'static_trim_mm', 'ml_dx_mm', 'ml_dy_mm', 'code_id', 'ml_gain', 'payload_kg',
         ]
         log_file.write(','.join(cols) + '\n')
         log_counter = 0
         _log_start_time = time.time()
         print(f"  Logging to: {filename}")
-        print(f"  CONDITION: ML {get_ml_status()} | right-leg mirroring {'ON' if ML_MIRROR_RIGHT_LEGS else 'OFF (old behaviour)'}"
+        print(f"  CONDITION: payload {PAYLOAD_KG} kg | ML {get_ml_status()} | right-leg mirroring {'ON' if ML_MIRROR_RIGHT_LEGS else 'OFF (old behaviour)'}"
               f" | static roll trim {STATIC_ROLL_TRIM_MM:+.1f} mm {'(applied: rides on ML)' if ML_COMPENSATION_ENABLED else '(not applied while ML is OFF)'}"
               f" | gain {ML_COMPENSATION_GAIN}"
               f" | leg height trim {LEG_HEIGHT_TRIM_MM} mm"
@@ -1770,7 +1790,7 @@ def log_control_step(phase: str) -> None:
             f"{elapsed:.4f},{phase},{leg_id},"
             f"{sp1:.3f},{act1:.3f},{sp2:.3f},{act2:.3f},"
             f"{cur_A},{cur_B},{log_v_cmd:.2f},{log_turn_cmd:.3f},"
-            f"{1 if ML_COMPENSATION_ENABLED else 0},{trim:.1f},{ml_dx:.3f},{ml_dy:.3f},{CODE_ID},{ML_COMPENSATION_GAIN}\n")
+            f"{1 if ML_COMPENSATION_ENABLED else 0},{trim:.1f},{ml_dx:.3f},{ml_dy:.3f},{CODE_ID},{ML_COMPENSATION_GAIN},{PAYLOAD_KG}\n")
     if (log_counter // LOG_RATE) % LOG_FLUSH_EVERY == 0:
         log_file.flush()
 
@@ -2672,7 +2692,7 @@ def print_menu():
     print(f"  IMU: {imu_status}")
     print(f"  ML : {get_ml_status()}   gain {ML_COMPENSATION_GAIN}")
     tilt_txt = 'level' if abs(ROLL_TILT_MM) < 1e-9 else (f'LEFT higher by {ROLL_TILT_MM:.1f} mm' if ROLL_TILT_MM > 0 else f'RIGHT higher by {-ROLL_TILT_MM:.1f} mm')
-    print(f"  TILT: {tilt_txt}   leg trim {LEG_HEIGHT_TRIM_MM}")
+    print(f"  LOAD: {PAYLOAD_KG} kg | TILT: {tilt_txt} | leg trim {LEG_HEIGHT_TRIM_MM}")
     print("=" * 70)
     print(f"  [7] Smooth walk {MODE7_DISTANCE_MM:+.0f}mm (march -> walk -> march -> stand)")
     print(f"  [8] Turn LEFT {MODE_TURN_DISTANCE_MM:+.0f}mm   (march -> turn -> march -> stand)")
@@ -2680,6 +2700,7 @@ def print_menu():
     print("  [R] RC drive (hold W/S/A/D + live gait tuning, Q exit)")
     print("  [M] Toggle ML compensation")
     print(f"  [ / ]  raise the LEFT / RIGHT side {ROLL_TILT_STEP_MM} mm (body tilt)    [0] level")
+    print("  [P] Payload 0 <-> 3 kg (selects that payload's per-leg levelling trims)")
     print("  [Q] Quit")
     print("=" * 70)
 
@@ -2712,6 +2733,8 @@ def interactive_mode():
                 adjust_roll_tilt(-ROLL_TILT_STEP_MM)
             elif key == b'0':
                 adjust_roll_tilt(None)
+            elif key.lower() == b'p':
+                set_payload(3 if PAYLOAD_KG == 0 else 0)
             elif key.lower() == b'q':
                 print("\n  Goodbye!")
                 break
@@ -2735,6 +2758,8 @@ def interactive_mode():
                 adjust_roll_tilt(-ROLL_TILT_STEP_MM)
             elif cmd == '0':
                 adjust_roll_tilt(None)
+            elif cmd.lower() == 'p':
+                set_payload(3 if PAYLOAD_KG == 0 else 0)
             elif cmd.lower() == 'q':
                 print("\n  Goodbye!")
                 break
