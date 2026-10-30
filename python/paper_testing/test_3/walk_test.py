@@ -158,6 +158,12 @@ ML_COMPENSATION_GAIN = 0.10
 ML_COMPENSATION_ALPHA = 0.05
 ML_COMPENSATION_MAX_DELTA_MM = 0.2
 ML_COMPENSATION_MAX_ABS_MM = 5.0
+# The model was trained on ONE LEFT leg (single_leg_xy_control.py, LEG_SIDE='LEFT').  A right
+# leg (FR, RR) is its mirror image: evaluate the model at the mirrored foot (-x) with the LEFT
+# geometry and flip the sign of the x correction.  Fed the right leg's own angles (False = the
+# behaviour before 30 Oct 2026) the polynomial is far outside its data: raw error +40..+880 mm,
+# so every right-leg tick saturates at the +/-5 mm clamp.
+ML_MIRROR_RIGHT_LEGS = True
 
 # ============================================================================
 # PROTOCOL CONSTANTS
@@ -1522,8 +1528,14 @@ def apply_ml_compensation(leg_id: str, x: float, y: float) -> tuple[float, float
     if model is None:
         return x, y, False
 
-    p_a, p_b = get_motor_positions(leg_id)
-    nominal_angles = calculate_ik_no_ef(np.array([x, y]), p_a, p_b)
+    mirror = ML_MIRROR_RIGHT_LEGS and leg_id in ('FR', 'RR')
+    if mirror:
+        p_a, p_b = get_motor_positions('FL')           # the geometry the model was trained on
+        eval_pos = np.array([-x, y])
+    else:
+        p_a, p_b = get_motor_positions(leg_id)
+        eval_pos = np.array([x, y])
+    nominal_angles = calculate_ik_no_ef(eval_pos, p_a, p_b)
     if np.isnan(nominal_angles).any():
         return x, y, False
 
@@ -1531,12 +1543,14 @@ def apply_ml_compensation(leg_id: str, x: float, y: float) -> tuple[float, float
     current_b = None
     if not SIMULATION_MODE and leg_id in leg_motors:
         motors = leg_motors[leg_id]
-        current_a = motors['A'].current_current
+        current_a = motors['A'].current_current        # motor A is the inner motor on both sides
         current_b = motors['B'].current_current
 
     err_x, err_y = predict_kinematic_error(
         np.rad2deg(nominal_angles[0]), np.rad2deg(nominal_angles[1]),
         model, current_a, current_b)
+    if mirror:
+        err_x = -err_x                                 # x points the other way on the mirrored leg
     gain = _clamp(ML_COMPENSATION_GAIN, 0.0, 1.0)
     err_x *= gain
     err_y *= gain
@@ -1648,11 +1662,16 @@ def init_logging(target_distance: float) -> bool:
             'theta2_setpoint_deg', 'theta2_actual_deg',
             'current_A_mA', 'current_B_mA',
             'v_cmd_mm_s', 'turn_k_cmd',
+            # what was actually applied, so a log states its own condition
+            'ml_on', 'static_trim_mm', 'ml_dx_mm', 'ml_dy_mm',
         ]
         log_file.write(','.join(cols) + '\n')
         log_counter = 0
         _log_start_time = time.time()
         print(f"  Logging to: {filename}")
+        print(f"  CONDITION: ML {get_ml_status()} | right-leg mirroring {'ON' if ML_MIRROR_RIGHT_LEGS else 'OFF (old behaviour)'}"
+              f" | static roll trim {STATIC_ROLL_TRIM_MM:+.1f} mm {'(applied: rides on ML)' if ML_COMPENSATION_ENABLED else '(not applied while ML is OFF)'}"
+              f" | gain {ML_COMPENSATION_GAIN}")
         return True
     except Exception as e:
         print(f"  Logging init failed: {e}")
@@ -1686,10 +1705,17 @@ def log_control_step(phase: str) -> None:
         else:
             act1 = act2 = float('nan')
             cur_A = cur_B = float('nan')
+        if ML_COMPENSATION_ENABLED:
+            st = ml_compensation_state.get(leg_id, {})
+            ml_dx, ml_dy = -st.get('err_x', 0.0), -st.get('err_y', 0.0)    # command = target - error
+            trim = get_static_roll_offsets()[leg_id]
+        else:
+            ml_dx = ml_dy = trim = 0.0
         log_file.write(
             f"{elapsed:.4f},{phase},{leg_id},"
             f"{sp1:.3f},{act1:.3f},{sp2:.3f},{act2:.3f},"
-            f"{cur_A},{cur_B},{log_v_cmd:.2f},{log_turn_cmd:.3f}\n")
+            f"{cur_A},{cur_B},{log_v_cmd:.2f},{log_turn_cmd:.3f},"
+            f"{1 if ML_COMPENSATION_ENABLED else 0},{trim:.1f},{ml_dx:.3f},{ml_dy:.3f}\n")
     if (log_counter // LOG_RATE) % LOG_FLUSH_EVERY == 0:
         log_file.flush()
 
