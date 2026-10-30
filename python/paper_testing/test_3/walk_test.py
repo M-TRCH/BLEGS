@@ -130,7 +130,7 @@ STATIC_ROLL_TRIM_MM = 0.0   # 0.0 = pure ML on/off comparison (set 30 Oct 2026).
 # Per-leg stance-height levelling (mm, added to the foot y; NEGATIVE = longer leg = that corner rises).
 # Applied in every mode with ML on AND off, so it cannot favour either condition.  Measure first:
 # put the robot on a flat table in the stand pose and find which foot floats / which corner is low.
-LEG_HEIGHT_TRIM_MM = {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': 0.0}
+LEG_HEIGHT_TRIM_MM = {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': -8.0}   # RL stands 8 mm short (author, 30 Oct 2026)
 
 GAIT_CYCLE_TIME = TRAJECTORY_STEPS / UPDATE_RATE
 
