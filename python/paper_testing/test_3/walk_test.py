@@ -1636,10 +1636,16 @@ def combine_balance_offsets(dynamic_offsets: dict = None) -> dict:
 def move_to_stand_position() -> bool:
     stand_pos = (DEFAULT_STANCE_OFFSET_X, DEFAULT_STANCE_HEIGHT)
     static_offsets = get_static_roll_offsets()
+    ok = True
     for leg_id in ('FR', 'FL', 'RR', 'RL'):
+        # keep going if one leg's write fails: returning at the first failure used to leave
+        # the legs after it unsent, i.e. still in the air
         if not update_leg_position(leg_id, stand_pos, static_offsets[leg_id]):
-            return False
-    return True
+            print(f"  WARNING: stand command failed for {leg_id} - retrying")
+            if not update_leg_position(leg_id, stand_pos, static_offsets[leg_id]):
+                print(f"  WARNING: {leg_id} still not at the stand pose")
+                ok = False
+    return ok
 
 # ============================================================================
 # LOGGING
