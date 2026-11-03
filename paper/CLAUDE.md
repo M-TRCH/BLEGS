@@ -68,13 +68,13 @@ Both drop `<mark>` placeholders silently — each script warns about how many re
 
 Watch the heading syntax: an ATX heading with **no blank line above it** is not parsed as a heading, and the whole section title silently disappears into the previous paragraph in both outputs (this bit §2.2.2 in `02_methods.md`). Levels must stay consistent too — §2.1/§2.2/§2.3 are siblings and all belong at `###`.
 
-## Measurement facts for §2.3 (verified from the four walk videos)
+## Measurement facts for §2.3.2 (re-shot 3 Nov 2026; the August single-run data is retired)
 
-- Runway frame: X = 0–80 cm across (centreline 40), Y = 0–120 cm along; heading 90° = along +Y. Analysis: `../python/paper_testing/test_3/apriltag_runway_tilt_check.py` (writes `<video>_pose.csv`; videos on `D:\THESIS\walk_test\`).
-- Robot back tags: **19.9 × 46.6 cm** tape-measured (`ROBOT_TAG_LOCAL_POINTS_CM`).
-- **Parallax**: runway markers lie on the floor, robot tags ride ~31 cm above it → homography magnifies distances by m ≈ 1.21–1.22 (consistent across all four videos; camera ≈ 1.8 m). Divide distances by m; angles unaffected. §2.3.1 eq. (16)–(17). Raising runway markers to tag height removes the effect for future recordings.
-- Robot walks ~2 m but the grid covers 120 cm → about half of each track is extrapolated (tag-rectangle self-check shows the mapping holds; report the proportion).
-- §2.3.2 has **one recorded run per condition** — the weakest evidence in the paper, and limitation 1 in chapter 4. §2.1 is the mean of 5 gauge trials (individual readings were never written down, so no SD). §2.2.4's "5 repeats" means **5 consecutive laps inside one continuous clip**, not 5 separate trials — verified 2026-08-26 by unwrapping the tracked angle: all 24 clips contain 5.00 ± 0.03 laps.
+- Data: 5 ML-on/ML-off pairs per payload (0 kg, 3 kg), videos `D:\THESIS\Walk-Test\261103-{0,3}-kg\ML-0N/WO-0N.MP4`, metrics `../python/paper_testing/test_3/output/data/walk_video_metrics_261103_{0kg,3kg}.csv` (written by `walk_video_metrics.py`), table 4 and `figures/src/fig5_tracks.npz` from those. Each clip matches its walk_test log by end time (within 3 s).
+- Runway: 14 floor tags (IDs 4–17) in 2 columns × 7 rows, 80 × 40 cm pitch, 240 cm long; world origin at tag 4, +x toward tag 5, heading 90° = +y. Camera Sony 4K 25p APS-C 20 mm, `calib_20mm_APSC_v2.npz`, every frame undistorted; camera pose (≈1.47 m high) solved from the floor tags.
+- Robot back tags: 140 × 373 mm frame; positions by **ray–plane intersection at tag height** (rear 26.0 cm, front 27.5 cm — the heights at which the four tag spacings match the tape within 0.5 mm), §2.3.1 eq. (5). No homography magnification any more.
+- Gait for §2.3.2: walk_test r22/r23 (stroke 50 mm, lift 25 mm, 0.44 s cycle, stance 0.70); ML gain 1.0, EMA α 0.30, slew 1 mm/tick, clamp 12 mm, right legs mirrored. Steering trim was tuned by hand **with ML on**: +40 % (pairs 1–2) / +35 % (pairs 3–5) at 0 kg, +60 % at 3 kg — compare ML on/off within a payload only. The 3 kg set uses the 0 kg levelling table on purpose (all four corners sank equally). Every 3 kg ML-off run was stopped by hand before leaving the runway.
+- §2.1 is the mean of 5 gauge trials (individual readings were never written down, so no SD). §2.2.4's "5 repeats" means **5 consecutive laps inside one continuous clip**, not 5 separate trials — verified 2026-08-26 by unwrapping the tracked angle: all 24 clips contain 5.00 ± 0.03 laps.
 
 ## Known text-vs-code gaps (details + file:line in `action-plan.md`)
 

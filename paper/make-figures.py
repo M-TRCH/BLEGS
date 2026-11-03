@@ -9,7 +9,7 @@ measurement files.
     fig2  five-bar linkage at the home pose                            - from L_AC, L_CE, spacing
     fig3  trot phasing and the Bezier foot path                        - from walk_test.py mode 7
     fig4  measured foot circles, compensation off vs on                - from the circle clips
-    fig5  walking paths of the four conditions                         - from walk_test/*_pose.csv
+    fig5  walking paths, 5 pairs per payload (3 Nov 2026)              - from figures/src/fig5_tracks.npz
 
     python make-figures.py            # all
     python make-figures.py fig2 fig3  # some
@@ -30,8 +30,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 EXPORT = os.path.join(HERE, 'figures', 'export')
 COL_CM = 7.5
 DPI = 300
-WALK_DIR = r'D:\THESIS\walk_test'
 FIG4_TRACKS = os.path.join(HERE, 'figures', 'src', 'fig4_tracks.npz')
+FIG5_TRACKS = os.path.join(HERE, 'figures', 'src', 'fig5_tracks.npz')
 
 # linkage geometry, identical to python/paper_testing/test_3/walk_test.py
 L_AC, L_CE, SPACING = 105.0, 145.0, 85.0
@@ -47,9 +47,11 @@ STEP = min(70.0 * STEPS / 50.0, 35.0)
 # (REF_WORLD in test_2/vision_based_trajectory_eval.py), id4 rides on the foot, the camera
 # looks at the leg plane from 1.2 m with its axis normal to that plane
 CAMERA_M, LENS_MM, FPS = 1.2, 25, 60
-# runway (2.3.1): 8 floor tags in 4 rows on an 80 x 120 cm grid, 4 back tags on a
-# 19.9 x 46.6 cm frame 31 cm above the floor, camera behind the robot 1.8 m high
-GRID_W, GRID_L, TAG_FRAME = 80.0, 120.0, (19.9, 46.6)
+# runway (2.3.1, re-shot 3 Nov 2026): 14 floor tags in 7 rows on an 80 x 40 cm pitch
+# (80 x 240 cm), 4 back tags on a 14.0 x 37.3 cm frame 26-27.5 cm above the floor, camera
+# ~1.5 m high and 0.95 m behind the first tag row (walk_video_metrics.py camera pose)
+GRID_W, GRID_L, ROW_PITCH, TAG_FRAME = 80.0, 240.0, 40.0, (14.0, 37.3)
+CAM_BACK_M, CAM_HIGH_M = 0.95, 1.5
 
 # MATLAB look: Helvetica/Arial everywhere (maths included), a box of thin black axes
 # with the ticks pointing inwards on all four sides, no grid, black on white.
@@ -153,34 +155,37 @@ def fig1():
 
     # (b) the runway from above, robot walking to the right, camera behind it
     ax = fig.add_subplot(gs[1, :]); ax.set_aspect('equal'); ax.axis('off')
-    ax.set_xlim(-58, 148); ax.set_ylim(-30, 94)
+    cx = -100 * CAM_BACK_M                                   # camera lens, cm before the first row
+    ax.set_xlim(cx - 30, GRID_L + 12); ax.set_ylim(-34, 100)
     ax.add_patch(Rectangle((0, 0), GRID_L, GRID_W, fc='none', ec=INK, lw=0.5, ls=':'))
-    # runway ids (apriltag_runway_tilt_check.py): left side 4/6/8/10, right side 5/7/9/11,
-    # rows every 40 cm from the camera end; drawn with the walk direction to the right,
-    # so the robot's left side is the top edge
-    for row, x in enumerate((0, 40, 80, 120)):
+    # runway ids (walk_video_metrics.floor_world): even ids 4..16 on one side, odd 5..17 on
+    # the other, rows every 40 cm from the camera end; drawn with the walk direction to the
+    # right, so the robot's left side (the even ids) is the top edge
+    for row in range(int(GRID_L / ROW_PITCH) + 1):
+        x = row * ROW_PITCH
         for y, tid in ((GRID_W, 4 + 2 * row), (0, 5 + 2 * row)):
-            tagbox(ax, x, y, 7)
-            ax.text(x, y + (7 if y else -7), str(tid), ha='center', va='bottom' if y else 'top',
+            tagbox(ax, x, y, 9)
+            ax.text(x, y + (8 if y else -8), str(tid), ha='center', va='bottom' if y else 'top',
                     fontsize=7, color=INK)
-    ax.text(GRID_L / 2, -17, '%.0f x %.0f cm' % (GRID_L, GRID_W), ha='center', va='top', **lab)
-    rx, ry = 34, GRID_W / 2                                 # robot body
-    ax.add_patch(Rectangle((rx - 26, ry - 12), 52, 24, fc=LIGHT, ec=INK, lw=0.5))
+    ax.text(GRID_L / 2, -20, '%.0f x %.0f cm, rows every %.0f cm' % (GRID_L, GRID_W, ROW_PITCH),
+            ha='center', va='top', **lab)
+    rx, ry = 40, GRID_W / 2                                 # robot body
+    ax.add_patch(Rectangle((rx - 24, ry - 13), 48, 26, fc=LIGHT, ec=INK, lw=0.5))
     hx, hy = TAG_FRAME[1] / 2, TAG_FRAME[0] / 2
     # back tags: 0/1 rear, 2/3 front; 0/2 on the robot's left (top edge here)
     for tid, (ddx, ddy) in enumerate(((-hx, hy), (-hx, -hy), (hx, hy), (hx, -hy))):
-        tagbox(ax, rx + ddx, ry + ddy, 5.5)
-        ax.text(rx + ddx + (6 if ddx > 0 else -6), ry + ddy, str(tid), ha='left' if ddx > 0 else 'right',
+        tagbox(ax, rx + ddx, ry + ddy, 7)
+        ax.text(rx + ddx + (7 if ddx > 0 else -7), ry + ddy, str(tid), ha='left' if ddx > 0 else 'right',
                 va='center', fontsize=7, color=INK)
-    ax.text(rx, ry - 15, '%.1f x %.1f cm' % (TAG_FRAME[1], TAG_FRAME[0]), ha='center', va='top',
+    ax.text(rx, ry - 19, '%.1f x %.1f cm' % (TAG_FRAME[1], TAG_FRAME[0]), ha='center', va='top',
             fontsize=7, color=MID)
-    ax.annotate('', xy=(rx + 48, ry), xytext=(rx + 30, ry),
+    ax.annotate('', xy=(rx + 62, ry), xytext=(rx + 32, ry),
                 arrowprops=dict(arrowstyle='-|>', lw=1.0, color=INK, mutation_scale=7))
-    camera(ax, -39, ry, 9)
-    ax.plot([-39, -3.5], [ry, ry], color=INK, lw=0.5, ls='--')                     # camera to the first tag row
-    ax.text((-39 - 3.5) / 2, ry, '1.8 m', **lab, **onl)
-    ax.text(-45, ry + 6, 'camera', ha='center', va='bottom', **lab)
-    ax.text(-56, 94, '(b)', fontsize=9, fontweight='bold', va='top', color=INK)
+    camera(ax, cx, ry, 14)
+    ax.plot([cx, -4.5], [ry, ry], color=INK, lw=0.5, ls='--')                     # camera to the first tag row
+    ax.text((cx - 4.5) / 2, ry, '%.2f m' % CAM_BACK_M, **lab, **onl)
+    ax.text(cx - 9, ry + 10, 'camera\n%.1f m high' % CAM_HIGH_M, ha='center', va='bottom', **lab)
+    ax.text(cx - 28, 100, '(b)', fontsize=9, fontweight='bold', va='top', color=INK)
     save(fig, 'fig1', svg=True)
 
 
@@ -309,27 +314,30 @@ def fig4(tracks=FIG4_TRACKS):
 
 
 # ---------------------------------------------------------------- fig5 ----
-def fig5():
-    import csv
-    runs = [('walk_pose.csv', 'No-load, off', '0.6', '--'),
-            ('walk_ml_pose.csv', 'No-load, on', 'k', '-'),
-            ('walk_3kg_pose.csv', '3 kg, off', '0.6', ':'),
-            ('walk_ml_3kg_pose.csv', '3 kg, on', 'k', '-.')]
-    fig = new_fig(6.0); ax = fig.add_subplot(111)
-    for fn, lab, col, ls in runs:
-        path = os.path.join(WALK_DIR, fn)
-        if not os.path.exists(path):
-            print('fig5: missing', path); continue
-        rows = [r for r in csv.DictReader(open(path, encoding='utf-8')) if r['is_held'] == '0']
-        m = float(np.median([float(r['scale_est']) for r in rows]))   # equation (5): median over frames
-        x = np.array([float(r['x_cm']) for r in rows]) / m
-        y = np.array([float(r['y_cm']) for r in rows]) / m
-        ax.plot(x - x[0], y - y[0], color=col, ls=ls, lw=1.2, label=lab)
-    ax.axvline(0, color='0.75', lw=0.6)
-    ax.set_xlabel('lateral deviation from start (cm), + = right')
-    ax.set_ylabel('distance along the runway (cm)')
-    ax.set_xlim(-60, 25); ax.set_ylim(-5, 175)
-    ax.legend(loc='lower left', frameon=False)
+def fig5(tracks=FIG5_TRACKS):
+    """Body-centre paths of the 3 Nov 2026 runs, 5 pairs per payload, relative to each
+    release point (median of the first second).  Built from the walk_video_metrics.py
+    poses; the file stores one (x, y) cm array per run, keyed '<load>_<ML|WO>-NN'."""
+    if not os.path.exists(tracks):
+        print('fig5: no tracks at', tracks, '- skipped'); return
+    z = np.load(tracks)
+    fig = new_fig(7.0)
+    axes = fig.subplots(1, 2, sharey=True)
+    for ax, (load, title) in zip(axes, (('0kg', 'No-load'), ('3kg', '3 kg payload'))):
+        for key in sorted(k for k in z.files if k.startswith(load)):
+            p = z[key]; on = '_ML' in key
+            ax.plot(p[:, 0], p[:, 1], color='k' if on else '0.6', lw=0.8 if on else 0.8,
+                    ls='-' if on else '--', label='compensation on' if on else 'compensation off')
+            ax.plot(p[-1, 0], p[-1, 1], 'o', ms=2.2, color='k' if on else '0.6')
+        ax.axvline(0, color='0.75', lw=0.6)
+        ax.set_title(title, fontsize=8, pad=3)
+        ax.set_xlim(-60, 40); ax.set_ylim(-5, 215)
+        ax.set_xlabel('lateral (cm), + = right')
+    axes[0].set_ylabel('distance along the runway (cm)')
+    h, l = axes[0].get_legend_handles_labels()
+    keep = {lab: hh for hh, lab in zip(h, l)}
+    fig.legend(list(keep.values()), list(keep), loc='lower center', ncol=2, frameon=False,
+               bbox_to_anchor=(0.5, -0.13), handlelength=2.2)
     save(fig, 'fig5', svg=True)
 
 

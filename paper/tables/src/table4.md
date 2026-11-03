@@ -1,15 +1,14 @@
-<!-- Transposed relative to the first draft.  As 9 columns this could not fit a
-     journal column (7.5 cm / 9 = 0.86 cm per column), and forcing it there is
-     what made Word grind for minutes when applying the two-column layout.
-     With the four test conditions across and the metrics down the side it is
-     5 columns and fits.  tables/export/table3.jpg is rendered from this. -->
+<!-- 3 Nov 2026 re-shoot: 5 ML-on/ML-off pairs per payload, open-loop straight walk.
+     Source: python/paper_testing/test_3/output/data/walk_video_metrics_261103_{0kg,3kg}.csv
+     (walk_video_metrics.py).  Mean +/- SD over 5 runs; delta and phi_end are taken as absolute
+     values because the drift direction differs between payloads; d_60 is the lateral shift
+     at 60 cm along the runway, a distance every run reached.  Paired t-test p values in 3.3. -->
 
 | Metric | No-load off | No-load on | 3 kg off | 3 kg on |
 |---|---|---|---|---|
-| $D$ (m) | 1.67 | 1.68 | 1.19 | 1.41 |
-| $d_{end}$ (cm) | 15.54 | −1.72 | −51.49 | 12.27 |
-| $d_{RMS}$ (cm) | 8.91 | 2.20 | 33.46 | 7.50 |
-| $d_{max}$ (cm) | 15.61 | 3.76 | 51.74 | 12.37 |
-| $\delta$ (cm/m) | 9.31 | −1.03 | −43.25 | 8.73 |
-| $\varphi_{end}$ (deg) | −10.50 | −0.64 | 41.10 | −4.32 |
-| Speed (cm/s) | 7.79 | 8.18 | 5.18 | 6.55 |
+| Runs | 5 | 5 | 5 | 5 |
+| $D$ (m) | 1.98 ± 0.05 | 1.94 ± 0.03 | 0.82 ± 0.18 | 1.07 ± 0.03 |
+| $\vert\delta\vert$ (cm/m) | 23.7 ± 3.9 | 7.9 ± 3.2 | 29.4 ± 3.1 | 15.1 ± 3.0 |
+| $\vert\varphi_{end}\vert$ (deg) | 24.0 ± 5.0 | 5.3 ± 3.3 | 24.1 ± 1.9 | 10.3 ± 3.5 |
+| $\vert d_{60}\vert$ (cm) | 9.0 ± 1.0 | 7.5 ± 1.2 | 13.4 ± 3.7 | 5.0 ± 1.3 |
+| Speed (cm/s) | 13.8 ± 0.3 | 13.4 ± 1.0 | 8.9 ± 0.3 | 7.7 ± 0.4 |
