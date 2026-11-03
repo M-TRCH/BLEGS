@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>BLEGS §2.3 Infographic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0b0b0b; --ink2: #52514e; --ink3: #8a8984; --line: #e4e3df; --paper: #fcfcfb; --card: #ffffff;
+    --on: #2a78d6; --on-soft: #e6f0fc; --off: #eb6834; --off-soft: #fdece4; --navy: #0d2a4f;
+    --good: #1baf7a; --warn: #c98500;
+  }
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--paper); }
+  body { font-family: 'IBM Plex Sans Thai', 'Leelawadee UI', sans-serif; color: var(--ink); font-size: 8.6pt; line-height: 1.38;
+         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 210mm; height: 297mm; padding: 8mm 10mm 7mm; display: flex; flex-direction: column; gap: 2.8mm; overflow: hidden; }
+  .num { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  /* header */
+  header { flex-shrink: 0; background: var(--navy); color: #fff; border-radius: 4mm; padding: 4.5mm 6mm 4mm; position: relative; overflow: hidden; }
+  header::after { content: ''; position: absolute; right: -18mm; top: -22mm; width: 70mm; height: 70mm; border-radius: 50%;
+                  background: radial-gradient(circle, rgba(42,120,214,.55), rgba(42,120,214,0) 70%); }
+  .eyebrow { font-size: 7.5pt; letter-spacing: .14em; text-transform: uppercase; color: #9ec5f4; font-weight: 600; }
+  h1 { font-size: 19pt; line-height: 1.15; font-weight: 700; margin-top: 1mm; }
+  h1 small { display: block; font-size: 10pt; font-weight: 500; color: #cde2fb; margin-top: .8mm; }
+  .chips { display: flex; gap: 2mm; margin-top: 3mm; flex-wrap: wrap; position: relative; z-index: 1; }
+  .chip { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); border-radius: 10mm; padding: .7mm 3mm; font-size: 7.6pt; color: #e8f0fb; }
+  .chip b { color: #fff; font-weight: 600; }
+
+  /* section frame */
+  section { flex-shrink: 0; background: var(--card); border: 1px solid var(--line); border-radius: 3.5mm; padding: 3.6mm 4.2mm; }
+  .sh { display: flex; align-items: baseline; gap: 2.5mm; margin-bottom: 2.2mm; }
+  .tag { font-family: 'IBM Plex Mono', monospace; font-size: 8pt; font-weight: 500; color: #fff; background: var(--navy); border-radius: 1.5mm; padding: .3mm 1.8mm; }
+  h2 { font-size: 11.5pt; font-weight: 700; }
+  h2 span { font-weight: 400; color: var(--ink3); font-size: 8.5pt; margin-left: 1.5mm; }
+  h3 { font-size: 8.6pt; font-weight: 600; color: var(--ink2); margin-bottom: 1mm; }
+  p.lede { color: var(--ink2); }
+
+  /* 2.3.1 */
+  .setup { display: grid; grid-template-columns: 1fr 1.2fr; gap: 4mm; align-items: center; }
+  .setup svg { display: block; max-height: 29mm; }
+  .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6mm 3mm; }
+  .spec { border-left: 2px solid var(--line); padding-left: 2mm; }
+  .spec .k { font-size: 7.2pt; color: var(--ink3); }
+  .spec .v { font-size: 8.4pt; font-weight: 600; }
+
+  /* 2.3.2 */
+  .ml { display: grid; grid-template-columns: 62mm 1fr; gap: 4mm; }
+  .paths img { width: 100%; display: block; }
+  .legend { display: flex; gap: 4mm; font-size: 7.6pt; color: var(--ink2); margin-top: 1mm; justify-content: center; }
+  .legend i { display: inline-block; width: 6mm; height: 2px; vertical-align: middle; margin-right: 1.2mm; border-radius: 1px; }
+  .hero { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 2.5mm; margin-bottom: 2.6mm; }
+  .stat { border-radius: 2.5mm; padding: 2.4mm 3mm; background: var(--on-soft); }
+  .stat .big { font-size: 22pt; font-weight: 700; color: var(--on); line-height: 1; }
+  .stat .big small { font-size: 10pt; }
+  .stat .lab { font-size: 7.6pt; color: var(--ink2); margin-top: 1mm; }
+  .stat.neutral { background: #f0efec; } .stat.neutral .big { color: var(--ink); }
+  .bars { display: grid; grid-template-columns: 15mm 1fr; gap: 1.1mm 2mm; align-items: center; font-size: 7.6pt; }
+  .bars .grp { grid-column: 1 / -1; font-weight: 600; color: var(--ink); margin-top: 1.2mm; font-size: 8pt; }
+  .bars .rl { color: var(--ink2); }
+  .track { position: relative; height: 4mm; }
+  .bar { position: absolute; left: 0; top: 0; height: 100%; border-radius: 0 1.2mm 1.2mm 0; }
+  .bar.on { background: var(--on); } .bar.off { background: var(--off); }
+  .bar em { position: absolute; left: calc(100% + 1.5mm); top: 50%; transform: translateY(-50%); font-style: normal; color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .pv { font-size: 7.2pt; color: var(--ink3); }
+  .insight { margin-top: 2.4mm; background: #f6f6f4; border-radius: 2.5mm; padding: 2.2mm 3mm; color: var(--ink2); font-size: 8pt; }
+  .insight b { color: var(--ink); }
+
+  /* 2.3.3 */
+  .cap { display: grid; grid-template-columns: 1fr 57mm; gap: 4mm; }
+  table { width: 100%; border-collapse: separate; border-spacing: 1.2mm; font-size: 7.8pt; margin: -1.2mm; }
+  th { font-weight: 600; color: var(--ink2); font-size: 7.4pt; text-align: center; }
+  th.row { text-align: left; color: var(--ink); font-size: 8.2pt; }
+  td { border-radius: 1.8mm; padding: 1.4mm 1.6mm; text-align: center; }
+  td .cot { font-size: 11pt; font-weight: 700; display: block; line-height: 1.1; }
+  td .sub { font-size: 6.9pt; opacity: .85; }
+  td.pending { background: repeating-linear-gradient(135deg, #f3f2ef 0 2mm, #fbfbfa 2mm 4mm); color: var(--ink3); font-weight: 600; }
+  .facts { display: flex; flex-direction: column; gap: 2mm; }
+  .fact { border-radius: 2.5mm; padding: 2.2mm 3mm; background: #f6f6f4; }
+  .fact .big { font-size: 15pt; font-weight: 700; line-height: 1.05; }
+  .fact .lab { font-size: 7.4pt; color: var(--ink2); }
+  .fact.warn { background: #fff5e0; } .fact.warn .big { color: var(--warn); }
+  .scale { display: flex; align-items: center; gap: 1.5mm; font-size: 6.9pt; color: var(--ink3); margin-top: 1.6mm; }
+  .scale span.sw { display: inline-block; width: 26mm; height: 2.4mm; border-radius: 1mm; background: linear-gradient(90deg, #cde2fb, #5598e7, #184f95); }
+
+  /* footer */
+  footer { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; font-size: 7.4pt; color: var(--ink2); margin-top: auto; }
+  footer h3 { font-size: 7.8pt; color: var(--ink); }
+  footer ul { list-style: none; }
+  footer li { padding-left: 3.2mm; position: relative; margin-bottom: .5mm; }
+  footer li::before { content: ''; position: absolute; left: 0; top: 1.6mm; width: 1.4mm; height: 1.4mm; border-radius: 50%; background: var(--ink3); }
+  footer li.done::before { background: var(--good); } footer li.todo::before { background: var(--warn); }
+  .src { grid-column: 1 / -1; font-size: 6.8pt; color: var(--ink3); border-top: 1px solid var(--line); padding-top: 1.4mm; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">BLEGS quadruped · Paper section 2.3 · Physical Locomotion Test</div>
+    <h1>การทดสอบการเคลื่อนที่ของหุ่นยนต์
+      <small>ระบบชดเชยด้วย ML ทำให้หุ่นเดินตรงขึ้นจริงไหม และหุ่นเดินบนพื้นแบบไหนได้บ้าง</small></h1>
+    <div class="chips">
+      <span class="chip">ขา <b>4</b> · มอเตอร์ <b>8</b> ตัว · เฟือง <b>8:1</b></span>
+      <span class="chip">มวล <b>5.6 kg</b></span>
+      <span class="chip">แรงบิด/มวล <b>1.81 N·m/kg</b></span>
+      <span class="chip">ลูปควบคุม <b>50 Hz</b> · บัส <b>12 V</b></span>
+      <span class="chip">แบบจำลองชดเชย <b>POLY4</b></span>
+    </div>
+  </header>
+
+  <!-- 2.3.1 -->
+  <section>
+    <div class="sh"><span class="tag">2.3.1</span><h2>การจัดเตรียมการทดลอง<span>Setup</span></h2></div>
+    <div class="setup">
+      <svg viewBox="0 10 400 112" width="100%" aria-label="Runway layout">
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0b0b0b"/></marker></defs>
+        <!-- camera -->
+        <rect x="4" y="54" width="26" height="18" rx="3" fill="#0d2a4f"/><rect x="30" y="58" width="8" height="10" rx="1.5" fill="#0d2a4f"/>
+        <text x="21" y="46" font-size="9" text-anchor="middle" fill="#52514e">กล้อง 4K</text>
+        <text x="21" y="86" font-size="8" text-anchor="middle" fill="#8a8984">สูง 1.5 m</text>
+        <path d="M38 63 L376 26 M38 63 L376 100" stroke="#9ec5f4" stroke-width="1" stroke-dasharray="3 3" fill="none"/>
+        <!-- runway -->
+        <rect x="70" y="22" width="306" height="82" rx="4" fill="#f6f6f4" stroke="#d6d5d0"/>
+        <g fill="#fff" stroke="#0b0b0b" stroke-width="1.1">
+          <rect x="66" y="18" width="8" height="8"/><rect x="117" y="18" width="8" height="8"/><rect x="168" y="18" width="8" height="8"/><rect x="219" y="18" width="8" height="8"/><rect x="270" y="18" width="8" height="8"/><rect x="321" y="18" width="8" height="8"/><rect x="372" y="18" width="8" height="8"/>
+          <rect x="66" y="100" width="8" height="8"/><rect x="117" y="100" width="8" height="8"/><rect x="168" y="100" width="8" height="8"/><rect x="219" y="100" width="8" height="8"/><rect x="270" y="100" width="8" height="8"/><rect x="321" y="100" width="8" height="8"/><rect x="372" y="100" width="8" height="8"/>
+        </g>
+        <!-- robot -->
+        <rect x="94" y="49" width="64" height="28" rx="4" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.2"/>
+        <g fill="#fff" stroke="#2a78d6" stroke-width="1"><rect x="100" y="53" width="7" height="7"/><rect x="100" y="66" width="7" height="7"/><rect x="145" y="53" width="7" height="7"/><rect x="145" y="66" width="7" height="7"/></g>
+        <line x1="166" y1="63" x2="206" y2="63" stroke="#0b0b0b" stroke-width="1.6" marker-end="url(#ar)"/>
+        <text x="223" y="60" font-size="9" fill="#0b0b0b" font-weight="600">ทางวิ่ง 2.4 m</text>
+        <text x="223" y="72" font-size="8" fill="#52514e">แท็กพื้น 14 ตัว · ระยะ 80 × 40 cm</text>
+        <text x="126" y="90" font-size="7.5" text-anchor="middle" fill="#2a78d6">แท็กบนหลัง 14 × 37 cm</text>
+        <text x="223" y="118" font-size="7.5" fill="#8a8984">แท็ก ArUco 6×6 · มองจากด้านบน</text>
+      </svg>
+      <div class="specs">
+        <div class="spec"><div class="k">ท่าเดินทแยงมุม (2.3.2)</div><div class="v">ก้าว 50 mm · 0.44 s/รอบ</div></div>
+        <div class="spec"><div class="k">ยกเท้า · แตะพื้น</div><div class="v">25 mm · 70% ของรอบ</div></div>
+        <div class="spec"><div class="k">สอบเทียบกล้อง</div><div class="v">ค่าคลาดเคลื่อน 0.16 px</div></div>
+        <div class="spec"><div class="k">แก้ความผิดเพี้ยนเลนส์</div><div class="v">ทุกเฟรม</div></div>
+        <div class="spec"><div class="k">ตำแหน่งแท็กบนหลัง (รังสี × ระนาบ)</div><div class="v">ที่ความสูง 26–27.5 cm</div></div>
+        <div class="spec"><div class="k">ตรวจกลับด้วยขนาดกรอบแท็ก</div><div class="v">ตรงตลับเมตร ±0.5 mm</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2.3.2 -->
+  <section>
+    <div class="sh"><span class="tag">2.3.2</span><h2>การชดเชยด้วย ML บนการเดินจริง<span>เดินตรงแบบวงเปิด · โหลดละ 5 คู่ (เปิด/ปิด ML สลับกัน) · 3 พ.ย. 2026</span></h2></div>
+    <div class="ml">
+      <div class="paths">
+        <img src="paths.svg" alt="Body-centre paths, ML on vs off">
+        <div class="legend"><span><i style="background:var(--on)"></i>เปิด ML</span><span><i style="background:var(--off)"></i>ปิด ML</span><span>● จุดหยุด</span></div>
+      </div>
+      <div>
+        <div class="hero">
+          <div class="stat"><div class="big num">3.0<small>×</small></div><div class="lab">เบี่ยงน้อยลงเมื่อเปิด ML<br>ไม่มีโหลด</div></div>
+          <div class="stat"><div class="big num">1.9<small>×</small></div><div class="lab">เบี่ยงน้อยลงเมื่อเปิด ML<br>โหลด 3 กก.</div></div>
+          <div class="stat neutral"><div class="big num">10/10</div><div class="lab">คู่ที่เปิด ML<br>เดินตรงกว่า</div></div>
+        </div>
+        <h3>อัตราการเบี่ยงต่อระยะทาง |δ| (cm/m) · เฉลี่ย ± SD</h3>
+        <div class="bars">
+          <div class="grp">ไม่มีโหลด <span class="pv">· p = 0.0005 · มุมหันเปลี่ยน 24.0° → 5.3°</span></div>
+          <div class="rl">ปิด ML</div><div class="track"><div class="bar off" style="width:64.5%"><em class="num">23.7 ± 3.9</em></div></div>
+          <div class="rl">เปิด ML</div><div class="track"><div class="bar on" style="width:21.5%"><em class="num">7.9 ± 3.2</em></div></div>
+          <div class="grp">โหลด 3 กก. <span class="pv">· p = 0.0003 · มุมหันเปลี่ยน 24.1° → 10.3°</span></div>
+          <div class="rl">ปิด ML</div><div class="track"><div class="bar off" style="width:80%"><em class="num">29.4 ± 3.1</em></div></div>
+          <div class="rl">เปิด ML</div><div class="track"><div class="bar on" style="width:41.1%"><em class="num">15.1 ± 3.0</em></div></div>
+        </div>
+        <div class="insight">
+          <b>ML ไม่ได้เป็นแค่ค่าเลี้ยวคงที่:</b> ไม่มีโหลด หุ่นเบี่ยงซ้ายและ ML ดึงไปทางขวา ส่วนที่ 3 กก. หุ่นเบี่ยงขวาและ ML ดึงไปทางซ้าย
+          ทั้งสองกรณีเข้าหาแนวตรง · ที่ 3 กก. รอบปิด ML ทั้ง 5 รอบต้องหยุดที่ 0.63–1.11 m ก่อนออกนอกทางวิ่ง
+          ส่วนรอบเปิด ML เดินครบระยะสั่งการทุกรอบ
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2.3.3 -->
+  <section>
+    <div class="sh"><span class="tag">2.3.3</span><h2>ขีดจำกัดบนพื้นผิวจริง<span>บังคับด้วยแป้นพิมพ์ · ระยะ 2.4 m · เงื่อนไขละ 5 รอบ · วัดพลังงานด้วย PZEM-003</span></h2></div>
+    <div class="cap">
+      <div>
+        <table>
+          <tr><th></th><th>ไม่มีโหลด</th><th>โหลด 3 กก.</th></tr>
+          <tr><th class="row">พื้นราบ</th>
+            <td style="background:#cde2fb"><span class="cot num">5.8</span><span class="sub">5/5 · 7.4 cm/s · k̄ 0.10</span></td>
+            <td style="background:#86b6ef"><span class="cot num">8.2</span><span class="sub">5/5 · 6.1 cm/s · k̄ 0.14</span></td></tr>
+          <tr><th class="row">กรวด</th>
+            <td style="background:#86b6ef"><span class="cot num">8.5</span><span class="sub">5/5 · 5.8 cm/s · k̄ 0.15</span></td>
+            <td style="background:#2a78d6;color:#fff"><span class="cot num">12.0</span><span class="sub">5/5 · 4.5 cm/s · k̄ 0.11</span></td></tr>
+          <tr><th class="row">โฟม EVA 35 mm</th>
+            <td style="background:#3987e5;color:#fff"><span class="cot num">11.2</span><span class="sub">5/5 · 4.5 cm/s · k̄ 0.23</span></td>
+            <td style="background:#184f95;color:#fff"><span class="cot num">15.7</span><span class="sub">5/5 · 3.4 cm/s · k̄ 0.11</span></td></tr>
+          <tr><th class="row">ทางลาด 5–25°</th>
+            <td class="pending">รอทดสอบ</td><td class="pending">รอทดสอบ</td></tr>
+        </table>
+        <div class="scale">ตัวเลขใหญ่ = ต้นทุนการขนส่ง CoT · <span>ต่ำ</span><span class="sw"></span><span>สูง</span> · k̄ = ความพยายามบังคับทิศเฉลี่ย</div>
+      </div>
+      <div class="facts">
+        <div class="fact"><div class="big num">30/30</div><div class="lab">รอบที่เก็บแล้วผ่านทุกรอบ<br>พื้นราบ กรวด โฟม × 2 โหลด</div></div>
+        <div class="fact"><div class="big num">~40%</div><div class="lab">ของกำลังขณะเดินใช้ไปกับการยืนรับน้ำหนัก (8.9 W ไม่มีโหลด / 15.8 W ที่ 3 กก.) CoT จึงสูง</div></div>
+        <div class="fact warn"><div class="big num">4.65 A</div><div class="lab">กระแสบัสสูงสุด (โฟม 3 กก.) ใกล้ฟิวส์ 5 A<br>ทางลาด 3 กก. ต้องวางแผนความปลอดภัย</div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>
+      <h3>เงื่อนไขของ 2.3.2 ที่ต้องอ่านคู่กับผล</h3>
+      <ul>
+        <li>ML gain 1.0 · กรองผ่านต่ำ α 0.30 · ≤ 1 mm/รอบ · จำกัด ±12 mm · ขาขวาใช้โมเดลแบบสะท้อน</li>
+        <li>steer trim ตั้งด้วยมือขณะเปิด ML: +35–40% (0 กก.) / +60% (3 กก.) → เทียบได้ภายในโหลดเดียว</li>
+        <li>ค่าชดเชยระหว่างเดินเกือบคงที่ (dx ~4, dy 6–8 mm) · หุ่นตัวเดียว เก็บวันเดียว</li>
+      </ul>
+    </div>
+    <div>
+      <h3>สถานะ</h3>
+      <ul>
+        <li class="done">2.3.2 ครบ 20 รอบ · เขียนลงต้นฉบับแล้ว (§3.3, ตารางที่ 4, รูปที่ 5)</li>
+        <li class="done">2.3.3 พื้นราบ · กรวด · โฟม ครบ 2 โหลด × 5 รอบ</li>
+        <li class="todo">2.3.3 ทางลาด 5–25° ทีละ 5° · ยืนยันสถานะ ML ของชุดเดือน ต.ค.</li>
+        <li class="todo">ตารางที่ 5 จริง → เขียน §3.4 และข้อจำกัดข้อ 4</li>
+      </ul>
+    </div>
+    <div class="src">ที่มา: walk_video_metrics_261103_{0kg,3kg}.csv (วิดีโอ 4K, 20 รอบ) · evaluate_capability_runs.py + PZEM-003 (14–22 ต.ค. 2026) · paired t-test บนค่าสัมบูรณ์ · BLEGS, ร่างบทความ TCI กลุ่ม 1</div>
+  </footer>
+
+</div>
+</body>
+</html>
