@@ -47,7 +47,7 @@ if sys.platform == 'win32':
 # reading the same ID are running byte-identical code.  Printed once at start-up (under the
 # header) and written to the log (column code_id).
 # ----------------------------------------------------------------------------
-CODE_VERSION = '2026-10-30.r16'
+CODE_VERSION = '2026-11-03.r23'
 
 
 def _code_fingerprint() -> str:
@@ -79,11 +79,16 @@ MOTOR_INIT_ANGLE = -90.0
 DEFAULT_STANCE_HEIGHT = -220.0
 DEFAULT_STANCE_OFFSET_X = 0.0
 
-GAIT_LIFT_HEIGHT = 40.0     # old: 15.0
-GAIT_STEP_FORWARD = 35.0    # old: 25.0
+# Short, quick steps for a soft landing (r22, 3 Nov 2026; was lift 40 / step 35 / 30 steps = 0.6 s / stance 0.75):
+# stroke 70 -> 50 mm, cadence 1.67 -> 2.27 Hz, foot lift 40 -> 25 mm (march 80 -> 50), and a slightly longer
+# swing share so the foot comes down slower (~190 vs ~270 mm/s nominal).  Nominal speed stays about the same
+# (114 vs 117 mm/s), but this is a NEW gait: VELOCITY_CALIBRATION, MODE7_DISTANCE_MM and the steer trim were
+# all tuned on the old one, and runs before r22 are not comparable with runs after it.
+GAIT_LIFT_HEIGHT = 25.0     # old: 15.0, then 40.0
+GAIT_STEP_FORWARD = 25.0    # half-stroke (stroke = 2x); old: 25.0, then 35.0
 UPDATE_RATE = 50
-TRAJECTORY_STEPS = 30
-SMOOTH_TROT_STANCE_RATIO = 0.75
+TRAJECTORY_STEPS = 22       # was 30; keep it even so the trot half-cycle offset is a whole step
+SMOOTH_TROT_STANCE_RATIO = 0.70   # was 0.75
 
 NAV_V_MAX = 70.0
 NAV_K_P = 1.0
@@ -152,9 +157,11 @@ STATIC_ROLL_TRIM_MM = 0.0   # 0.0 = pure ML on/off comparison (set 30 Oct 2026).
 # put the robot on a flat table in the stand pose and find which foot floats / which corner is low.
 # One table per payload, chosen live with the menu key [P].  Measured body height at each corner in the
 # stand pose (author, 30 Oct 2026), 3 kg: RL 267, RR 270, FL 270, FR 273 mm -> level to their mean (270 mm):
-# RL 3 mm longer (-3), FR 3 mm shorter (+3).  No-load not measured yet.
+# RL 3 mm longer (-3), FR 3 mm shorter (+3).  No load (3 Nov 2026): FL 280, FR 281, RL 273, RR 277 mm
+# -> trim = corner height - mean (277.75 mm); front sits ~5.5 mm higher than rear, right ~2.5 mm higher than left.
+# Re-measured with those trims: FL/RL/RR ~275, FR 280 -> FR +5 more (+3.25 -> +8.25).
 LEG_HEIGHT_TRIM_BY_PAYLOAD_MM = {
-    0: {'FR': 0.0, 'FL': 0.0, 'RR': 0.0, 'RL': 0.0},
+    0: {'FR': +8.25, 'FL': +2.25, 'RR': -0.75, 'RL': -4.75},
     3: {'FR': +3.0, 'FL': 0.0, 'RR': 0.0, 'RL': -3.0},
 }
 PAYLOAD_KG = 0
@@ -165,6 +172,18 @@ LEG_HEIGHT_TRIM_MM = dict(LEG_HEIGHT_TRIM_BY_PAYLOAD_MM[PAYLOAD_KG])   # the ACT
 ROLL_TILT_MM = 0.0
 ROLL_TILT_STEP_MM = 0.5
 ROLL_TILT_LIMIT_MM = 15.0
+# Straight-walk steering trim, set live from the menu with the keys , . / : the LEFT legs step this many
+# percent of the step length longer than the RIGHT legs (+ = steer right, - = steer left).  A ratio, not a
+# fixed mm bias, so it stays proportional while the speed ramps up and down.  Applied in modes 7/8/9 with ML
+# on and off (never in RC), logged in steer_trim_pct.  The 30 Oct no-load runs veer left ~30 cm/m, which a
+# left/right stroke difference of ~6 % explains (BODY_WIDTH / turn radius ~2.9 m), but on 3 Nov (no load)
+# it took +20 % to walk nearly straight: the legs reach only 70-83 % of the commanded stroke and the left
+# legs (FL 70-75 %) saturate first, so +20 % commanded (77 vs 63 mm) became only ~6 mm actual (57 vs 51).
+# With the short, quick r22 gait it took +35..+40 % (3 Nov, no load, ML on and off): +40 % for the first two
+# video pairs, +35 % for the last three.  The default is +35 %; the limit is 60 % so 40 % is not the ceiling.
+STEER_TRIM_PCT = 35.0
+STEER_TRIM_STEP_PCT = 1.0
+STEER_TRIM_LIMIT_PCT = 60.0
 
 GAIT_CYCLE_TIME = TRAJECTORY_STEPS / UPDATE_RATE
 
@@ -194,11 +213,15 @@ ML_COMPENSATION_ENABLED = False
 COMPENSATION_MODEL_DIR = os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'test_2', 'output', 'models'))
 COMPENSATION_MODEL_NAME = 'model_poly4'
-ML_COMPENSATION_GAIN = 0.60   # was 0.10 until 30 Oct 2026, then 0.30 (author: ML had no visible effect). Every gain is
+ML_COMPENSATION_GAIN = 1.00   # was 0.10 until 30 Oct 2026, then 0.30, 0.60 (author: ML had no visible effect). Every gain is
                               # a different condition - never pool runs of different gains; logged in column ml_gain.
-ML_COMPENSATION_ALPHA = 0.05
-ML_COMPENSATION_MAX_DELTA_MM = 0.2
-ML_COMPENSATION_MAX_ABS_MM = 5.0
+# Filter opened up on 3 Nov 2026 (r21).  With ALPHA 0.05 (tau ~0.4 s, longer than the 0.6 s gait cycle) the
+# applied correction was a constant (3 Nov log at gain 0.6: dx -2.5 +-0.1, dy +4.4 +-0.2 mm on EVERY leg):
+# a static shift, the same on all four legs, so it could never change the heading.  ALPHA 0.3 (tau ~0.06 s)
+# lets the within-cycle shape through; the slew/clamp limits rise with it.  Was 0.05 / 0.2 / 5.0.
+ML_COMPENSATION_ALPHA = 0.30
+ML_COMPENSATION_MAX_DELTA_MM = 1.0
+ML_COMPENSATION_MAX_ABS_MM = 12.0
 # The model was trained on ONE LEFT leg (single_leg_xy_control.py, LEG_SIDE='LEFT').  A right
 # leg (FR, RR) is its mirror image: evaluate the model at the mirrored foot (-x) with the LEFT
 # geometry and flip the sign of the x correction.  Fed the right leg's own angles (False = the
@@ -1187,6 +1210,11 @@ control_paused = True
 idle_marching = False
 march_thread: Optional[threading.Thread] = None
 march_step_indices = {'FR': 0, 'FL': 0, 'RR': 0, 'RL': 0}
+# Stopping a march: instead of freezing mid-step (a diagonal pair up to 2 x lift in the air) and jumping
+# to the stand pose, the lift fades out over this many gait cycles (cosine ramp) while the legs keep
+# their rhythm, so the feet land gently and the final stand command is already where the feet are.
+MARCH_STOP_RAMP_CYCLES = 2.0
+march_ramp_down = False
 
 ml_compensation_state = {
     'FR': {'err_x': 0.0, 'err_y': 0.0, 'initialized': False},
@@ -1353,6 +1381,26 @@ def _rc_print_params(gait: dict, v_cmd: float) -> None:
     print(f"  RC_TURN_K = {gait['turn_k']:.1f}")
     print(f"  RC_V_DEFAULT = {v_cmd:.1f}")
     print("  ---------------------------------------------------------")
+
+
+def steer_trim_mm(v_body_y: float) -> float:
+    """yaw_correction (mm per side) for STEER_TRIM_PCT: each side moves by half the left-right difference."""
+    step_length, _ = update_gait_from_velocity(v_body_y)
+    return step_length * STEER_TRIM_PCT / 100.0 / 2.0
+
+
+def adjust_steer_trim(delta_pct: float | None) -> float:
+    """Menu keys , . / : None resets to 0."""
+    global STEER_TRIM_PCT
+    if delta_pct is None:
+        STEER_TRIM_PCT = 0.0
+    else:
+        STEER_TRIM_PCT = _clamp(round(STEER_TRIM_PCT + delta_pct, 3), -STEER_TRIM_LIMIT_PCT, STEER_TRIM_LIMIT_PCT)
+    side = 'straight' if abs(STEER_TRIM_PCT) < 1e-9 else ('steer RIGHT' if STEER_TRIM_PCT > 0 else 'steer LEFT')
+    # the foot stroke is 2 x step_forward (start/end x symmetric about home_x)
+    print(f"  Steer trim {STEER_TRIM_PCT:+.1f} % ({side}) = left-right foot stroke difference "
+          f"{2 * GAIT_STEP_FORWARD * STEER_TRIM_PCT / 100.0:+.2f} mm at full step")
+    return STEER_TRIM_PCT
 
 
 def get_trajectory_for_velocity(v_body_y: float, leg_id: str,
@@ -1737,6 +1785,7 @@ def init_logging(target_distance: float) -> bool:
             'v_cmd_mm_s', 'turn_k_cmd',
             # what was actually applied, so a log states its own condition
             'ml_on', 'static_trim_mm', 'ml_dx_mm', 'ml_dy_mm', 'code_id', 'ml_gain', 'payload_kg',
+            'steer_trim_pct',
         ]
         log_file.write(','.join(cols) + '\n')
         log_counter = 0
@@ -1746,7 +1795,8 @@ def init_logging(target_distance: float) -> bool:
               f" | static roll trim {STATIC_ROLL_TRIM_MM:+.1f} mm {'(applied: rides on ML)' if ML_COMPENSATION_ENABLED else '(not applied while ML is OFF)'}"
               f" | gain {ML_COMPENSATION_GAIN}"
               f" | leg height trim {LEG_HEIGHT_TRIM_MM} mm"
-              f" | roll tilt {ROLL_TILT_MM:+.1f} mm (+ = left higher)")
+              f" | roll tilt {ROLL_TILT_MM:+.1f} mm (+ = left higher)"
+              f" | steer trim {STEER_TRIM_PCT:+.1f} % (+ = steer right, modes 7/8/9)")
         return True
     except Exception as e:
         print(f"  Logging init failed: {e}")
@@ -1790,7 +1840,8 @@ def log_control_step(phase: str) -> None:
             f"{elapsed:.4f},{phase},{leg_id},"
             f"{sp1:.3f},{act1:.3f},{sp2:.3f},{act2:.3f},"
             f"{cur_A},{cur_B},{log_v_cmd:.2f},{log_turn_cmd:.3f},"
-            f"{1 if ML_COMPENSATION_ENABLED else 0},{trim:.1f},{ml_dx:.3f},{ml_dy:.3f},{CODE_ID},{ML_COMPENSATION_GAIN},{PAYLOAD_KG}\n")
+            f"{1 if ML_COMPENSATION_ENABLED else 0},{trim:.1f},{ml_dx:.3f},{ml_dy:.3f},{CODE_ID},{ML_COMPENSATION_GAIN},{PAYLOAD_KG},"
+            f"{STEER_TRIM_PCT:.1f}\n")
     if (log_counter // LOG_RATE) % LOG_FLUSH_EVERY == 0:
         log_file.flush()
 
@@ -1818,6 +1869,8 @@ def _march_loop():
             stance_ratio=SMOOTH_TROT_STANCE_RATIO,
             home_x=DEFAULT_STANCE_OFFSET_X, home_y=DEFAULT_STANCE_HEIGHT,
             reverse=False)
+    ramp_ticks = max(1, int(MARCH_STOP_RAMP_CYCLES * TRAJECTORY_STEPS))
+    k = 0
     try:
         while idle_marching:
             t0 = time.time()
@@ -1827,11 +1880,22 @@ def _march_loop():
                     o = imu_reader.get_orientation()
                     bal = combine_balance_offsets(
                         balance_controller.compute(o['roll'], o['pitch'], t0))
-            update_all_legs_gait(march_traj, march_step_indices, bal)
+            traj = march_traj
+            last = False
+            if march_ramp_down:
+                k += 1
+                scale = 0.5 * (1.0 + np.cos(np.pi * min(k, ramp_ticks) / ramp_ticks))
+                last = k >= ramp_ticks
+                h = DEFAULT_STANCE_HEIGHT
+                traj = {leg: [(p[0], h + scale * (p[1] - h)) for p in pts]
+                        for leg, pts in march_traj.items()}
+            update_all_legs_gait(traj, march_step_indices, bal)
             for leg_id in march_step_indices:
                 march_step_indices[leg_id] = (
                     march_step_indices[leg_id] + 1) % TRAJECTORY_STEPS
             log_control_step("MARCH")
+            if last:
+                break                   # all feet down at the stand pose
             sleep_t = (1.0 / UPDATE_RATE) - (time.time() - t0)
             if sleep_t > 0:
                 time.sleep(sleep_t)
@@ -1857,13 +1921,17 @@ def start_idle_march(resume_from: dict = None) -> bool:
 
 
 def stop_idle_march() -> bool:
-    global idle_marching, march_thread
+    global idle_marching, march_thread, march_ramp_down
     if not idle_marching:
         return False
+    if march_thread and march_thread.is_alive():
+        march_ramp_down = True          # fade the lift out, the loop ends itself with all feet down
+        march_thread.join(timeout=MARCH_STOP_RAMP_CYCLES * GAIT_CYCLE_TIME + 2.0)
     idle_marching = False
+    march_ramp_down = False
     if march_thread and march_thread.is_alive():
         march_thread.join(timeout=2.0)
-    time.sleep(0.2)
+    time.sleep(0.1)
     move_to_stand_position()
     print("  Idle march stopped")
     return True
@@ -1967,7 +2035,7 @@ def move_relative_y(target_distance_mm: float, timeout_s: float = NAV_TIMEOUT,
 
             v_body_y = nav_planner.compute_velocity()
 
-            yaw_correction = 0.0
+            yaw_correction = steer_trim_mm(v_body_y)
             if yaw_controller is not None and state_estimator.has_imu():
                 yaw_correction = yaw_controller.compute(
                     state_estimator.get_yaw(), t_now)
@@ -2109,7 +2177,7 @@ def move_relative_y_with_turn(target_distance_mm: float, turn_bias: float,
 
             v_body_y = nav_planner.compute_velocity()
 
-            yaw_correction = turn_bias
+            yaw_correction = turn_bias + steer_trim_mm(v_body_y)
             if yaw_controller is not None and state_estimator.has_imu():
                 yaw_correction += yaw_controller.compute(
                     state_estimator.get_yaw(), t_now)
@@ -2693,6 +2761,8 @@ def print_menu():
     print(f"  ML : {get_ml_status()}   gain {ML_COMPENSATION_GAIN}")
     tilt_txt = 'level' if abs(ROLL_TILT_MM) < 1e-9 else (f'LEFT higher by {ROLL_TILT_MM:.1f} mm' if ROLL_TILT_MM > 0 else f'RIGHT higher by {-ROLL_TILT_MM:.1f} mm')
     print(f"  LOAD: {PAYLOAD_KG} kg | TILT: {tilt_txt} | leg trim {LEG_HEIGHT_TRIM_MM}")
+    steer_txt = 'straight' if abs(STEER_TRIM_PCT) < 1e-9 else (f'RIGHT {STEER_TRIM_PCT:.1f} %' if STEER_TRIM_PCT > 0 else f'LEFT {-STEER_TRIM_PCT:.1f} %')
+    print(f"  STEER TRIM: {steer_txt} (left-right step difference, modes 7/8/9, ML on and off)")
     print("=" * 70)
     print(f"  [7] Smooth walk {MODE7_DISTANCE_MM:+.0f}mm (march -> walk -> march -> stand)")
     print(f"  [8] Turn LEFT {MODE_TURN_DISTANCE_MM:+.0f}mm   (march -> turn -> march -> stand)")
@@ -2700,6 +2770,7 @@ def print_menu():
     print("  [R] RC drive (hold W/S/A/D + live gait tuning, Q exit)")
     print("  [M] Toggle ML compensation")
     print(f"  [ / ]  raise the LEFT / RIGHT side {ROLL_TILT_STEP_MM} mm (body tilt)    [0] level")
+    print(f"  [, / .]  steer LEFT / RIGHT {STEER_TRIM_STEP_PCT:.0f} % (straight-walk trim)    [/] straight")
     print("  [P] Payload 0 <-> 3 kg (selects that payload's per-leg levelling trims)")
     print("  [Q] Quit")
     print("=" * 70)
@@ -2733,6 +2804,12 @@ def interactive_mode():
                 adjust_roll_tilt(-ROLL_TILT_STEP_MM)
             elif key == b'0':
                 adjust_roll_tilt(None)
+            elif key in (b',', b'<'):
+                adjust_steer_trim(-STEER_TRIM_STEP_PCT)
+            elif key in (b'.', b'>'):
+                adjust_steer_trim(+STEER_TRIM_STEP_PCT)
+            elif key == b'/':
+                adjust_steer_trim(None)
             elif key.lower() == b'p':
                 set_payload(3 if PAYLOAD_KG == 0 else 0)
             elif key.lower() == b'q':
@@ -2758,6 +2835,12 @@ def interactive_mode():
                 adjust_roll_tilt(-ROLL_TILT_STEP_MM)
             elif cmd == '0':
                 adjust_roll_tilt(None)
+            elif cmd in (',', '<'):
+                adjust_steer_trim(-STEER_TRIM_STEP_PCT)
+            elif cmd in ('.', '>'):
+                adjust_steer_trim(+STEER_TRIM_STEP_PCT)
+            elif cmd == '/':
+                adjust_steer_trim(None)
             elif cmd.lower() == 'p':
                 set_payload(3 if PAYLOAD_KG == 0 else 0)
             elif cmd.lower() == 'q':
