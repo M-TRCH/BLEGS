@@ -19,11 +19,11 @@ movement_+0mm_20261014_163121.csv#2,Flat (reference),3,2,,1,2.40,14 Oct; out-and
 movement_+0mm_20261014_163121.csv#3,Flat (reference),3,3,,1,2.40,14 Oct; out-and-back alternating direction; 3 kg payload (file 16:28 was a trial)
 movement_+0mm_20261014_163121.csv#4,Flat (reference),3,4,,1,2.40,14 Oct; out-and-back alternating direction; 3 kg payload (file 16:28 was a trial)
 movement_+0mm_20261014_163121.csv#5,Flat (reference),3,5,,1,2.40,14 Oct; out-and-back alternating direction; 3 kg payload (file 16:28 was a trial)
-,Ramp,0,1,5,,,ramp: go up one angle at a time; stop once an angle fails for that payload; leave the rest blank
-,Ramp,0,2,5,,,
-,Ramp,0,3,5,,,
-,Ramp,0,4,5,,,
-,Ramp,0,5,5,,,
+movement_+0mm_20261106_155323.csv#1,Ramp,0,1,5,1,1.20,"6 Nov; ML off; L=1.2 m along the slope, start fully on the ramp; stood 30 s without slipping; set angle 5 (measured angle not recorded)"
+movement_+0mm_20261106_155323.csv#2,Ramp,0,2,5,1,1.20,"6 Nov; ML off; L=1.2 m along the slope, start fully on the ramp; stood 30 s without slipping; set angle 5 (measured angle not recorded)"
+movement_+0mm_20261106_155323.csv#3,Ramp,0,3,5,1,1.20,"6 Nov; ML off; L=1.2 m along the slope, start fully on the ramp; stood 30 s without slipping; set angle 5 (measured angle not recorded)"
+movement_+0mm_20261106_155323.csv#4,Ramp,0,4,5,1,1.20,"6 Nov; ML off; L=1.2 m along the slope, start fully on the ramp; stood 30 s without slipping; set angle 5 (measured angle not recorded)"
+movement_+0mm_20261106_155323.csv#5,Ramp,0,5,5,1,1.20,"6 Nov; ML off; L=1.2 m along the slope, start fully on the ramp; stood 30 s without slipping; set angle 5 (measured angle not recorded)"
 ,Ramp,3,1,5,,,
 ,Ramp,3,2,5,,,
 ,Ramp,3,3,5,,,
