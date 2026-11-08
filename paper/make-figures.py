@@ -1,6 +1,7 @@
 """Draw the manuscript figures into figures/export/fig1..5.jpg.
 
-Every figure is 7.5 cm wide (one journal column), English-labelled, and reads in
+Every figure is exactly 7.5 cm wide (one journal column), English-labelled in
+TH Sarabun New 12 pt with variables in Times New Roman, and reads in
 black and white.  Nothing here is hand-placed data: the schematics are drawn from
 the geometry constants in the control code, and the plots come straight from the
 measurement files.
@@ -53,17 +54,24 @@ CAMERA_M, LENS_MM, FPS = 1.2, 25, 60
 GRID_W, GRID_L, ROW_PITCH, TAG_FRAME = 80.0, 240.0, 40.0, (14.0, 37.3)
 CAM_BACK_M, CAM_HIGH_M = 0.95, 1.5
 
-# MATLAB look: Helvetica/Arial everywhere (maths included), a box of thin black axes
-# with the ticks pointing inwards on all four sides, no grid, black on white.
+# Fonts follow the journal (8 Nov 2026): every word in TH Sarabun New 12 pt - the
+# guide's size for figure detail text - and variables (P_A, theta_A, L_AC) in Times
+# New Roman, as the equations in the body text are.  Times at 9 pt sits with
+# Sarabun 12 as the body's Times 10 sits with Sarabun 14 (Sarabun runs small).
+# Sizes are true sizes in the printed column: save() exports every figure at
+# exactly 7.5 cm, the width the manuscript places it at.  A box of thin black
+# axes with the ticks pointing inwards on all four sides, no grid, black on white.
+TXT, MATH = 12, 9
+PAD_IN = 0.03
 plt.rcParams.update({
-    'font.family': 'Arial', 'font.size': 8,
-    'mathtext.fontset': 'custom', 'mathtext.rm': 'Arial', 'mathtext.it': 'Arial:italic',
-    'mathtext.bf': 'Arial:bold',
+    'font.family': 'TH Sarabun New', 'font.size': TXT,
+    'mathtext.fontset': 'custom', 'mathtext.rm': 'Times New Roman',
+    'mathtext.it': 'Times New Roman:italic', 'mathtext.bf': 'Times New Roman:bold',
     'axes.linewidth': 0.5, 'axes.edgecolor': 'black', 'axes.labelcolor': 'black',
     'xtick.direction': 'in', 'ytick.direction': 'in', 'xtick.top': True, 'ytick.right': True,
     'xtick.major.width': 0.5, 'ytick.major.width': 0.5, 'xtick.major.size': 3, 'ytick.major.size': 3,
-    'xtick.labelsize': 7, 'ytick.labelsize': 7, 'legend.fontsize': 7, 'axes.labelsize': 8,
-    'axes.grid': False, 'lines.linewidth': 1.0, 'legend.frameon': False,
+    'xtick.labelsize': TXT, 'ytick.labelsize': TXT, 'legend.fontsize': TXT, 'axes.labelsize': TXT,
+    'axes.titlesize': TXT, 'axes.grid': False, 'lines.linewidth': 1.0, 'legend.frameon': False,
 })
 
 
@@ -71,17 +79,62 @@ def new_fig(height_cm):
     return plt.figure(figsize=(COL_CM / 2.54, height_cm / 2.54))
 
 
+def _fit_width(fig):
+    """Scale the canvas until the tight-cropped export is exactly one column wide,
+    so the manuscript places it at 100 % and the type keeps its point size."""
+    target = COL_CM / 2.54
+    size0 = fig.get_size_inches().copy()
+    for _ in range(8):
+        fig.canvas.draw()
+        w = fig.get_tightbbox(fig.canvas.get_renderer()).width + 2 * PAD_IN
+        if abs(w - target) < 0.002:
+            return
+        r = target / w
+        if not 0.5 < r < 2.0:            # something wider than the column - fix the layout
+            break
+        fig.set_size_inches(fig.get_figwidth() * r, fig.get_figheight() * r)
+    if abs(w - target) / target < 0.01:                  # within 1 %: type stays 12 +- 0.1 pt
+        return
+    fig.set_size_inches(*size0)
+    sys.exit('  %s: export would be %.2f cm wide, not %.1f cm - something does not fit'
+             % (fig.get_label() or 'figure', w * 2.54, COL_CM))
+
+
+def _label_and_legend_below(fig, axes, xlabel, handles, labels, **legend_kw):
+    """One x label shared by side-by-side panels (12 pt is too long for one per
+    panel), the legend straight under it.  Placed from the drawn tick labels, and
+    placed again by save() after _fit_width has rescaled the canvas."""
+    sx = fig.supxlabel(xlabel, fontsize=TXT, va='top')
+    leg = fig.legend(handles, labels, loc='upper center', frameon=False, borderaxespad=0.1,
+                     borderpad=0.2, **legend_kw)
+
+    def place():
+        fig.canvas.draw()
+        ticks = min(t.get_window_extent().y0 for a in axes for t in a.get_xticklabels())
+        sx.set_y(ticks / fig.bbox.height - 0.005)
+        fig.canvas.draw()
+        leg.set_bbox_to_anchor((0.5, sx.get_window_extent().y0 / fig.bbox.height),
+                               transform=fig.transFigure)
+    fig._place_below = place
+    place()
+
+
 def save(fig, name, svg=False):
     """Always the .jpg the manuscript and the journal use; with svg=True also an
     editable .svg (text kept as text) next to it."""
     os.makedirs(EXPORT, exist_ok=True)
+    _fit_width(fig)
+    if hasattr(fig, '_place_below'):
+        fig._place_below()
+        _fit_width(fig)
+        fig._place_below()
     out = os.path.join(EXPORT, name + '.jpg')
-    fig.savefig(out, dpi=DPI, bbox_inches='tight', pad_inches=0.03,
+    fig.savefig(out, dpi=DPI, bbox_inches='tight', pad_inches=PAD_IN,
                 facecolor='white')
     if svg:
         with plt.rc_context({'svg.fonttype': 'none'}):
             fig.savefig(os.path.join(EXPORT, name + '.svg'), bbox_inches='tight',
-                        pad_inches=0.03, facecolor='white')
+                        pad_inches=PAD_IN, facecolor='white')
     plt.close(fig)
     print('%-5s -> %s%s' % (name, out, ' (+ .svg)' if svg else ''))
 
@@ -108,10 +161,10 @@ def fig1():
     """(a) the single-leg rig as the camera sees it, plus a top view of where the
     camera stands; (b) the walking runway from above, robot walking to the right."""
     INK, MID, LIGHT = 'black', '#808080', '#e6e6e6'
-    fig = new_fig(10.0)
-    gs = fig.add_gridspec(2, 2, width_ratios=[0.56, 0.44], height_ratios=[1.12, 1.0],
+    fig = new_fig(9.3)
+    gs = fig.add_gridspec(2, 2, width_ratios=[0.56, 0.44], height_ratios=[1.75, 0.86],
                           hspace=0.12, wspace=0.0, left=0.01, right=0.99, top=0.99, bottom=0.01)
-    lab = dict(fontsize=7, color=INK)
+    lab = dict(fontsize=TXT, color=INK)
     onl = dict(ha='center', va='center_baseline', bbox=dict(fc='white', ec='none', pad=1.0))   # text sitting on a line
 
     def tagbox(ax, x, y, s, z=6):
@@ -138,11 +191,11 @@ def fig1():
     ax.text(pe[0] + 15, pe[1], 'id4', va='center', **lab)
     ax.plot([0, 0], [pe[1] - 10, -256], color=INK, lw=0.5)                        # cord
     ax.add_patch(Rectangle((-18, -284), 36, 28, fc=LIGHT, ec=INK, lw=0.5))
-    ax.text(24, -270, '0-3 kg', va='center', **lab)
+    ax.text(24, -270, '0–3 kg', va='center', **lab)
     ax.annotate('', xy=(96, -300), xytext=(96, -250),
                 arrowprops=dict(arrowstyle='-|>', lw=0.7, color=MID))             # gravity
-    ax.text(102, -275, 'g', va='center', fontsize=7, color=MID, style='italic')
-    ax.text(-122, 50, '(a)', fontsize=9, fontweight='bold', va='top', color=INK)
+    ax.text(102, -275, r'$g$', va='center', fontsize=MATH, color=MID)
+    ax.text(-122, 50, '(a)', fontsize=TXT, fontweight='bold', va='top', color=INK)
 
     # (a) right: the camera stands 1.2 m in front of that plane, axis normal to it
     ax = fig.add_subplot(gs[0, 1]); ax.axis('off'); ax.set_aspect('equal')
@@ -156,7 +209,7 @@ def fig1():
     # (b) the runway from above, robot walking to the right, camera behind it
     ax = fig.add_subplot(gs[1, :]); ax.set_aspect('equal'); ax.axis('off')
     cx = -100 * CAM_BACK_M                                   # camera lens, cm before the first row
-    ax.set_xlim(cx - 30, GRID_L + 12); ax.set_ylim(-34, 100)
+    ax.set_xlim(cx - 30, GRID_L + 12); ax.set_ylim(-52, 104)
     ax.add_patch(Rectangle((0, 0), GRID_L, GRID_W, fc='none', ec=INK, lw=0.5, ls=':'))
     # runway ids (walk_video_metrics.floor_world): even ids 4..16 on one side, odd 5..17 on
     # the other, rows every 40 cm from the camera end; drawn with the walk direction to the
@@ -166,8 +219,8 @@ def fig1():
         for y, tid in ((GRID_W, 4 + 2 * row), (0, 5 + 2 * row)):
             tagbox(ax, x, y, 9)
             ax.text(x, y + (8 if y else -8), str(tid), ha='center', va='bottom' if y else 'top',
-                    fontsize=7, color=INK)
-    ax.text(GRID_L / 2, -20, '%.0f x %.0f cm, rows every %.0f cm' % (GRID_L, GRID_W, ROW_PITCH),
+                    fontsize=TXT, color=INK)
+    ax.text(GRID_L / 2, -31, '%.0f × %.0f cm, rows every %.0f cm' % (GRID_L, GRID_W, ROW_PITCH),
             ha='center', va='top', **lab)
     rx, ry = 40, GRID_W / 2                                 # robot body
     ax.add_patch(Rectangle((rx - 24, ry - 13), 48, 26, fc=LIGHT, ec=INK, lw=0.5))
@@ -176,16 +229,17 @@ def fig1():
     for tid, (ddx, ddy) in enumerate(((-hx, hy), (-hx, -hy), (hx, hy), (hx, -hy))):
         tagbox(ax, rx + ddx, ry + ddy, 7)
         ax.text(rx + ddx + (7 if ddx > 0 else -7), ry + ddy, str(tid), ha='left' if ddx > 0 else 'right',
-                va='center', fontsize=7, color=INK)
-    ax.text(rx, ry - 19, '%.1f x %.1f cm' % (TAG_FRAME[1], TAG_FRAME[0]), ha='center', va='top',
-            fontsize=7, color=MID)
+                va='center', fontsize=TXT, color=INK)
+    # back-tag frame size, under the robot and clear of the runway edge
+    ax.text(rx + 22, (ry - 13) / 2 + 5, '%.1f × %.1f cm' % (TAG_FRAME[1], TAG_FRAME[0]), ha='center',
+            va='center_baseline', fontsize=TXT, color=MID)
     ax.annotate('', xy=(rx + 62, ry), xytext=(rx + 32, ry),
                 arrowprops=dict(arrowstyle='-|>', lw=1.0, color=INK, mutation_scale=7))
     camera(ax, cx, ry, 14)
     ax.plot([cx, -4.5], [ry, ry], color=INK, lw=0.5, ls='--')                     # camera to the first tag row
     ax.text((cx - 4.5) / 2, ry, '%.2f m' % CAM_BACK_M, **lab, **onl)
-    ax.text(cx - 9, ry + 10, 'camera\n%.1f m high' % CAM_HIGH_M, ha='center', va='bottom', **lab)
-    ax.text(cx - 28, 100, '(b)', fontsize=9, fontweight='bold', va='top', color=INK)
+    ax.text(cx - 9, ry - 11, 'camera\n%.1f m high' % CAM_HIGH_M, ha='center', va='top', **lab)
+    ax.text(cx - 28, 104, '(b)', fontsize=TXT, fontweight='bold', va='top', color=INK)
     save(fig, 'fig1', svg=True)
 
 
@@ -200,17 +254,17 @@ def fig2():
     for p in (pa, pb, c, d):
         ax.add_patch(Circle(p, 4, fc='w', ec='k', lw=0.8, zorder=5))
     ax.add_patch(Circle(pe, 4, fc='k', ec='k', zorder=5))
-    lab = dict(fontsize=8)
+    lab = dict(fontsize=MATH)
     ax.text(pa[0] - 6, pa[1] + 9, r'$P_A$', ha='right', **lab)
     ax.text(pb[0] + 6, pb[1] + 9, r'$P_B$', ha='left', **lab)
     ax.text(c[0] - 8, c[1], r'$C$', ha='right', va='center', **lab)
     ax.text(d[0] + 8, d[1], r'$D$', ha='left', va='center', **lab)
-    ax.text(pe[0], pe[1] - 14, r'$P_E$ (0, $-$220)', ha='center', fontsize=8)
-    ax.text((pa[0] + c[0]) / 2 - 14, (pa[1] + c[1]) / 2, r'$L_{AC}$', ha='right', fontsize=7)
-    ax.text((pb[0] + d[0]) / 2 + 14, (pb[1] + d[1]) / 2, r'$L_{BD}$', ha='left', fontsize=7)
-    ax.text((c[0] + pe[0]) / 2 - 12, (c[1] + pe[1]) / 2, r'$L_{CE}$', ha='right', fontsize=7)
-    ax.text((d[0] + pe[0]) / 2 + 12, (d[1] + pe[1]) / 2, r'$L_{DE}$', ha='left', fontsize=7)
-    ax.text(0, 8, '%.0f mm' % SPACING, ha='center', fontsize=7)
+    ax.text(pe[0], pe[1] - 14, r'$P_E\ (0, -220)$', ha='center', fontsize=MATH)
+    ax.text((pa[0] + c[0]) / 2 - 14, (pa[1] + c[1]) / 2, r'$L_{AC}$', ha='right', fontsize=MATH)
+    ax.text((pb[0] + d[0]) / 2 + 14, (pb[1] + d[1]) / 2, r'$L_{BD}$', ha='left', fontsize=MATH)
+    ax.text((c[0] + pe[0]) / 2 - 12, (c[1] + pe[1]) / 2, r'$L_{CE}$', ha='right', fontsize=MATH)
+    ax.text((d[0] + pe[0]) / 2 + 12, (d[1] + pe[1]) / 2, r'$L_{DE}$', ha='left', fontsize=MATH)
+    ax.text(0, 8, '%.0f mm' % SPACING, ha='center', fontsize=TXT)
     # joint angles measured from +x at each motor, as in equation (3)
     for p, q, name, sgn in ((pa, c, r'$\theta_A$', 1), (pb, d, r'$\theta_B$', -1)):
         ang = np.degrees(np.arctan2(q[1] - p[1], q[0] - p[0]))
@@ -218,7 +272,7 @@ def fig2():
         ax.add_patch(Arc(p, 2 * R_ARC, 2 * R_ARC, theta1=min(0, ang), theta2=max(0, ang),
                          color='0.3', lw=0.6, zorder=4))
         mid = np.radians(ang / 2)                                  # label on the arc's bisector
-        ax.text(p[0] + 38 * np.cos(mid), p[1] + 38 * np.sin(mid), name, ha='center', va='center', fontsize=8)
+        ax.text(p[0] + 38 * np.cos(mid), p[1] + 38 * np.sin(mid), name, ha='center', va='center', fontsize=MATH)
     ax.set_xlabel('x (mm)'); ax.set_ylabel('y (mm)')
     ax.set_xlim(-150, 150); ax.set_ylim(-250, 30)
     save(fig, 'fig2', svg=True)
@@ -247,8 +301,8 @@ def foot_path():
 
 
 def fig3():
-    fig = new_fig(6.5)
-    gs = fig.add_gridspec(2, 1, height_ratios=[0.72, 1.0], hspace=0.55)
+    fig = new_fig(6.6)
+    gs = fig.add_gridspec(2, 1, height_ratios=[0.72, 1.0], hspace=0.7)
     # (a) trot phasing over two cycles: black = stance.  Diagonal pairs share a
     # phase (FR+RL at 0, FL+RR at 0.5), as get_gait_phase_offset() in walk_test.py
     ax = fig.add_subplot(gs[0])
@@ -259,16 +313,16 @@ def fig3():
             ax.add_patch(Rectangle((s0, y - 0.3), STANCE_RATIO, 0.6, fc='k', ec='k', lw=0.5))
             ax.add_patch(Rectangle((s0 + STANCE_RATIO, y - 0.3), 1 - STANCE_RATIO, 0.6,
                                    fc='w', ec='k', lw=0.5))
-        ax.text(-0.05, y, name, ha='right', va='center', fontsize=7)
+        ax.text(-0.05, y, name, ha='right', va='center', fontsize=TXT)
     ax.set_xlim(0, 2); ax.set_ylim(-0.6, len(legs) + 0.7)
     ax.set_yticks([]); ax.set_xticks([0, 0.5, 1, 1.5, 2])
     ax.set_xlabel('gait cycle', labelpad=1)
     ax.add_patch(Rectangle((0.02, 4.0), 0.12, 0.3, fc='k', ec='k', lw=0.5, clip_on=False))
-    ax.text(0.18, 4.15, 'stance', va='center', fontsize=7)
+    ax.text(0.18, 4.15, 'stance', va='center', fontsize=TXT)
     ax.add_patch(Rectangle((1.25, 4.0), 0.12, 0.3, fc='w', ec='k', lw=0.5, clip_on=False))
-    ax.text(1.41, 4.15, 'swing', va='center', fontsize=7)
+    ax.text(1.41, 4.15, 'swing', va='center', fontsize=TXT)
     ax.tick_params(axis='x', top=False)                       # the legend sits on the top edge
-    ax.text(-0.16, 1.0, '(a)', fontsize=9, fontweight='bold', transform=ax.transAxes)
+    ax.text(-0.16, 1.0, '(a)', fontsize=TXT, fontweight='bold', transform=ax.transAxes)
 
     # (b) the foot path in the leg frame: the foot pushes back along the ground
     # during stance, so the body advances the other way.  Dashed = the Bezier curve,
@@ -280,11 +334,11 @@ def fig3():
     ax.plot(st[:, 0], st[:, 1], 'k.', ms=3); ax.plot(sw[:, 0], sw[:, 1], 'k.', ms=3)
     ax.annotate('', xy=(-STEP + 3, HOME[1] - 7), xytext=(STEP - 3, HOME[1] - 7),
                 arrowprops=dict(arrowstyle='-|>', lw=0.6, color='k', mutation_scale=7))
-    ax.text(0, HOME[1] - 11, 'stance', ha='center', va='top', fontsize=7)
-    ax.text(0, apex + 3, 'swing', ha='center', va='bottom', fontsize=7)
+    ax.text(0, HOME[1] - 11, 'stance', ha='center', va='top', fontsize=TXT)
+    ax.text(0, apex + 3, 'swing', ha='center', va='bottom', fontsize=TXT)
     ax.set_xlabel('x (mm)'); ax.set_ylabel('y (mm)')
     ax.set_xlim(-STEP - 40, STEP + 40); ax.set_ylim(HOME[1] - 24, apex + 20)
-    ax.text(-0.3, 1.0, '(b)', fontsize=9, fontweight='bold', transform=ax.transAxes)
+    ax.text(-0.3, 1.0, '(b)', fontsize=TXT, fontweight='bold', transform=ax.transAxes)
     save(fig, 'fig3', svg=True)
 
 
@@ -302,14 +356,15 @@ def fig4(tracks=FIG4_TRACKS):
         ax.plot(30 * np.cos(th), -170 + 30 * np.sin(th), color='0.55', lw=0.8, ls='--',
                 label='commanded')
         off = z[load + '__original']; on = z[load + '__model_poly4']
-        ax.plot(off[:, 0], off[:, 1], '.', color='0.6', ms=1.2, label='compensation off')
-        ax.plot(on[:, 0], on[:, 1], '.', color='k', ms=1.2, label='POLY4 on')
-        ax.set_title(title, fontsize=8, pad=3)
-        ax.set_xlabel('x (mm)'); ax.set_xlim(-48, 48); ax.set_ylim(-232, -128)
+        ax.plot(off[:, 0], off[:, 1], '.', color='0.6', ms=1.2, label='off')
+        ax.plot(on[:, 0], on[:, 1], '.', color='k', ms=1.2, label='on (POLY4)')
+        ax.set_title(title, pad=3)
+        ax.set_xlim(-48, 48); ax.set_ylim(-232, -128)
     axes[0].set_ylabel('y (mm)')
+    # three entries in one 7.5 cm row at 12 pt; the caption says off/on is the compensation
     h, l = axes[0].get_legend_handles_labels()
-    fig.legend(h, l, loc='lower center', ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.06),
-               markerscale=5, handlelength=1.6)
+    _label_and_legend_below(fig, axes, 'x (mm)', h, l, ncol=3, markerscale=5,
+                            handlelength=1.1, handletextpad=0.4, columnspacing=0.8)
     save(fig, 'fig4', svg=True)
 
 
@@ -330,14 +385,13 @@ def fig5(tracks=FIG5_TRACKS):
                     ls='-' if on else '--', label='compensation on' if on else 'compensation off')
             ax.plot(p[-1, 0], p[-1, 1], 'o', ms=2.2, color='k' if on else '0.6')
         ax.axvline(0, color='0.75', lw=0.6)
-        ax.set_title(title, fontsize=8, pad=3)
+        ax.set_title(title, pad=3)
         ax.set_xlim(-60, 40); ax.set_ylim(-5, 215)
-        ax.set_xlabel('lateral (cm), + = right')
     axes[0].set_ylabel('distance along the runway (cm)')
     h, l = axes[0].get_legend_handles_labels()
     keep = {lab: hh for hh, lab in zip(h, l)}
-    fig.legend(list(keep.values()), list(keep), loc='lower center', ncol=2, frameon=False,
-               bbox_to_anchor=(0.5, -0.13), handlelength=2.2)
+    _label_and_legend_below(fig, axes, 'lateral (cm), + = right', list(keep.values()), list(keep),
+                            ncol=2, handlelength=1.3, handletextpad=0.4, columnspacing=0.8)
     save(fig, 'fig5', svg=True)
 
 
