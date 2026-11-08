@@ -19,7 +19,8 @@ Checked against kmutnb-article-template.docx and five published TCI-1 papers
   table       native tables: single borders all round, TH Sarabun New 12 pt,
               header row bold, cells centred vertically; rows keep together.
   reference   hanging indent 0.75 cm with a tab after "[n]" (IEEE list layout).
-  author      one blank line between the title and the author line.
+  author      one blank line between the title and the author line; regular
+              weight (the style is based on Title, which is bold).
   figure      image paragraphs centred and kept with their caption.
 """
 import os
@@ -61,14 +62,14 @@ def main():
 
     styles = parts['word/styles.xml'].decode('utf8')
     if 'w:styleId="Reference"' in styles:
-        if 'thaiDistribute' in style_block(styles, 'BodyText').group(0):
+        new = author_regular(thai_distribute(styles))
+        if new == styles:
             print('reference.docx already patched - nothing to do')
             return
-        styles = thai_distribute(styles)
-        parts['word/styles.xml'] = styles.encode('utf8')
+        parts['word/styles.xml'] = new.encode('utf8')
         write(src, parts, order)
         return
-    styles = thai_distribute(styles)
+    styles = author_regular(thai_distribute(styles))
 
     # ---- styles -------------------------------------------------------------
     styles = replace_style(styles, 'TableCaption',
@@ -183,6 +184,17 @@ def thai_distribute(styles):
     the slack between characters instead (checked on the rendered PDF, 8 Nov)."""
     m = style_block(styles, 'BodyText')
     new = re.sub(r'<w:jc w:val="both" ?/>', '<w:jc w:val="thaiDistribute"/>', m.group(0))
+    return styles[:m.start()] + new + styles[m.end():]
+
+
+def author_regular(styles):
+    """Author is based on Title and so inherited its bold; the guide sets the
+    author line in 14 pt regular, and all five published papers have it
+    regular (checked 8 Nov 2026)."""
+    m = style_block(styles, 'Author')
+    if '<w:b w:val="0"/>' in m.group(0):
+        return styles
+    new = m.group(0).replace('</w:rPr>', '<w:b w:val="0"/><w:bCs w:val="0"/></w:rPr>', 1)
     return styles[:m.start()] + new + styles[m.end():]
 
 

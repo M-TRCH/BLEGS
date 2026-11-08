@@ -24,6 +24,7 @@ italic) - the journal's template has no footer part, so pandoc gets none.
 
 Stdlib only, so the plain PATH python works.
 """
+import html
 import io
 import re
 import sys
@@ -59,22 +60,79 @@ def patch_document(xml: str) -> str:
     out = re.sub(r'<w:r(?: [^>]*)?>.*?</w:r>', tag_run, xml, flags=re.S)
     print(f'  document.xml: {tagged[0]} Thai runs tagged cs + th-TH')
 
-    # the journal sets equations at 10 pt: give every OMML run an explicit size
-    sz = '<w:sz w:val="20"/><w:szCs w:val="20"/>'
-
-    def size_math(m):
-        run = m.group(0)
-        if '<w:sz ' in run:
-            return run
-        if '<w:rPr>' in run:
-            return run.replace('<w:rPr>', '<w:rPr>' + sz, 1)
-        if '</m:rPr>' in run:
-            return run.replace('</m:rPr>', '</m:rPr><w:rPr>' + sz + '</w:rPr>', 1)
-        return run.replace('<m:r>', '<m:r><w:rPr>' + sz + '</w:rPr>', 1)
-
-    out, n = re.subn(r'<m:r>.*?</m:r>', size_math, out, flags=re.S)
-    print(f'  document.xml: {n} maths runs set to 10 pt')
+    out = times_math(out)
     out = size_tables(out)
+    return out
+
+
+# The guide: variables and symbols in Times New Roman 10 pt (the published
+# papers comply: Times New Roman italic 10 in text and equations, no Cambria
+# Math anywhere).  Word only lets a maths font (Cambria Math) render OMML runs
+# in maths style, so a run that should look like Times is switched to "normal
+# text" (m:nor) with Times New Roman and its italic/bold set by hand from the
+# run's maths style.  Runs that hold only operators, brackets and punctuation
+# stay maths-style: Word spaces binary operators only for those, and its glyphs
+# for them match Times closely.  Checked on the rendered PDF, 8 Nov 2026.
+MATH_OPS = set('=+-−×,.;:()[]|∈∫⊤&      ')
+TNR = '<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>'
+SZ10 = '<w:sz w:val="20"/><w:szCs w:val="20"/>'
+
+
+def _math_run(m):
+    run = m.group(0)
+    mr = re.search(r'<m:rPr>(.*?)</m:rPr>', run, re.S)
+    mrp = mr.group(1) if mr else ''
+    text = ''.join(re.findall(r'<m:t(?: [^>]*)?>([^<]*)</m:t>', run))
+    body = re.sub(r'<m:rPr>.*?</m:rPr>|<w:rPr>.*?</w:rPr>', '', run, flags=re.S)
+    if text and all(c in MATH_OPS for c in text.replace('&amp;', '&')):
+        rpr = '<w:rPr><w:rFonts w:ascii="Cambria Math" w:hAnsi="Cambria Math"/>' + SZ10 + '</w:rPr>'
+        return body.replace('<m:r>', '<m:r>' + (mr.group(0) if mr else '') + rpr, 1)
+    sty = re.search(r'm:sty m:val="(\w+)"', mrp)
+    sty = sty.group(1) if sty else ('p' if '<m:nor/>' in mrp else 'i')
+    bold = '<w:b/><w:bCs/>' if 'b' in sty else ''
+    if sty not in ('i', 'bi'):
+        return _tnr_run(text, bold, False)
+    # maths style sets letters italic but digits upright on its own; normal
+    # text does neither, so split the run: letters italic, the rest upright
+    return ''.join(_tnr_run(seg, bold, bool(re.match("[%s]" % _LETTERS, seg)))
+                   for seg in re.findall(r'[%s]+|[^%s]+' % (_LETTERS, _LETTERS),
+                                         html.unescape(text)))
+
+
+_LETTERS = 'A-Za-zΑ-Ωα-ωϑϕϵ'
+
+
+def _tnr_run(text: str, bold: str, italic: bool) -> str:
+    esc = html.escape(html.unescape(text), quote=False)
+    return ('<m:r><m:rPr><m:nor/></m:rPr><w:rPr>' + TNR + bold
+            + ('<w:i/><w:iCs/>' if italic else '') + SZ10
+            + '</w:rPr><m:t xml:space="preserve">' + esc + '</m:t></m:r>')
+
+
+def _unwrap_delims(xml: str) -> str:
+    """A delimiter pair with an explicit | or [ is drawn in the style of the
+    run next to it, so beside a Times italic run it comes out slanted.  Neither
+    pair in the paper has to stretch (one-line contents: a subscript, a 1x3
+    row vector), so write them as plain upright Times characters.  The big
+    parentheses of eq. 3 start with an upright "(" run and are left alone."""
+    def unwrap(m):
+        beg, end, inner = m.group(1), m.group(2), m.group(3)
+        if beg not in '|[' or re.search(r'<m:(?:d|f|eqArr|rad|nary)>', inner) \
+                or inner.count('<m:mr>') > 1:
+            return m.group(0)
+        ch = lambda c: _tnr_run(c, '', False)
+        return ch(beg) + inner + ch(end)
+    pat = (r'<m:d><m:dPr>(?:(?!</m:dPr>).)*?<m:begChr m:val="([^"]*)"\s*/>'
+           r'(?:(?!</m:dPr>).)*?<m:endChr m:val="([^"]*)"\s*/>'
+           r'(?:(?!</m:dPr>).)*?</m:dPr><m:e>((?:(?!<m:d>).)*?)</m:e></m:d>')
+    return re.sub(pat, unwrap, xml, flags=re.S)
+
+
+def times_math(xml: str) -> str:
+    out = _unwrap_delims(xml)
+    out, n = re.subn(r'<m:r>.*?</m:r>', _math_run, out, flags=re.S)
+    print(f'  document.xml: {n} maths runs set to Times New Roman 10 pt '
+          '(operators stay Cambria Math for spacing)')
     return out
 
 
