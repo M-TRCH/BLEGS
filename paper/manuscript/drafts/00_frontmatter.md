@@ -20,7 +20,7 @@
 
 :::: author
 ::: {custom-style="Author"}
-ธีรโชติ เมืองจำนงค์\*
+ธีรโชติ เมืองจำนงค์^\*^
 :::
 
 ::: {custom-style="Affiliation"}
@@ -28,7 +28,7 @@
 :::
 
 ::: {custom-style="Corresponding"}
-\* ผู้นิพนธ์ประสานงาน โทรศัพท์ 08 4556 0911 อีเมล: m.teerachot@outlook.com
+^\*^ ผู้นิพนธ์ประสานงาน โทรศัพท์ 08 4556 0911 อีเมล: m.teerachot@outlook.com
 :::
 ::::
 
@@ -52,7 +52,7 @@ Data-Driven Compensation of Mechanical Deflection in a Lightweight Quadruped Rob
 
 :::: author
 ::: {custom-style="Author"}
-Teerachot Mueangchamnong\*
+Teerachot Mueangchamnong^\*^
 :::
 
 ::: {custom-style="Affiliation"}
@@ -60,7 +60,7 @@ College of Industrial Technology, King Mongkut's University of Technology North 
 :::
 
 ::: {custom-style="Corresponding"}
-\* Corresponding Author, Tel. 08 4556 0911, E-mail: m.teerachot@outlook.com
+^\*^ Corresponding Author, Tel. 08 4556 0911, E-mail: m.teerachot@outlook.com
 :::
 ::::
 
@@ -68,4 +68,4 @@ College of Industrial Technology, King Mongkut's University of Technology North 
 
 &emsp;Designing a robot leg for low mass raises its torque-to-weight ratio, but the same lightness lets the structure deflect under load, so the foot settles away from the position inverse kinematics predicts. Stiffening or adding sensors adds mass. This paper instead compensates that error in software from measured data, adding neither mass nor sensors. The prototype is a quadruped with two degrees of freedom per leg through a five-bar linkage, driven by brushless DC motors with absolute encoders and an 8:1 reduction, giving 1.81 N·m/kg. A calibrated vision system with fiducial markers measured true foot positions over a 152-point grid under four payloads (608 samples), and five machine-learning models were trained to predict positional error from commanded joint angles and motor currents, then evaluated on continuous circular motion absent from training. The error was a translation of the whole path, not a distortion of its shape: the radius held at 29.91 ± 0.39 mm across every payload, while the path centre sagged by up to 11.65 mm, not in proportion to load. Compensation recovered 9.78 mm at the heaviest payload, and the five models landed within 0.30 mm of one another. In open-loop straight walking with five paired runs per payload, compensation cut lateral drift from 23.7 to 7.9 cm/m unloaded and from 29.4 to 15.1 cm/m under 3 kg, in every pair. In teleoperated tests the robot passed every run on flat, gravel and foam surfaces and climbed ramps up to 10° unloaded and 5° under 3 kg.
 
-**Keywords:** five-bar linkage, machine learning, fiducial marker, payload
+**Keywords:** Five-Bar Linkage, Machine Learning, Fiducial Marker, Payload

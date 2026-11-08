@@ -17,6 +17,9 @@ enough: runs-only and settings-only variants both stayed broken; the full set
 fixed it.  The minimal subset was not isolated - this applies exactly what
 native Word writes.
 
+It also sets equations to 10 pt and (since 8 Nov 2026, when tables became
+native Word tables) fixes every table to one 7.5 cm journal column.
+
 Stdlib only, so the plain PATH python works.
 """
 import io
@@ -69,6 +72,114 @@ def patch_document(xml: str) -> str:
 
     out, n = re.subn(r'<m:r>.*?</m:r>', size_math, out, flags=re.S)
     print(f'  document.xml: {n} maths runs set to 10 pt')
+    out = size_tables(out)
+    return out
+
+
+COLUMN_TW = 4252   # one journal column, 7.5 cm, in twips
+CELL_PAD_TW = 175  # left + right cell margin (2 x 57) and the slack Word keeps
+
+# Advance widths in twips at 12 pt, measured from THSarabunNew.ttf / Bold.ttf
+# with Pillow (8 Nov 2026) for ' '..'~' then U+2212 U+00B1 U+00B0 U+2013
+# U+2014 U+00D7 U+00B7.  OMML characters (Cambria Math 10 pt) average 106.
+_GLYPHS = ''.join(chr(c) for c in range(32, 127)) + '−±°–—×·'
+_W_REG = [52, 35, 50, 97, 87, 140, 102, 29, 46, 46, 68, 99, 39, 52, 39, 65, 87, 87, 87, 87, 87, 87,
+          87, 87, 87, 87, 39, 39, 99, 99, 99, 68, 129, 96, 91, 97, 103, 84, 84, 102, 106, 35, 63, 90,
+          85, 132, 106, 117, 91, 117, 91, 84, 91, 112, 94, 141, 100, 88, 102, 47, 63, 47, 99, 84, 49,
+          83, 96, 79, 96, 90, 49, 75, 94, 34, 37, 76, 48, 144, 94, 96, 96, 96, 52, 68, 57, 94, 82,
+          122, 76, 81, 77, 50, 37, 50, 100, 99, 99, 51, 86, 173, 99, 39]
+_W_BOLD = [54, 40, 70, 111, 88, 165, 117, 41, 59, 59, 82, 100, 41, 54, 41, 66, 91, 91, 91, 91, 91, 91,
+           91, 91, 91, 91, 41, 41, 100, 100, 100, 69, 137, 108, 95, 104, 110, 86, 86, 109, 113, 39, 68,
+           99, 86, 138, 113, 124, 94, 124, 95, 88, 101, 116, 101, 147, 102, 95, 108, 56, 64, 56, 100,
+           90, 50, 88, 104, 83, 104, 94, 61, 80, 102, 39, 41, 82, 51, 153, 102, 99, 103, 103, 59, 71,
+           62, 100, 86, 115, 84, 87, 86, 61, 42, 61, 101, 100, 106, 66, 80, 166, 100, 41]
+_REG = dict(zip(_GLYPHS, _W_REG))
+_BOLD = dict(zip(_GLYPHS, _W_BOLD))
+
+
+def _cell_tokens(cell: str, bold: bool):
+    """(width, is_space) per character of one table cell."""
+    table = _BOLD if bold else _REG
+    out = []
+    for m in re.finditer(r'<(w|m):t(?: [^>]*)?>([^<]*)</(?:w|m):t>', cell):
+        for ch in m.group(2):
+            w = 106.0 if m.group(1) == 'm' else float(table.get(ch, 100))
+            out.append((w, ch == ' ' and m.group(1) == 'w'))
+    return out
+
+
+def size_tables(xml: str) -> str:
+    """Native tables (journal.lua) come out of pandoc 'auto' wide with equal
+    grid columns that add up to more than a column.  Fix each one to exactly
+    one column (7.5 cm): every column gets the width of its longest cell text;
+    if that is too wide in total, the first (label) column - the only one whose
+    text is words that can wrap - gives up the difference, never below its
+    longest word.  If the numeric columns still do not fit, the table is set
+    in 11 pt (the guide allows smaller table text if it stays legible) and
+    sized again; spare width is shared out in proportion."""
+    count = [0]
+
+    def fix(m):
+        t = m.group(0)
+        ncol = len(re.findall(r'<w:gridCol ', t))
+        if ncol == 0:
+            return t
+        full = [0.0] * ncol     # widest cell text per column
+        word = [0.0] * ncol     # widest unbreakable word per column
+        for r, row in enumerate(re.findall(r'<w:tr[ >].*?</w:tr>', t, re.S)):
+            for j, cell in enumerate(re.findall(r'<w:tc>.*?</w:tc>', row, re.S)[:ncol]):
+                toks = _cell_tokens(cell, bold=(r == 0))   # header row is bold
+                run = longest = 0.0
+                for w, sp in toks + [(0.0, True)]:
+                    if sp:
+                        longest = max(longest, run)
+                        run = 0.0
+                    else:
+                        run += w
+                word[j] = max(word[j], longest)
+                # a header may wrap between its words; body cells should not
+                full[j] = max(full[j], longest if r == 0 else sum(w for w, _ in toks))
+        scale = 1.0
+        if word[0] + sum(full[1:]) + ncol * CELL_PAD_TW > COLUMN_TW:
+            scale = 11.0 / 12.0      # the numbers do not fit at 12 pt
+        elif COLUMN_TW - sum(full[1:]) - (ncol - 1) * CELL_PAD_TW < 0.55 * (full[0] + CELL_PAD_TW):
+            scale = 11.0 / 12.0      # they fit, but the labels would wrap to 3+ lines
+        want = [scale * f + CELL_PAD_TW for f in full]
+        excess = sum(want) - COLUMN_TW
+        if excess > 0:
+            give = min(excess, want[0] - (scale * word[0] + CELL_PAD_TW))
+            want[0] -= give
+            excess -= give
+            if excess > 0:   # still too wide: shrink every column alike
+                total = sum(want)
+                want = [w - excess * w / total for w in want]
+        widths = [int(COLUMN_TW * w / sum(want)) for w in want]
+        widths[-1] += COLUMN_TW - sum(widths)
+        if scale < 1.0:
+            sz = '<w:sz w:val="22"/><w:szCs w:val="22"/>'
+            t = re.sub(r'(<w:r>)(?!<w:rPr>)', r'\1<w:rPr>' + sz + '</w:rPr>', t)
+            t = re.sub(r'(<w:r><w:rPr>)(?!' + re.escape(sz) + ')', r'\1' + sz, t)
+        t = re.sub(r'<w:tblW [^>]*/>',
+                   f'<w:tblW w:type="dxa" w:w="{COLUMN_TW}"/><w:tblLayout w:type="fixed"/>', t, count=1)
+        t = re.sub(r'<w:tblGrid>.*?</w:tblGrid>',
+                   '<w:tblGrid>' + ''.join(f'<w:gridCol w:w="{w}"/>' for w in widths) + '</w:tblGrid>',
+                   t, count=1, flags=re.S)
+
+        def fix_row(rm):
+            k = [0]
+
+            def tcw(_):
+                w = widths[min(k[0], ncol - 1)]
+                k[0] += 1
+                return f'<w:tcPr><w:tcW w:w="{w}" w:type="dxa"/></w:tcPr>'
+            return re.sub(r'<w:tcPr ?/>', tcw, rm.group(0))
+        t = re.sub(r'<w:tr[ >].*?</w:tr>', fix_row, t, flags=re.S)
+        count[0] += 1
+        return t
+
+    out = re.sub(r'<w:tbl>.*?</w:tbl>', fix, xml, flags=re.S)
+    if count[0]:
+        print(f'  document.xml: {count[0]} tables fixed to one column (7.5 cm)')
     return out
 
 

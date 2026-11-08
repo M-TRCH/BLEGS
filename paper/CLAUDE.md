@@ -23,8 +23,8 @@ The manuscript is Thai academic prose; English in parentheses on first use of a 
 
 Full set: `journal/FORMAT_GUIDE.md` and the official docs in `journal/instructions/`. The ones that bite:
 
-- **≤ 9 A4 pages total** on paper, two columns, TH Sarabun New — but the author has confirmed up to **12** is acceptable. As of 2026-08-26 the Word build measures **12**, i.e. the ceiling, with §3.4 still unwritten. Anything added from here needs something else cut.
-- **Every figure AND table must also be submitted as a separate .jpg** → `figures/export/`, `tables/export/`. Figures are drawn by **`make-figures.py`** (schematics from the geometry constants, plots from the measurement files; fig4 reads `figures/src/fig4_tracks.npz`), so regenerate rather than hand-edit. Tables are authored as pipe-tables in `tables/src/*.md` and rendered by **`render-tables.py`** (the only writer of `tables/export/`); the manuscript embeds the same .jpg, so a table can never drift from its picture. Tables are English-only — Thai text renders as empty boxes in DejaVu Sans.
+- **≤ 9 A4 pages total** on paper (the newer guide says 8–10), two columns, TH Sarabun New — but the author has confirmed up to **12** is acceptable, and the five published TCI-1 examples run 10–14 pages. As of 2026-11-08 the Word build measures **12** with every section written, i.e. the ceiling. Anything added from here needs something else cut. **Figure/table position in the drafts is a layout decision**: figures 1–3 and tables 4–5 sit one paragraph after their first mention so that they land at the top of a column and text fills the gaps (journal rule: figures at the top of the page); moving them back costs about a column, i.e. page 13.
+- **Every figure AND table must also be submitted as a separate .jpg** → `figures/export/`, `tables/export/`. Figures are drawn by **`make-figures.py`** (schematics from the geometry constants, plots from the measurement files; fig4 reads `figures/src/fig4_tracks.npz`), so regenerate rather than hand-edit. Tables are authored as pipe-tables in `tables/src/*.md` and rendered by **`render-tables.py`** (the only writer of `tables/export/`, the separate .jpg the journal wants). Since 8 Nov 2026 the .docx carries **native Word tables** read from the same `tables/src/*.md` by `journal.lua` (the drafts still reference `tableN.jpg`; the filter swaps the image for the table), so the two cannot drift. Tables are English-only — Thai text renders as empty boxes in DejaVu Sans.
 - Abstract ≤ 250 words, stand-alone, no citations; keywords must not repeat title words; conclusion 1–2 paragraphs, must not restate the abstract. **Count the Thai abstract with Word** (`Range.ComputeStatistics(0)` on `manuscript/preview-word.docx`), not with a regex — Word's Thai word breaker is what the editors use; it read 356 before the 8 Oct cut and 241 after. There is no acknowledgement section (no funding source) — the build scripts list six draft files.
 - Double-blind copy: `build.ps1 -Anonymous` / `preview.ps1 -Anonymous` drop the `::: author` div in `00_frontmatter.md` via `journal/templates/anonymize.lua`. Keep every identifying line inside that div.
 - References: IEEE, English only, Thai sources get `(in Thai)`; every entry cited in text.
@@ -34,7 +34,7 @@ Full set: `journal/FORMAT_GUIDE.md` and the official docs in `journal/instructio
 
 Two paths over the same drafts:
 
-- **`build.ps1`** → `manuscript/submission/manuscript.docx` — the submission. pandoc with `journal/templates/reference.docx`. `journal/templates/journal.lua` (first filter in all three scripts) numbers the equations flush right (tab stops of the Equation style), styles table/figure captions, inserts the template's blank lines and maps the front-matter divs to the Title/Author/Affiliation/Corresponding styles; `patch-thai-docx.py` sets OMML runs to 10 pt. Left for Word: moving figures next to their first reference and page-by-page checks. Margins 3.5/3/3/2.5 cm per `journal/instructions/template-example.pdf`.
+- **`build.ps1`** → `manuscript/submission/manuscript.docx` — single-column, pre-layout. **The file actually handed over for submission is the two-column `preview-word.docx`, saved under a new name in `manuscript/submission/`** (8 Nov: `BLEGS_KMUTNB_2026-11-08_v2.docx`). pandoc with `journal/templates/reference.docx`. `journal/templates/journal.lua` (first filter in all three scripts) numbers the equations (starting at the paragraph indent, number flush right), bolds only the caption label ("ตารางที่ N" / "รูปที่ N"), swaps table images for native tables, inserts the template's blank lines (one between consecutive equations, none when a heading follows), drops the space above a level-2 heading that follows a level-1 heading, gives references a hanging indent, puts a blank line above the keywords, and maps the front-matter divs to the Title/Author/Affiliation/Corresponding styles; `patch-thai-docx.py` sets OMML runs to 10 pt and sizes every table to one 7.5 cm column from glyph widths measured off THSarabunNew.ttf (a table whose numbers would not fit, or whose labels would wrap to 3+ lines, is set in 11 pt — the guide allows smaller table text). `journal/templates/patch-reference-docx.py` documents and reproduces every change to reference.docx (journal header with logo and odd/even page numbers copied from the official template, regular-weight caption styles, Equation/Reference/Table styles, Thai Distribute body text) — it rebuilds the committed file byte-for-byte from the 3 Nov version, so edit the script, not the .docx. Left for Word: final figure placement and page-by-page checks. Margins 3.5/3/3/2.5 cm per `journal/instructions/template-example.pdf`.
 - **`preview.ps1`** → `manuscript/preview.pdf` — journal-formatted PDF for judging length and looks while writing. pandoc → XeLaTeX with `journal/templates/preview-header.tex`; **no Word needed**, so cutting can be done entirely in Markdown. Prints the page count against the 9-page limit.
 
 **`preview-word.ps1` renders the true two-column layout through Word** (pandoc -> Word COM
@@ -59,8 +59,10 @@ output even opens in compatibility mode 12), and no single item is enough - the 
 was isolated by A/B on rendered PDFs. `patch-thai-docx.py` applies them and both `build.ps1`
 and `preview-word.ps1` run it right after pandoc, so the submission .docx lays out correctly
 on any Thai-capable Word. Related permanent fixes in reference.docx: complex-script language
-`ar-SA` (pandoc default) -> `th-TH`, and body justification matches the journal template's
-plain `both` instead of `thaiDistribute`.
+`ar-SA` (pandoc default) -> `th-TH`, and body text in **Thai Distribute** (8 Nov 2026; it
+was `both` to copy the template's XML, but with `both` Word can only stretch spaces, so a
+Thai line without any stayed ragged and short lines opened wide gaps — the guide's text
+asks for Thai Distribute and the published papers look like it). References stay `both`.
 
 The two disagree by ~2 pages (Word pads OMML equations and applies widow/orphan control). Use the PDF for the picture, the .docx for the verdict on page count.
 
@@ -80,9 +82,9 @@ Watch the heading syntax: an ATX heading with **no blank line above it** is not 
 
 Still open:
 
-1. **The §2.3.3 experiment itself** — §3.4 is empty and the paper promises a capability matrix. This is the only thing still blocking submission on the data side.
+1. §2.3.3's one remaining mock: the gravel spec (size and thickness) — waiting on the author. (§3.4 and table 5 carry real data since 6–8 Nov.)
 2. Physical runway has a duplicate ID-6 tag standing in for ID 7 (`--duplicate-id6-mode`).
-3. §2.3.3's remaining `<mark>`: test distance $L$, ramp-angle steps, and the compliant/rough surface specs. $L$ is constrained by the power tether — see action-plan item 3.1.ข.
+3. The affiliation names no department (guide: ภาควิชา คณะ มหาวิทยาลัย จังหวัด) — ask the author before adding one.
 
 Closed (kept here because the reasoning is easy to re-break):
 
