@@ -36,13 +36,13 @@ FIG5_TRACKS = os.path.join(HERE, 'figures', 'src', 'fig5_tracks.npz')
 # linkage geometry, identical to python/paper_testing/test_3/walk_test.py
 L_AC, L_CE, SPACING = 105.0, 145.0, 85.0
 HOME = (0.0, -220.0)
-# gait of walk_test.py mode 7, the one the 2.3.2 runs used: TRAJECTORY_STEPS = 30 points
-# per cycle at 50 Hz, SMOOTH_TROT_STANCE_RATIO = 0.75, GAIT_LIFT_HEIGHT = 40 (the Bezier
-# control points sit at 1.25 x lift, so the apex is 0.75 x 1.25 x 40 = 37.5 mm), and the
-# half-amplitude actually walked is min(NAV_V_MAX x cycle time, GAIT_STEP_FORWARD)
-# = min(70 mm/s x 0.6 s, 35 mm) = 35 mm
-STEPS, STANCE_RATIO, LIFT = 30, 0.75, 40.0
-STEP = min(70.0 * STEPS / 50.0, 35.0)
+# gait of walk_test.py mode 7 as the 3 Nov 2026 2.3.2 runs used it (code r22/r23):
+# TRAJECTORY_STEPS = 22 points per cycle at 50 Hz (0.44 s), SMOOTH_TROT_STANCE_RATIO = 0.70,
+# GAIT_LIFT_HEIGHT = 25 (the Bezier control points sit at 1.25 x lift, so the apex is
+# 0.75 x 1.25 x 25 = 23.4 mm), and the half-amplitude actually walked is
+# min(NAV_V_MAX x cycle time, GAIT_STEP_FORWARD) = min(70 mm/s x 0.44 s, 25 mm) = 25 mm
+STEPS, STANCE_RATIO, LIFT = 22, 0.70, 25.0
+STEP = min(70.0 * STEPS / 50.0, 25.0)
 # single-leg rig (2.2.1): the vision reference tags id0/id1 sit on the two motor axes
 # (REF_WORLD in test_2/vision_based_trajectory_eval.py), id4 rides on the foot, the camera
 # looks at the leg plane from 1.2 m with its axis normal to that plane
@@ -272,7 +272,7 @@ def fig3():
 
     # (b) the foot path in the leg frame: the foot pushes back along the ground
     # during stance, so the body advances the other way.  Dashed = the Bezier curve,
-    # dots = the points the controller actually commands (30 per cycle)
+    # dots = the points the controller actually commands (STEPS per cycle)
     ax = fig.add_subplot(gs[1]); ax.set_aspect('equal')
     st, sw, curve = foot_path()
     apex = float(curve[:, 1].max()); lift = apex - HOME[1]
