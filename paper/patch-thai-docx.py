@@ -18,7 +18,9 @@ fixed it.  The minimal subset was not isolated - this applies exactly what
 native Word writes.
 
 It also sets equations to 10 pt and (since 8 Nov 2026, when tables became
-native Word tables) fixes every table to one 7.5 cm journal column.
+native Word tables) fixes every table to one 7.5 cm journal column, and adds
+the running footer the published papers carry (rule + authors, "title." in
+italic) - the journal's template has no footer part, so pandoc gets none.
 
 Stdlib only, so the plain PATH python works.
 """
@@ -196,28 +198,113 @@ def patch_settings(xml: str) -> str:
     return out
 
 
+W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+R_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
+FOOTER_REL = R_NS + '/footer'
+FOOTER_CT = 'application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml'
+
+
+def _para_text(xml: str, style: str) -> str:
+    """Text of the first paragraph in `style`, superscripts (the * marks) dropped."""
+    m = re.search(r'<w:p\b(?:(?!</w:p>).)*?<w:pStyle w:val="%s"\s*/>.*?</w:p>' % style, xml, re.S)
+    if not m:
+        return ''
+    runs = [r for r in re.findall(r'<w:r\b.*?</w:r>', m.group(0), re.S)
+            if '<w:vertAlign w:val="superscript"' not in r]
+    text = ''.join(''.join(re.findall(r'<w:t(?: [^>]*)?>([^<]*)</w:t>', r)) for r in runs)
+    return re.sub(r'\s+', ' ', text).strip()
+
+
+def footer_text(doc_xml: str) -> str:
+    """The running footer of the published papers: <authors>, "<title>."  -
+    'A และ B' for two authors, 'A และคณะ' for three or more.  The -Anonymous
+    build has no Author paragraph, so the footer is then the title alone."""
+    title = _para_text(doc_xml, 'Title')
+    authors = [a.strip() for a in re.split(r',| และ ', _para_text(doc_xml, 'Author')) if a.strip()]
+    if len(authors) > 2:
+        who = authors[0] + ' และคณะ'
+    else:
+        who = ' และ '.join(authors)
+    quoted = '“%s.”' % title.rstrip('.')
+    return (who + ', ' + quoted) if who else quoted
+
+
+def footer_part(text: str) -> bytes:
+    """Rule across the text width, then the line in 12 pt italic, flush left -
+    as on pages 3+ of every published TCI-1 paper checked (8 Nov 2026)."""
+    esc = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    rpr = ('<w:rPr><w:rFonts w:ascii="TH Sarabun New" w:hAnsi="TH Sarabun New" '
+           'w:eastAsia="TH Sarabun New" w:cs="TH Sarabun New"/><w:i/><w:iCs/>'
+           '<w:sz w:val="24"/><w:szCs w:val="24"/>' + CS_LANG + '</w:rPr>')
+    return ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<w:ftr xmlns:w="%s" xmlns:r="%s"><w:p><w:pPr>'
+            '<w:pBdr><w:top w:val="single" w:sz="6" w:space="4" w:color="000000"/></w:pBdr>'
+            '<w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>'
+            '<w:ind w:left="0" w:right="0" w:firstLine="0"/><w:jc w:val="left"/>%s</w:pPr>'
+            '<w:r>%s<w:t xml:space="preserve">%s</w:t></w:r></w:p></w:ftr>'
+            % (W_NS, R_NS, rpr, rpr, esc)).encode('utf-8')
+
+
+def add_footer(parts: dict) -> None:
+    """The journal's template has no footer; the published papers all have one
+    (typeset by the journal).  Same text on odd and even pages, because the
+    reference doc turns evenAndOddHeaders on and an even page with no footer
+    part of its own would be blank.  Footer distance 1.25 cm, as the template."""
+    doc = parts['word/document.xml'].decode('utf-8')
+    if 'w:footerReference' in doc:
+        return
+    text = footer_text(doc)
+    for n in ('1', '2'):
+        parts['word/footer%s.xml' % n] = footer_part(text)
+    rels = parts['word/_rels/document.xml.rels'].decode('utf-8')
+    for n in ('1', '2'):
+        rels = rels.replace('</Relationships>', '<Relationship Type="%s" Id="rIdFtr%s" '
+                            'Target="footer%s.xml"/></Relationships>' % (FOOTER_REL, n, n))
+    parts['word/_rels/document.xml.rels'] = rels.encode('utf-8')
+    ct = parts['[Content_Types].xml'].decode('utf-8')
+    for n in ('1', '2'):
+        ct = ct.replace('</Types>', '<Override PartName="/word/footer%s.xml" '
+                        'ContentType="%s"/></Types>' % (n, FOOTER_CT))
+    parts['[Content_Types].xml'] = ct.encode('utf-8')
+    # the body's final sectPr: header refs come first, footer refs right after them
+    i = doc.rfind('<w:sectPr')
+    j = doc.index('>', i) + 1
+    hdrs = re.match(r'(?:<w:headerReference [^>]*/>)*', doc[j:]).end()
+    refs = ('<w:footerReference w:type="default" r:id="rIdFtr1"/>'
+            '<w:footerReference w:type="even" r:id="rIdFtr2"/>')
+    doc = doc[:j + hdrs] + refs + doc[j + hdrs:]
+    doc = doc[:i] + re.sub(r'w:footer="\d+"', 'w:footer="709"', doc[i:], count=1)
+    parts['word/document.xml'] = doc.encode('utf-8')
+    print('  footer (odd + even):', text)
+
+
 def main(path: str) -> None:
     zin = zipfile.ZipFile(path)
-    items = [(i, zin.read(i.filename)) for i in zin.infolist()]
+    infos = zin.infolist()
+    parts = {i.filename: zin.read(i.filename) for i in infos}
     zin.close()
+
+    parts['word/document.xml'] = patch_document(parts['word/document.xml'].decode('utf-8')).encode('utf-8')
+    parts['word/settings.xml'] = patch_settings(parts['word/settings.xml'].decode('utf-8')).encode('utf-8')
+    add_footer(parts)
 
     buf = io.BytesIO()
     zout = zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED)
-    for info, data in items:
-        if info.filename == 'word/document.xml':
-            data = patch_document(data.decode('utf-8')).encode('utf-8')
-        elif info.filename == 'word/settings.xml':
-            data = patch_settings(data.decode('utf-8')).encode('utf-8')
+    names = [i.filename for i in infos]
+    for info in infos:
         zi = zipfile.ZipInfo(info.filename, date_time=info.date_time)
         zi.compress_type = info.compress_type
-        zout.writestr(zi, data)
+        zout.writestr(zi, parts[info.filename])
+    for name in parts:
+        if name not in names:
+            zout.writestr(name, parts[name])
     zout.close()
 
     # sanity: both parts must still parse before we overwrite the original
     import xml.etree.ElementTree as ET
     check = zipfile.ZipFile(io.BytesIO(buf.getvalue()))
-    ET.fromstring(check.read('word/document.xml'))
-    ET.fromstring(check.read('word/settings.xml'))
+    for part in ('document', 'settings', 'footer1', 'footer2'):
+        ET.fromstring(check.read('word/%s.xml' % part))
 
     with open(path, 'wb') as f:
         f.write(buf.getvalue())
