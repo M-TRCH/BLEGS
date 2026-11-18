@@ -63,48 +63,47 @@
       ไม่เหลือชื่อ สังกัด อีเมล · ส่งฉบับนี้ถ้าระบบขอ "manuscript without author details"
 - 🔧 ตรวจว่าเนื้อความไม่เผยตัวตนทางอื่น (ชื่อห้องแล็บ, ทุน, "งานก่อนหน้าของเรา")
 
-## การส่งผ่านระบบ ThaiJO (แผน 18 พ.ย. 2026)
+## การส่งผ่านระบบ ThaiJO (แผน 18 พ.ย. · ทบทวนคู่มือทุกหน้าซ้ำ 19 พ.ย. 2026)
 
-ที่มา: คู่มือ ThaiJO (OJS 3.3.0-8) หน้า 175–229 ที่ผู้นิพนธ์บันทึกไว้ใน `OneDrive\Desktop\ThaiJO\` (13 ไฟล์ อ่านครบแล้ว) + `paper/journal/instructions/`
-ไฟล์ต้นฉบับที่ใช้ = **`BLEGS_KMUTNB_2026-11-08_v5.docx` บน Desktop** — ผู้นิพนธ์ตรวจทั้งเล่มแล้ว (17 พ.ย.) **ห้ามแก้ไฟล์นี้** งานด้านล่างทุกชิ้นทำจากสำเนาหรืออ่านอย่างเดียว
+ที่มา: คู่มือ ThaiJO (OJS 3.3.0-8) หน้า 175–229 ครบทุกหน้า ที่ผู้นิพนธ์บันทึกไว้ใน `OneDrive\Desktop\ThaiJO\` (13 ไฟล์ — อ่านทั้งข้อความและภาพหน้าจอทีละหน้าแล้ว) + `paper/journal/instructions/`
+เป็นคู่มือกลางของ ThaiJO (ภาพตัวอย่างคือ "Journal of TCI") — **ไม่มีข้อกำหนดเฉพาะของวารสาร KMUTNB** ซึ่งจะเห็นเองใน Step 1
+ไฟล์ต้นฉบับ = **`BLEGS_KMUTNB_2026-11-08_v5.docx` บน Desktop** ผู้นิพนธ์ตรวจทั้งเล่มแล้ว (17 พ.ย.) **ห้ามแก้ไฟล์นี้** ทุกไฟล์ด้านล่างทำจากสำเนา
 
-สถานะ v5 ที่ตรวจแบบอ่านอย่างเดียว 18 พ.ย.: ไม่มี ⟦จำลอง⟧ เหลือ (สเปกกรวด 15–30 มม. ใส่แล้ว) · ชื่อเรื่องไทย/อังกฤษใหม่ + ท้ายกระดาษตรงชื่อใหม่แล้ว ·
-ไม่มี track changes/comment ค้าง · ตาราง 5 รูป 5 อ้างอิง 19 · บทคัดย่ออังกฤษ 219 คำ · ตารางใน v5 ตรงกับ `tables/src/` ยกเว้นตารางที่ 3 แถวแรก "None" (src: "None (off)")
+**ชุดไฟล์พร้อมส่ง (19 พ.ย.): `OneDrive\Desktop\BLEGS_ThaiJO_Submission\`**
+- `BLEGS_Manuscript.docx` = สำเนา v5 ตรงทุกไบต์ (md5 5b0e288c…) · Word 12 หน้า
+- `BLEGS_Manuscript_Anonymous.docx` = สำเนา v5 ที่ตัดย่อหน้า ชื่อ/สังกัด/ผู้ประสานงาน ทั้งไทย-อังกฤษ (6 ย่อหน้า), ตัดชื่อออกจากท้ายกระดาษ (เหลือชื่อเรื่อง),
+  ล้าง Author/Last modified by ใน Properties — ตรวจด้วยสคริปต์และ PDF ที่ Word render แล้วว่าไม่เหลือชื่อ อีเมล โทรศัพท์ สังกัด · Word 12 หน้า
+- `figures_tables_jpg\Figure1–5.jpg` (ตรงกับรูปใน v5 ทุกไบต์) และ `Table1–5.jpg` (table3 ทำใหม่ 19 พ.ย. ให้แถวแรกเป็น "None" ตาม v5)
+- `ThaiJO_Metadata.txt` = ข้อความคัดลอกลงแบบฟอร์ม (ชื่อเรื่อง บทคัดย่อ ผู้นิพนธ์ คำสำคัญ อ้างอิง 19 รายการ + ร่างข้อความถึงบรรณาธิการ) ดึงจาก v5
+- `ThaiJO_Submission_Plan_A4.pdf` = อินโฟกราฟิกสรุป 1 หน้า
 
-### ก. เตรียมไฟล์ (ก่อนเข้าระบบ)
-- [ ] A1 ไฟล์บทความ .docx = สำเนาของ v5 ตั้งชื่อใหม่ (เช่น `BLEGS_KMUTNB_submit.docx`) — อัปโหลดเป็น **Article Text**
-- [ ] A2 ฉบับปิดชื่อ (ถ้า checklist ของวารสารใน Step 1 ขอ หรือถ้าระบบให้แนบแยก): สำเนาของ v5 ที่ลบ ชื่อ/สังกัด/โทรศัพท์/อีเมล ทั้งไทยและอังกฤษ,
-      **ท้ายกระดาษ (มีชื่อผู้นิพนธ์)**, และ File → Info → Properties (Author/Last modified by = ชื่อจริง) — ตรวจเนื้อความว่าไม่มีคำที่บอกตัวตน
-- [ ] A3 .jpg รูป 5 ชิ้น `paper/figures/export/fig1–5.jpg` และตาราง 5 ชิ้น `paper/tables/export/table1–5.jpg` — อัปโหลดเป็น **Other**
-      ก่อนส่ง: ทำ table3.jpg ใหม่ให้ตรง v5 ("None") หรือยืนยันว่าไม่ต้อง; ตรวจว่ารูปใน v5 ยังเป็นชุดเดียวกับ export
-- [ ] A4 ทุกไฟล์ ≤ 50 MB (v5 = 0.37 MB)
-- [ ] A5 ไฟล์ข้อความสำหรับคัดลอกลงแบบฟอร์ม Metadata (ข้อ ค) — ดึงจาก v5 แบบอ่านอย่างเดียว
+### ก. บัญชีผู้ใช้ — สมัครแล้ว (19 พ.ย.)
+- [x] Register + ยืนยันอีเมล (ลิงก์ยืนยันหมดอายุใน 10 นาที, ลิงก์รีเซ็ตรหัส 5 นาที; อีเมลมาจาก admin@tci-thaijo.org — ดู spam/junk)
+- [ ] โปรไฟล์ **2 ระดับ**: (1) บัญชีกลาง https://sso.tci-thaijo.org/ — ชื่อ/นามสกุล/สังกัด ทั้ง EN และ TH, ORCID
+      (2) โปรไฟล์ในเว็บวารสาร (View Profile) — Identity/Contact ให้ลูกโลกเขียว, Contact → Working Languages ติ๊ก English + ไทย, Roles → Author ถูกติ๊ก
+- [ ] Notifications: **คงค่าเริ่มต้น** (อย่าติ๊ก "Do not send me an email") — ผลพิจารณาและคำขอแก้มาทางอีเมล
 
-### ข. บัญชีผู้ใช้
-- [ ] B1 Register ที่ https://ph01.tci-thaijo.org/index.php/kmutnb-journal/index (ชื่อ-นามสกุลอังกฤษ ไม่ใส่ยศ, อีเมล, สังกัดอังกฤษ, ประเทศ) — CAPTCHA และรหัสผ่านผู้นิพนธ์ทำเอง
-- [ ] B2 ยืนยันอีเมล "Verify email" จาก admin@tci-thaijo.org (ดู spam/junk ด้วย)
-- [ ] B3 Profile: ชื่อ/สังกัด **ทั้งไทยและอังกฤษ** ให้ลูกโลกเป็นสีเขียว · ORCID (ไม่บังคับ แต่ควรมี) · Roles → ติ๊ก Author → Save → reload ถ้าไม่เห็น New Submission
-- [ ] B4 ใช้อีเมลเดียวกับที่พิมพ์ในบทความ (m.teerachot@outlook.com) — ตัดสินใจเอง
+### ข. ส่งบทความ 5 ขั้น (Dashboard → New Submission)
+- [ ] 1 Start: ภาษา ไทย · Section (ถ้ามี) · Categories (ถ้ามี) · **อ่าน Section Policy และ Submission Requirements จริงก่อนติ๊กทุกข้อ** (จดข้อความไว้ — เป็นที่เดียวที่บอกเงื่อนไขเฉพาะวารสาร เช่น ขอฉบับปิดชื่อหรือแบบฟอร์มแนบ)
+      · Comments for the Editor (ไม่บังคับ; ร่างใน Metadata.txt) · Corresponding Contact · ยอมรับลิขสิทธิ์ (CC) + privacy — ผู้นิพนธ์อ่านและกดเอง
+- [ ] 2 Upload: ลากหลายไฟล์พร้อมกันได้ แต่ละไฟล์ ≤ 50 MB · เลือกประเภท **Article Text** = ต้นฉบับ (ค่าเริ่มต้นใช้ฉบับปิดชื่อ), **Other** = jpg 10 ไฟล์ · ขั้นนี้ไม่มีการตั้งชื่อไฟล์
+      (ภาพตัวอย่างในคู่มือแนบ `agreement.pdf` เป็น Other — ถ้า KMUTNB มีแบบฟอร์ม ให้แนบตรงนี้)
+- [ ] 3 Metadata: Prefix/Subtitle ว่าง · Title + Abstract ไทย/อังกฤษ · Contributors: ระบบใส่ชื่อผู้ส่งไว้แล้ว → Edit เติมชื่อไทย สังกัด ORCID, ติ๊ก Principal contact + Include in browse lists
+      · Keywords ทีละคำ + Enter (ลูกโลกแดงที่ช่องนี้เป็นบั๊กของระบบตามคู่มือ) · Supporting Agencies ว่าง · References วางทีละบรรทัด
+- [ ] 4 Confirmation: Finish Submission → กล่อง "Are you sure…" → OK — **หลังกด OK แก้ข้อมูลเองไม่ได้** ต้องขอผ่าน Pre-Review Discussions
+- [ ] 5 Next Steps: "Submission complete" + อีเมล "Submission Acknowledgement" (มีลิงก์และเลข ID บทความ) — จด ID ไว้ที่นี่: ______
 
-### ค. ส่งบทความ 5 ขั้น (New Submission)
-- [ ] C1 Start: ภาษา = ไทย · Section = Research article (ถ้ามี) · Category/สาขา ให้ตรงงาน (วิศวกรรม/หุ่นยนต์) · ติ๊ก Submission Requirements ทุกข้อ **หลังอ่านแล้วว่าผ่านจริง**
-      (บันทึกข้อความ checklist ของวารสารไว้ ถ้ามีข้อเรื่อง blind review ให้ใช้ไฟล์ A2) · Comments for the Editor (จดหมายนำสั้น ๆ — ไม่บังคับ)
-      · ติ๊กยอมรับลิขสิทธิ์ (CC) และ privacy — ผู้นิพนธ์ตัดสินใจและกดเอง
-- [ ] C2 Upload: A1 เป็น Article Text, A3 ทั้ง 10 ไฟล์เป็น Other (ตั้งชื่อไฟล์ทั้งช่องไทยและอังกฤษ)
-- [ ] C3 Metadata (กรอกทั้งช่องไทยและอังกฤษ): Title · Abstract · Contributors (ผู้นิพนธ์คนเดียว = Primary Contact) · Keywords ทีละคำกด Enter
-      (ไทย: กลไกห้าชิ้นส่วน / การเรียนรู้ของเครื่อง / เครื่องหมายอ้างอิงเชิงภาพ / ภาระโหลด · อังกฤษ: Five-Bar Linkage / Machine Learning / Fiducial Marker / Payload;
-      ลูกโลกแดงที่ Keywords เป็นข้อผิดพลาดของระบบตามคู่มือ) · Supporting Agencies เว้นว่าง (ไม่มีทุน) · References 19 รายการ แต่ละรายการขึ้นบรรทัดใหม่
-- [ ] C4 Confirmation → Finish Submission → OK — **หลังกด OK แก้อะไรเองไม่ได้แล้ว** ต้องขอผ่าน Discussion
-- [ ] C5 เก็บอีเมล "Submission Acknowledgement" + เลข ID บทความ จดลงไฟล์นี้
+### ค. หลังส่ง (ตามคู่มือหน้า 213–229)
+- สถานะเดินตาม Submission → Review → Copyediting → Production → Archives (Published / Declined) ดูได้จาก Dashboard → View
+- ขอแก้ข้อมูลก่อนเข้าสู่ Review: Workflow → Submission → **Pre-Review Discussions → Add discussion**
+- Editor Decision มาทางอีเมล/Discussion พร้อมไฟล์ผลประเมิน (ถ้าบรรณาธิการเปิดให้เห็น) และกำหนดส่ง
+- แก้ไข: **ห้ามกด New Submission** (จะได้ ID ใหม่) → Review → Revisions → Upload File: ต้นฉบับแก้แล้ว = Article Text, **ตารางสรุปการแก้ไข** = Other
+      (อัปโหลดทีละไฟล์ ตั้งชื่อไฟล์ทั้งช่องไทยและอังกฤษ; ไฟล์แก้ต้องปิดชื่อเหมือนเดิม) แล้วตอบกลับใน Review Discussions ด้วย Add Message
+- Copyediting / Production: ตรวจไฟล์และตอบกระทู้ที่วารสารส่งมา โดยเฉพาะ PDF ฉบับจัดหน้า (สมการ ตาราง ภาษาไทย)
+- กระทู้ Discussion ใช้ได้ทุกสถานะ แนบไฟล์ได้ ≤ 50 MB/ไฟล์
 
-### ง. หลังส่ง
-- ตรวจคัดลอกผลงาน → double-blind 3 ท่าน → "Editor Decision" ทางอีเมลหรือ Discussion
-- แก้ไข (Revisions): **ห้ามกด New Submission** — อัปโหลดไฟล์แก้ที่หัวข้อ Revisions และตอบความเห็นใน Review Discussion (ทำตารางตอบผู้ทรงฯ ทีละข้อ)
-- Copyediting / Production: ตรวจไฟล์ที่วารสารส่งกลับผ่าน Discussion โดยเฉพาะ PDF ฉบับจัดหน้า (สมการ ตาราง ภาษาไทย)
-- Published: บทความย้ายไป Archives
-
-### ยังต้องตัดสินใจ / ตรวจบนเว็บวารสารเอง (คู่มือ ThaiJO เป็นคู่มือกลาง ไม่ได้ระบุเฉพาะวารสาร)
-- ค่าธรรมเนียมการตีพิมพ์ (ถ้ามี) และแบบฟอร์มเฉพาะวารสาร (เช่น หนังสือรับรอง/โอนลิขสิทธิ์) — ไม่มีในเอกสารที่ได้รับ
-- ข้อความ Submission Requirements จริงของวารสาร ซึ่งจะเห็นใน Step 1 เท่านั้น
-- ความยาว 12 หน้า เทียบกับ "ไม่เกิน 9 หน้า" ในคำแนะนำ — ผู้นิพนธ์ยอมรับแล้ว อาจชี้แจงใน Comments for the Editor
-- สังกัดยังไม่มี "ภาควิชา"
+### ยังต้องตัดสินใจ / ดูบนเว็บวารสาร
+- ส่งฉบับปิดชื่อหรือฉบับมีชื่อเป็น Article Text — ดูจาก Step 1 (ค่าเริ่มต้น: ปิดชื่อ)
+- ค่าธรรมเนียมการตีพิมพ์ (ถ้ามี) และแบบฟอร์มเฉพาะวารสาร — ไม่มีในเอกสารที่ได้รับ
+- ความยาว 12 หน้า เทียบกับ "ไม่เกิน 9 หน้า" ในคำแนะนำ — ผู้นิพนธ์ยอมรับแล้ว ร่างข้อความถึงบรรณาธิการกล่าวถึงไว้
+- สังกัดยังไม่มี "ภาควิชา" · ORCID (ไม่บังคับ)

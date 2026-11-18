@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>แผนส่งบทความ ThaiJO</title>
+<style>
+  @page { size: A4; margin: 0; }
+  :root {
+    --navy: #14304f; --ink: #1d2733; --muted: #5b6776; --line: #d5dce4;
+    --blue: #1f6fb2; --blue-bg: #e8f1fa; --green: #1e8a52; --green-bg: #e6f4ec;
+    --amber: #b86e00; --amber-bg: #fdf3e1; --red: #c0392b; --red-bg: #fbeae8;
+    --paper: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--paper); }
+  body {
+    width: 210mm; height: 297mm; overflow: hidden;
+    font-family: "TH Sarabun New", sans-serif; font-size: 13.3pt; line-height: 1.0;
+    color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  h1, h2, h3, .k { font-family: "Kanit", "Leelawadee UI", sans-serif; font-weight: 500; }
+  .page { padding: 8mm 10mm 6mm; height: 100%; display: flex; flex-direction: column; gap: 2.8mm; }
+
+  /* header */
+  header { background: var(--navy); color: #fff; border-radius: 3mm; padding: 4mm 5mm 3.6mm; }
+  header h1 { font-size: 15.5pt; line-height: 1.3; }
+  header .sub { font-size: 13pt; opacity: .85; margin-top: .6mm; }
+  .status { display: flex; gap: 2mm; margin-top: 2.4mm; flex-wrap: wrap; }
+  .pill { font-family: "Kanit", sans-serif; font-size: 8.6pt; padding: .9mm 2.6mm; border-radius: 10mm; background: rgba(255,255,255,.14); }
+  .pill.done::before { content: "✓ "; color: #7be0a6; }
+  .pill.next { background: #f2a900; color: #1d2733; }
+
+  /* journey */
+  .journey { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1.4mm; }
+  .stage { position: relative; border: .3mm solid var(--line); border-radius: 2mm; padding: 1.6mm 1.6mm 1.4mm; text-align: center; background: #fbfcfd; }
+  .stage .n { font-family: "Kanit", sans-serif; font-size: 8pt; color: var(--muted); }
+  .stage .t { font-family: "Kanit", sans-serif; font-size: 8.8pt; font-weight: 500; line-height: 1.25; }
+  .stage .d { font-size: 12pt; color: var(--muted); line-height: 1.05; margin-top: .4mm; }
+  .stage.done { background: var(--green-bg); border-color: #a9d8bd; }
+  .stage.now { background: var(--amber-bg); border-color: #f2a900; box-shadow: 0 0 0 .5mm #f2a900 inset; }
+  .stage:not(:last-child)::after { content: "›"; position: absolute; right: -1.45mm; top: 38%; font-size: 13pt; color: #9aa6b2; font-family: "Kanit"; }
+
+  /* main grid */
+  .main { display: grid; grid-template-columns: 1.18fr 1fr; gap: 3mm; }
+  .card { border: .3mm solid var(--line); border-radius: 2.6mm; padding: 2.6mm 3.2mm; background: #fff; }
+  .card h2 { font-size: 11pt; color: var(--navy); margin-bottom: 1.6mm; display: flex; align-items: center; gap: 1.6mm; }
+  .card h2 .tag { font-size: 7.6pt; font-weight: 400; color: var(--muted); }
+
+  .steps { display: flex; flex-direction: column; gap: 1.5mm; }
+  .step { display: grid; grid-template-columns: 7mm 1fr; gap: 2mm; align-items: start; }
+  .step .num { width: 7mm; height: 7mm; border-radius: 50%; background: var(--blue); color: #fff; font-family: "Kanit"; font-size: 10pt; display: grid; place-items: center; }
+  .step .num.last { background: var(--red); }
+  .step h3 { font-size: 9.6pt; color: var(--blue); line-height: 1.3; }
+  .step h3.last { color: var(--red); }
+  .step ul { list-style: none; }
+  .step li { padding-left: 3mm; position: relative; }
+  .step li::before { content: "•"; position: absolute; left: 0; color: #9aa6b2; }
+  b { font-weight: 700; }
+  .hl { background: #fff1c2; padding: 0 .6mm; border-radius: .6mm; }
+
+  .files { font-size: 13.6pt; }
+  .tree { border-left: .4mm solid var(--line); margin-left: 1mm; padding-left: 2.4mm; display: flex; flex-direction: column; gap: .9mm; }
+  .fname { font-family: Consolas, monospace; font-size: 8.3pt; }
+  .type { font-family: "Kanit"; font-size: 7.2pt; padding: .2mm 1.6mm; border-radius: 1mm; margin-left: 1mm; white-space: nowrap; }
+  .type.at { background: var(--blue-bg); color: var(--blue); }
+  .type.ot { background: #eef0f3; color: var(--muted); }
+  .type.no { background: var(--amber-bg); color: var(--amber); }
+  .folder { font-family: "Kanit"; font-size: 8.4pt; color: var(--navy); margin-bottom: 1mm; word-break: break-all; }
+  .note { color: var(--muted); font-size: 12.6pt; line-height: 1.0; font-family: "TH Sarabun New"; font-weight: 400; }
+
+  .checks { list-style: none; display: grid; grid-template-columns: 1fr; gap: .5mm; margin-top: .4mm; }
+  .checks li { padding-left: 5mm; position: relative; }
+  .checks li::before { content: ""; position: absolute; left: 0; top: 1.3mm; width: 3mm; height: 3mm; border: .35mm solid var(--navy); border-radius: .6mm; }
+
+  .right { display: flex; flex-direction: column; gap: 2.8mm; }
+
+  /* bottom */
+  .bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3.4mm; flex: 1; }
+  .card.warn { border-color: #e7b3ac; background: var(--red-bg); }
+  .card.warn h2 { color: var(--red); }
+  .card.dec { border-color: #f0cf8f; background: var(--amber-bg); }
+  .card.dec h2 { color: var(--amber); }
+  .card.after { border-color: #b9d3ea; background: var(--blue-bg); }
+  .card ul.plain { list-style: none; display: flex; flex-direction: column; gap: .9mm; }
+  .card ul.plain li { padding-left: 3.4mm; position: relative; }
+  .card ul.plain li::before { content: "▸"; position: absolute; left: 0; font-size: 9pt; top: .4mm; color: inherit; opacity: .6; }
+
+  footer { display: flex; justify-content: space-between; font-size: 11.5pt; color: var(--muted); border-top: .3mm solid var(--line); padding-top: 1.4mm; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <h1>แผนส่งบทความ BLEGS ผ่านระบบ ThaiJO</h1>
+  <div class="sub">วารสารวิชาการพระจอมเกล้าพระนครเหนือ (The Journal of KMUTNB) · สรุปจากคู่มือ ThaiJO (OJS 3.3.0-8) หน้า 175–229 และคำแนะนำผู้แต่ง · 19 พ.ย. 2569</div>
+  <div class="status">
+    <span class="pill done">ต้นฉบับ v5 ตรวจครบทั้งเล่ม</span>
+    <span class="pill done">สมัครสมาชิกแล้ว</span>
+    <span class="pill done">ชุดไฟล์พร้อมส่ง</span>
+    <span class="pill next">ถัดไป: ตั้งโปรไฟล์ แล้วส่งบทความ 5 ขั้น</span>
+  </div>
+</header>
+
+<section class="journey">
+  <div class="stage done"><div class="n">1</div><div class="t">สมัครสมาชิก</div><div class="d">Register + ยืนยันอีเมล</div></div>
+  <div class="stage now"><div class="n">2</div><div class="t">ส่งบทความ</div><div class="d">5 ขั้น (อยู่ตรงนี้)</div></div>
+  <div class="stage"><div class="n">3</div><div class="t">คัดกรอง+ประเมิน</div><div class="d">ตรวจคัดลอก · double-blind 3 ท่าน</div></div>
+  <div class="stage"><div class="n">4</div><div class="t">แก้ไขบทความ</div><div class="d">Revisions ตามผู้ทรงฯ</div></div>
+  <div class="stage"><div class="n">5</div><div class="t">Copyediting</div><div class="d">ตรวจต้นฉบับ (บางวารสารข้าม)</div></div>
+  <div class="stage"><div class="n">6</div><div class="t">Production</div><div class="d">ตรวจไฟล์ PDF จัดหน้า</div></div>
+  <div class="stage"><div class="n">7</div><div class="t">เผยแพร่</div><div class="d">ย้ายไป Archives</div></div>
+</section>
+
+<section class="main">
+  <div class="card">
+    <h2>ส่งบทความ 5 ขั้น <span class="tag">Dashboard → New Submission</span></h2>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div>
+        <h3>Start</h3>
+        <ul>
+          <li>ภาษา <b>ไทย</b> · เลือก Section/สาขา ถ้ามี</li>
+          <li><span class="hl">อ่าน Section Policy และ Submission Requirements ก่อนติ๊ก</span> จุดเดียวที่บอกเงื่อนไขเฉพาะวารสาร</li>
+          <li>Comments for the Editor (ไม่บังคับ มีร่างให้) · ยอมรับลิขสิทธิ์และ privacy เอง</li>
+        </ul></div></div>
+      <div class="step"><div class="num">2</div><div>
+        <h3>Upload Submission</h3>
+        <ul>
+          <li>ลากหลายไฟล์พร้อมกันได้ ไฟล์ละ ≤ 50 MB</li>
+          <li>ต้นฉบับ = <b>Article Text</b> · jpg 10 ไฟล์ = <b>Other</b></li>
+          <li class="note">ภาพตัวอย่างในคู่มือแนบ agreement.pdf เป็น Other ถ้าวารสารมีแบบฟอร์มให้แนบที่ขั้นนี้</li>
+        </ul></div></div>
+      <div class="step"><div class="num">3</div><div>
+        <h3>Enter Metadata <span class="note">คัดลอกจาก ThaiJO_Metadata.txt</span></h3>
+        <ul>
+          <li>Title และ Abstract กรอกทั้งไทย/อังกฤษ · Prefix/Subtitle เว้นว่าง</li>
+          <li>Contributors กด Edit เติมชื่อไทย สังกัด ORCID · ติ๊ก Principal contact และ Browse lists</li>
+          <li>Keywords ทีละคำแล้ว Enter (4+4) · Supporting Agencies ว่าง · References 19 บรรทัด</li>
+        </ul></div></div>
+      <div class="step"><div class="num last">4</div><div>
+        <h3 class="last">Confirmation → Finish Submission → OK</h3>
+        <ul><li><b>หลังกด OK แก้เองไม่ได้แล้ว</b> ต้องขอผ่าน Pre-Review Discussions</li></ul></div></div>
+      <div class="step"><div class="num">5</div><div>
+        <h3>Next Steps</h3>
+        <ul><li>อีเมล "Submission Acknowledgement" มาพร้อมลิงก์ ให้<b>จดเลข ID บทความ</b></li>
+          <li>Dashboard แสดงสถานะ "Submission" กด View เพื่อเข้าดูบทความ</li>
+          <li>ขอแก้ข้อมูลก่อนเข้าสู่ Review: แท็บ Workflow ส่วน Submission ที่ <b>Pre-Review Discussions</b> กด Add discussion</li></ul></div></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="card">
+      <h2>ตั้งโปรไฟล์ก่อนส่ง <span class="tag">2 ระดับ</span></h2>
+      <ul class="checks">
+        <li>บัญชีกลาง sso.tci-thaijo.org: ชื่อ-นามสกุล และสังกัด ทั้ง EN/TH, ORCID</li>
+        <li>โปรไฟล์ในเว็บวารสาร (View Profile): ลูกโลกเขียวทุกช่อง</li>
+        <li>แท็บ Contact: Working Languages ติ๊กไทย + อังกฤษ · แท็บ Roles: Author</li>
+        <li>Notifications คงค่าเดิม <b>อย่าปิดอีเมลแจ้งเตือน</b></li>
+      </ul>
+    </div>
+
+    <div class="card files">
+      <h2>ชุดไฟล์พร้อมส่ง</h2>
+      <div class="folder">Desktop\BLEGS_ThaiJO_Submission\</div>
+      <div class="tree">
+        <div><span class="fname">BLEGS_Manuscript_Anonymous.docx</span><span class="type at">Article Text</span><div class="note">ฉบับปิดชื่อ (ค่าเริ่มต้น) ไม่มีชื่อในหน้าแรก ท้ายกระดาษ และ Properties</div></div>
+        <div><span class="fname">BLEGS_Manuscript.docx</span><span class="type no">สำรอง</span><div class="note">สำเนา v5 ทุกไบต์ ใช้เมื่อ Step 1 ขอฉบับมีชื่อ</div></div>
+        <div><span class="fname">figures_tables_jpg\ Figure1–5, Table1–5</span><span class="type ot">Other</span></div>
+        <div><span class="fname">ThaiJO_Metadata.txt</span><div class="note">ข้อความวางลงแบบฟอร์ม และร่างข้อความถึงบรรณาธิการ</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>ตรวจก่อนกด Finish</h2>
+      <ul class="checks">
+        <li>อ่านเงื่อนไขใน Step 1 แล้ว และเลือกไฟล์ตามนั้น</li>
+        <li>ต้นฉบับ 1 ไฟล์เป็น Article Text, jpg 10 ไฟล์เป็น Other</li>
+        <li>ลูกโลกเขียวที่ Title และ Abstract ทั้งสองภาษา</li>
+        <li>ชื่อ-สังกัดไทย/อังกฤษครบ · อีเมลถูก</li>
+        <li>Keywords ไทย 4 คำ และอังกฤษ 4 คำ</li>
+        <li>References ครบ 19 รายการ แยกบรรทัด</li>
+        <li>ชื่อเรื่องในฟอร์มตรงกับในไฟล์ Word</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="bottom">
+  <div class="card warn">
+    <h2>กฎที่พลาดไม่ได้</h2>
+    <ul class="plain">
+      <li><b>ห้ามแก้ไฟล์ v5</b> บน Desktop ใช้ไฟล์ในโฟลเดอร์ส่งเท่านั้น</li>
+      <li>แก้บทความ <b>ห้ามกด New Submission</b> จะได้ ID ใหม่และเกิดบทความซ้ำ</li>
+      <li>กด OK ใน Step 4 แล้วแก้เองไม่ได้</li>
+      <li>อีเมลระบบมาจาก admin@tci-thaijo.org ดูในจดหมายขยะด้วย</li>
+    </ul>
+  </div>
+  <div class="card after">
+    <h2>เมื่อได้ผลประเมิน</h2>
+    <ul class="plain">
+      <li>อีเมล "Editor Decision" ผลประเมินอาจแนบมาในกระทู้</li>
+      <li>แท็บ Review ส่วน Revisions กด Upload File: ต้นฉบับแก้แล้ว = Article Text, <b>ตารางสรุปการแก้ไข</b> = Other</li>
+      <li>อัปโหลดทีละไฟล์ ตั้งชื่อไฟล์ทั้งไทยและอังกฤษ และไฟล์ต้องยังปิดชื่อ</li>
+      <li>ตอบใน Review Discussions ด้วย Add Message ก่อนกำหนดส่ง</li>
+    </ul>
+  </div>
+  <div class="card dec">
+    <h2>ต้องตัดสินใจ / ดูบนเว็บวารสาร</h2>
+    <ul class="plain">
+      <li>ส่งฉบับปิดชื่อหรือมีชื่อ ให้ดูจาก Step 1</li>
+      <li>ค่าธรรมเนียม และแบบฟอร์มเฉพาะวารสาร (ไม่มีในคู่มือ)</li>
+      <li>ยาว 12 หน้า แต่คำแนะนำระบุไม่เกิน 9 หน้า (ร่างข้อความถึงบรรณาธิการกล่าวถึงไว้แล้ว)</li>
+      <li>สังกัดยังไม่มี "ภาควิชา" · ORCID ถ้าต้องการ</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <span>รายละเอียดเต็ม: paper/manuscript/submission/SUBMISSION_CHECKLIST.md</span>
+  <span>คู่มือต้นฉบับ: Desktop\ThaiJO\ (13 ไฟล์)</span>
+</footer>
+
+</div>
+</body>
+</html>
