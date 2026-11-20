@@ -24,17 +24,30 @@ infos = zin.infolist()
 
 doc = parts['word/document.xml'].decode('utf8')
 n_drop = 0
+
+
 def drop(m):
+    """Author and affiliation lines, and the corresponding-author line with the
+    phone and e-mail.  Since v6 the Corresponding style also carries the
+    template's received/accepted dates and copyright line - those stay."""
     global n_drop
     p = m.group(0)
     st = re.search(r'<w:pStyle w:val="([^"]+)"', p)
-    if st and st.group(1) in ('Author', 'Affiliation', 'Corresponding'):
+    text = ''.join(re.findall(r'<w:t(?: [^>]*)?>([^<]*)</w:t>', p))
+    if st and (st.group(1) in ('Author', 'Affiliation')
+               or st.group(1) == 'Corresponding' and ('@' in text or 'โทรศัพท์' in text or 'Tel.' in text)):
         n_drop += 1
         return ''
     return p
-doc = re.sub(r'<w:p\b[^>]*>(?:(?!</w:p>).)*</w:p>', drop, doc, flags=re.S)
+
+
+# only plain paragraphs: a text box (v6's citation boxes) nests paragraphs inside one
+doc = re.sub(r'<w:p\b[^>]*>(?:(?!</w:p>|<w:txbxContent>).)*</w:p>', drop, doc, flags=re.S)
 if n_drop != 6:
     sys.exit('expected 6 author paragraphs, dropped %d' % n_drop)
+# v6 on: the name also appears in the citation boxes and the CRediT statement
+doc, n_th = re.subn(r'ธีรโชติ เมืองจำนงค์', 'ผู้นิพนธ์', doc)
+doc, n_en = re.subn(r'Mueangchamnong, T\.', 'Author, A.', doc)
 parts['word/document.xml'] = doc.encode('utf8')
 
 n_ftr = 0
@@ -68,4 +81,5 @@ if left:
 with zipfile.ZipFile(dst, 'w', zipfile.ZIP_DEFLATED) as out:
     for i in infos:
         out.writestr(i, parts[i.filename])
-print('wrote', dst, '- dropped', n_drop, 'paragraphs, cleaned', n_ftr, 'footers')
+print('wrote', dst, '- dropped', n_drop, 'paragraphs, cleaned', n_ftr, 'footers,',
+      'replaced the name %d (Thai) + %d (English) times in the body' % (n_th, n_en))
