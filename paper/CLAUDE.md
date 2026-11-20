@@ -21,6 +21,8 @@ The manuscript is Thai academic prose; English in parentheses on first use of a 
 
 ## Journal rules that shape the work
 
+**The journal changed its template on 1 Oct 2026 (2569), and everything below up to "Build pipeline" describes the OLD one.** Read on 20 Nov 2026 from the journal's own Submissions page and its Google Drive template folder: 18.7 × 26.0 cm pages, ONE column, research articles "ควร" ≤ 12 pages in that format, abstract ≤ 300 words, 4–5 keywords, sections 1 บทนำ / 2 วิธีการทดลอง / 3 ผลการทดลองและอภิปรายผลการทดลอง / 4 สรุปผลการทดลอง, four new end declarations (conflict of interest, CRediT, **AI use — the checklist limits AI to language editing**, ethics), and references in **APA** (numbered [n] in text, no preprints). v5 follows the old template. The migration plan is `manuscript/submission/NEW_TEMPLATE_PLAN.md`. `journal/instructions/` holds only the pre-October documents.
+
 Full set: `journal/FORMAT_GUIDE.md` and the official docs in `journal/instructions/`. The ones that bite:
 
 - **≤ 9 A4 pages total** on paper (the newer guide says 8–10), two columns, TH Sarabun New — but the author has confirmed up to **12** is acceptable, and the five published TCI-1 examples run 10–14 pages. As of 2026-11-08 the Word build measures **12** with every section written, i.e. the ceiling. Anything added from here needs something else cut. **Figure/table position in the drafts is a layout decision**: figures 1–3 and tables 4–5 sit one paragraph after their first mention so that they land at the top of a column and text fills the gaps (journal rule: figures at the top of the page); moving them back costs about a column, i.e. page 13.
