@@ -300,6 +300,54 @@ doc, n = re.subn(r'<w:tbl>.*?</w:tbl>', widen, doc, flags=re.S)
 if n != 5:
     sys.exit('expected 5 tables, found %d' % n)
 
+
+# ---- figures: 7.5 cm wide in a 15.2 cm column -> two to a row ------------------
+# Figures 1 and 2 are first cited in consecutive paragraphs of 2.2.1; figure 4 at
+# the end of 3.2 and figure 5 at the start of 3.3, so that pair sits between the two.
+def cut_figure(num):
+    """Remove figure `num` (picture paragraph, caption, and the blank line the build
+    put under the caption); return the picture and caption paragraphs."""
+    global doc
+    cap = find_para(lambda p: '<w:pStyle w:val="ImageCaption"/>' in p and ptext(p).startswith('รูปที่ %d ' % num),
+                    'caption %d' % num)
+    figs = [m for m in PARA_RE.finditer(doc, 0, cap.start()) if '<wp:inline' in m.group(0)]
+    fig = figs[-1]
+    after = PARA_RE.match(doc, cap.end())
+    end = after.end() if after and not ptext(after.group(0)).strip() and '<w:drawing' not in after.group(0) else cap.end()
+    fig_xml, cap_xml = fig.group(0), cap.group(0)
+    between = doc[fig.end():cap.start()]
+    if PARA_RE.sub('', between).strip() or ptext(between).strip() or '<w:drawing' in between:
+        sys.exit('figure %d: something other than empty lines between picture and caption' % num)
+    doc = doc[:fig.start()] + doc[end:]
+    return fig.start(), fig_xml, cap_xml
+
+
+NOB = ''.join('<w:%s w:val="nil"/>' % s for s in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'))
+HALF = TEXT_W // 2
+
+
+def pair(a, b):
+    def row(cells, valign):
+        return ('<w:tr><w:trPr><w:cantSplit/></w:trPr>%s</w:tr>' % ''.join(
+            '<w:tc><w:tcPr><w:tcW w:w="%d" w:type="dxa"/><w:vAlign w:val="%s"/></w:tcPr>%s</w:tc>'
+            % (HALF, valign, c) for c in cells))
+    return ('<w:tbl><w:tblPr><w:tblW w:w="%d" w:type="dxa"/><w:jc w:val="center"/>'
+            '<w:tblBorders>%s</w:tblBorders><w:tblLayout w:type="fixed"/>'
+            '<w:tblCellMar><w:left w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar>'
+            '<w:tblLook w:val="0000" w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" '
+            'w:noHBand="1" w:noVBand="1"/></w:tblPr><w:tblGrid><w:gridCol w:w="%d"/><w:gridCol w:w="%d"/>'
+            '</w:tblGrid>%s%s</w:tbl>'
+            % (TEXT_W, NOB, HALF, HALF, row((a[1], b[1]), 'bottom'), row((a[2], b[2]), 'top')))
+
+
+f2 = cut_figure(2)
+f1 = cut_figure(1)
+doc = doc[:f1[0]] + pair(f1, f2) + doc[f1[0]:]
+f5 = cut_figure(5)
+f4 = cut_figure(4)
+m = find_para(by_text('3.3 ', 'Heading3'), 'heading 3.3')
+insert_before(m, pair(f4, f5) + '<w:p/>')
+
 parts['word/document.xml'] = doc.encode('utf8')
 
 # ---- styles: equation numbers flush with the new, wider text block ------------
