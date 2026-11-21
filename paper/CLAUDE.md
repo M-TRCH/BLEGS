@@ -86,7 +86,7 @@ Still open:
 
 1. §2.3.3's one remaining mock: the gravel spec (size and thickness) — waiting on the author. (§3.4 and table 5 carry real data since 6–8 Nov.)
 2. Physical runway has a duplicate ID-6 tag standing in for ID 7 (`--duplicate-id6-mode`).
-3. The affiliation names no department (guide: ภาควิชา คณะ มหาวิทยาลัย จังหวัด) — ask the author before adding one.
+3. ~~The affiliation names no department~~ — settled 21 Nov 2026: ภาควิชาเทคโนโลยีวิศวกรรมเครื่องกล (author) / Department of Mechanical Engineering Technology (as the college's own ภาควิชา/หลักสูตร page at cit.kmutnb.ac.th writes it). The author types it into the file under review; v5 and v6 still carry the gap.
 
 Closed (kept here because the reasoning is easy to re-break):
 
