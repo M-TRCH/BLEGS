@@ -6,6 +6,8 @@
 **21 พ.ย. 2026 — ไฟล์บน Desktop ย้ายรวมไว้ที่ `OneDrive\Desktop\BLEGS_KMUTNB\`** (ตำแหน่ง "Desktop" ด้านล่างคือที่เดิมก่อนย้าย; v5 ย้ายอย่างเดียว md5 เท่าเดิม):
 `1_Manuscript\` v5 (.docx, .zip), v6, v7 tracked, PDF ของ v7 clean · `2_Journal_Template_2569\` แม่แบบ .docx ของวารสาร + PDF ที่แปลงด้วย Word ·
 `3_ThaiJO_Manual\` คู่มือ ThaiJO 13 ไฟล์ (เดิม `Desktop\ThaiJO\`) · `9_Old_Package_2026-11-19_DO-NOT-SEND\` ชุดส่ง 19 พ.ย. ที่ล้าสมัย (เดิม `Desktop\BLEGS_ThaiJO_Submission\`)
+ภายใน `1_Manuscript\` (จัดใหม่ 21 พ.ย.): ฉบับปัจจุบัน (.docx + .pdf) อยู่ชั้นบนสุด · `compare\` ไฟล์ tracked changes · `v5_master_DO-NOT-EDIT\` v5 (.docx, .zip) ·
+`old\` ฉบับที่ถูกแทนแล้ว (v6, v7 tracked, PDF ของ v7 clean)
 
 ## v8 (21 พ.ย. 2026) — ผู้นิพนธ์ทบทวน v7 แล้ว **ไม่รับการย่อข้อความ** · ตัดการทดสอบบนพื้นผิวจริงทั้งชุดแทน → **14 หน้า**
 
