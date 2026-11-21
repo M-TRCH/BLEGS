@@ -65,6 +65,9 @@
 
 > **20 พ.ย. 2026 — แม่แบบวารสารเปลี่ยนตั้งแต่ 1 ต.ค. 2569** (หน้าคอลัมน์เดียว 18.7 × 26 ซม., อ้างอิง APA, คำประกาศ 4 หัวข้อรวมการใช้ AI)
 > v5 และชุดไฟล์ `Desktop\BLEGS_ThaiJO_Submission\` (19 พ.ย.) อิงแม่แบบเดิม — **ยังไม่ควรส่ง** · แผนย้าย: [`NEW_TEMPLATE_PLAN.md`](NEW_TEMPLATE_PLAN.md)
+>
+> **21 พ.ย. 2026 — ไฟล์บน Desktop ย้ายรวมไว้ที่ `OneDrive\Desktop\BLEGS_KMUTNB\`**: ต้นฉบับทุกรุ่นอยู่ `1_Manuscript\`, คู่มือ ThaiJO (เดิม `Desktop\ThaiJO\`) อยู่ `3_ThaiJO_Manual\`,
+> ชุดส่ง 19 พ.ย. (เดิม `Desktop\BLEGS_ThaiJO_Submission\`) อยู่ `9_Old_Package_2026-11-19_DO-NOT-SEND\` — ตำแหน่ง Desktop ที่เขียนไว้ด้านล่างคือที่เดิมก่อนย้าย
 
 ## การส่งผ่านระบบ ThaiJO (แผน 18 พ.ย. · ทบทวนคู่มือทุกหน้าซ้ำ 19 พ.ย. 2026)
 
