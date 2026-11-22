@@ -6,6 +6,8 @@ Paper-layer guidance. Repo-wide architecture, build commands, and robot facts li
 
 The manuscript for a TCI Tier 1 journal paper (The Journal of KMUTNB) about the BLEGS quadruped and its data-driven leg-error compensation. **Two versions live side by side**: `manuscript/drafts/` is the journal version, cut to fit the hard 9-page limit, and is what `build.ps1` / `preview.ps1` read; `manuscript/drafts-full/` keeps the uncut thesis-scale text for reference and is read by nothing. Edits go to `drafts/` unless you are deliberately updating the thesis copy. Everything here is writing and submission material; the code that produced the data is `../python/paper_testing/` (test_2 = single-leg + ML models, test_3 = whole-robot walking) — **there is no code copy under paper/ by design**, so never "fix" analysis scripts here.
 
+**Checkpoint 22 Nov 2026 — first submission made (ThaiJO, research article / engineering section, under review).** The submitted manuscript is **v14** (`manuscript/submission/BLEGS_KMUTNB_2026-11-22_v14.docx`, git tag `submission-1`; package on the author's Desktop in `BLEGS_KMUTNB\4_Submission_Package_2026-11-22\`). Since v6 the source of truth is the .docx chain built by `make-v6.py` … `make-v14.py`, **not** `manuscript/drafts/*.md` (those still hold the old template, IEEE references and the cut real-surface experiment). Revisions continue from v14 as v15+ in the same way; re-run `anonymize-docx.py` and `make-thaijo-metadata.py` on every revised file.
+
 ## Writing conventions (match the existing text exactly)
 
 The manuscript is Thai academic prose; English in parentheses on first use of a technical term. Patterns used consistently in `manuscript/drafts/02_methods.md`:
