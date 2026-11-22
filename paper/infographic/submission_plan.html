@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>แผนส่งบทความ BLEGS</title>
+<!-- One-page A4 summary of the ThaiJO submission, printed to PDF with Edge headless:
+     msedge --headless --no-pdf-header-footer --print-to-pdf=OUT.pdf paper/infographic/submission_plan.html
+     Package of 22 Nov 2026 (v14). Update the file list and status when the package changes. -->
+<style>
+  @page { size: A4; margin: 11mm 12mm; }
+  * { box-sizing: border-box; }
+  body { font-family: 'TH Sarabun New', sans-serif; font-size: 13.5pt; line-height: 1.18; color: #1d2433; margin: 0; }
+  h1 { font-size: 23pt; margin: 0 0 1mm; color: #12305a; }
+  .sub { font-size: 12.5pt; color: #4a5568; margin-bottom: 3mm; }
+  .status { display: flex; gap: 2mm; flex-wrap: wrap; margin-bottom: 3mm; }
+  .chip { border-radius: 3mm; padding: 0.6mm 3mm; font-size: 12.5pt; background: #e6f4ea; color: #1e6b34; border: 0.3mm solid #b7dfc2; }
+  .chip.next { background: #fff4e0; color: #8a5300; border-color: #f0d29a; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+  .card { border: 0.35mm solid #cbd5e1; border-radius: 2.5mm; padding: 2.2mm 3mm; break-inside: avoid; }
+  .card h2 { font-size: 15pt; margin: 0 0 1.2mm; color: #12305a; }
+  .card h2 small { font-weight: normal; color: #64748b; font-size: 12pt; }
+  ol, ul { margin: 0; padding-left: 5mm; }
+  li { margin: 0.4mm 0; }
+  .steps { list-style: none; padding: 0; counter-reset: s; }
+  .steps li { counter-increment: s; position: relative; padding-left: 8mm; margin: 1mm 0; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 0.2mm; width: 5.6mm; height: 5.6mm; border-radius: 50%;
+                      background: #12305a; color: #fff; text-align: center; line-height: 5.6mm; font-weight: bold; font-size: 12pt; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5pt; }
+  td { border-bottom: 0.25mm solid #e2e8f0; padding: 0.6mm 1mm; vertical-align: top; }
+  td.t { white-space: nowrap; font-weight: bold; color: #12305a; }
+  .warn { background: #fdf0f0; border-color: #efc2c2; }
+  .warn h2 { color: #9b1c1c; }
+  .flow { display: flex; gap: 1.2mm; margin-top: 3mm; }
+  .flow div { flex: 1; text-align: center; border: 0.3mm solid #cbd5e1; border-radius: 2mm; padding: 1mm 0.5mm; font-size: 11.5pt; }
+  .flow b { display: block; font-size: 12.5pt; color: #12305a; }
+  .flow .here { background: #12305a; color: #fff; border-color: #12305a; }
+  .flow .here b { color: #fff; }
+  .foot { margin-top: 2.5mm; font-size: 11pt; color: #64748b; }
+  code { font-family: 'TH Sarabun New', sans-serif; background: #f1f5f9; padding: 0 1mm; border-radius: 1mm; }
+</style>
+</head>
+<body>
+<h1>แผนส่งบทความ BLEGS ผ่านระบบ ThaiJO</h1>
+<div class="sub">วารสารวิชาการพระจอมเกล้าพระนครเหนือ (The Journal of KMUTNB) · แม่แบบ 1 ต.ค. 2569 · ต้นฉบับ v14 (22 พ.ย. 2569) 15 หน้า</div>
+<div class="status">
+  <span class="chip">✓ ต้นฉบับ v14 ตรวจครบทุกมิติ</span>
+  <span class="chip">✓ อ้างอิง 17 รายการตรวจกับ Crossref แล้ว</span>
+  <span class="chip">✓ สมัครสมาชิก ThaiJO แล้ว</span>
+  <span class="chip">✓ ชุดไฟล์พร้อมส่ง</span>
+  <span class="chip next">ถัดไป: ตั้งโปรไฟล์ แล้วส่ง 5 ขั้น</span>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>ส่งบทความ 5 ขั้น <small>Dashboard → New Submission</small></h2>
+    <ol class="steps">
+      <li><b>Start</b> ภาษาไทย · อ่าน Section Policy และ Submission Requirements ก่อนติ๊กทุกข้อ · วาง Comments for the Editor · ยอมรับลิขสิทธิ์</li>
+      <li><b>Upload Submission</b> ลากไฟล์ลงพร้อมกัน แล้วเลือกประเภททีละไฟล์ (ตารางขวา)</li>
+      <li><b>Enter Metadata</b> คัดลอกจาก <code>ThaiJO_Metadata.txt</code> ทั้งไทยและอังกฤษ · เติมสังกัดและติ๊ก Principal contact · คำสำคัญทีละคำ + Enter</li>
+      <li><b>Confirmation</b> Finish Submission → OK — หลังกด OK แก้เองไม่ได้</li>
+      <li><b>Next Steps</b> จดเลข ID จากอีเมล Submission Acknowledgement</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>ชุดไฟล์ <small>Desktop\BLEGS_KMUTNB\4_Submission_Package_2026-11-22\</small></h2>
+    <table>
+      <tr><td>BLEGS_Manuscript_Anonymous.docx</td><td class="t">Article Text</td></tr>
+      <tr><td>BLEGS_Manuscript_Anonymous.pdf</td><td class="t">Article Text</td></tr>
+      <tr><td>figures_tables_jpg\ Figure1–5, Table1–4</td><td class="t">Other</td></tr>
+      <tr><td>BLEGS_Manuscript.docx / .pdf (มีชื่อ)</td><td>สำรอง ใช้เมื่อ Step 1 สั่ง</td></tr>
+      <tr><td>ThaiJO_Metadata.txt</td><td>ข้อความวางลงแบบฟอร์ม + ร่างถึงบรรณาธิการ</td></tr>
+    </table>
+    <div style="margin-top:1.2mm;font-size:12pt;color:#4a5568">ฉบับปิดชื่อ: ไม่มีชื่อ อีเมล โทรศัพท์ สังกัด ทั้งในเนื้อหา กล่องอ้างอิง ท้ายกระดาษ และ Properties (ตรวจแล้วทั้ง Word และ PDF)</div>
+  </div>
+
+  <div class="card">
+    <h2>ตั้งโปรไฟล์ก่อนส่ง <small>2 ระดับ</small></h2>
+    <ul>
+      <li>บัญชีกลาง sso.tci-thaijo.org: ชื่อ นามสกุล สังกัด ทั้งไทยและอังกฤษ · ORCID (ถ้ามี)</li>
+      <li>โปรไฟล์ในเว็บวารสาร: Identity/Contact ลูกโลกเขียว · Working Languages ไทย + English · Roles → Author</li>
+      <li>Notifications: คงค่าเริ่มต้น (ผลพิจารณามาทางอีเมล)</li>
+    </ul>
+  </div>
+  <div class="card warn">
+    <h2>ตรวจก่อนกด Finish</h2>
+    <ul>
+      <li>ชื่อเรื่องอังกฤษใหม่: <i>…of Mechanical Error for a Quadruped Robot…</i></li>
+      <li>Comments for the Editor: ตรวจข้อความ [ตรวจว่าเป็นจริง] และย่อหน้าเรื่อง AI</li>
+      <li>อัปโหลดฉบับปิดชื่อเป็น Article Text ไม่ใช่ฉบับมีชื่อ</li>
+      <li>ไม่ส่ง Table5.jpg (ตัดการทดลองนั้นออกแล้ว)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>กฎที่พลาดไม่ได้</h2>
+    <ul>
+      <li>แก้ไขรอบถัดไป: ห้ามกด New Submission (จะได้ ID ใหม่) → Review → Revisions → Upload File</li>
+      <li>ไฟล์แก้ไขต้องปิดชื่อเหมือนเดิม: <code>python paper/anonymize-docx.py</code></li>
+      <li>ขอแก้ข้อมูลก่อนเข้าสู่ Review: Pre-Review Discussions → Add discussion</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>ยังต้องดูบนเว็บวารสาร</h2>
+    <ul>
+      <li>ส่งฉบับปิดชื่อหรือมีชื่อ — ดูใน Step 1 (ค่าเริ่มต้น: ปิดชื่อ)</li>
+      <li>รายการตรวจสอบข้อ 2–3 อ้างแม่แบบภาษาอังกฤษของวารสารอื่น — ต้นฉบับใช้แม่แบบไทยของวารสารนี้</li>
+      <li>ค่าดำเนินการเก็บหลังตอบรับเท่านั้น · ลิขสิทธิ์โอนให้วารสาร</li>
+    </ul>
+  </div>
+</div>
+
+<div class="flow">
+  <div><b>1 สมัคร</b>Register ✓</div>
+  <div class="here"><b>2 ส่งบทความ</b>5 ขั้น (ตรงนี้)</div>
+  <div><b>3 คัดกรอง+ประเมิน</b>double-blind</div>
+  <div><b>4 แก้ไข</b>Revisions</div>
+  <div><b>5 Copyediting</b>ตรวจต้นฉบับ</div>
+  <div><b>6 Production</b>ตรวจ PDF จัดหน้า</div>
+  <div><b>7 เผยแพร่</b>Archives</div>
+</div>
+<div class="foot">รายละเอียดเต็ม: paper/manuscript/submission/SUBMISSION_CHECKLIST.md และ NEW_TEMPLATE_PLAN.md · คู่มือ ThaiJO: Desktop\BLEGS_KMUTNB\3_ThaiJO_Manual\ · 22 พ.ย. 2569</div>
+</body>
+</html>

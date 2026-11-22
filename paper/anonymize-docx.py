@@ -15,8 +15,10 @@ import zipfile
 
 src, dst = sys.argv[1], sys.argv[2]
 NAMES = ['ธีรโชติ', 'เมืองจำนงค์', 'Teerachot', 'Mueangchamnong',
-         'm.teerachot', '4556 0911', 'วิทยาลัยเทคโนโลยีอุตสาหกรรม',
-         'College of Industrial Technology']
+         'm.teerachot', 'outlook.com', '4556 0911', 'วิทยาลัยเทคโนโลยีอุตสาหกรรม',
+         'College of Industrial Technology',
+         # the department, filled in since v8 (21 Nov 2026)
+         'เทคโนโลยีวิศวกรรมเครื่องกล', 'Mechanical Engineering Technology']
 
 zin = zipfile.ZipFile(src)
 parts = {i.filename: zin.read(i.filename) for i in zin.infolist()}
@@ -46,6 +48,7 @@ doc = re.sub(r'<w:p\b[^>]*>(?:(?!</w:p>|<w:txbxContent>).)*</w:p>', drop, doc, f
 if n_drop != 6:
     sys.exit('expected 6 author paragraphs, dropped %d' % n_drop)
 # v6 on: the name also appears in the citation boxes and the CRediT statement
+doc = doc.replace('ธีรโชติ เมืองจำนงค์ เป็น', 'ธีรโชติ เมืองจำนงค์เป็น')   # CRediT: no stray space once the name goes
 doc, n_th = re.subn(r'ธีรโชติ เมืองจำนงค์', 'ผู้นิพนธ์', doc)
 doc, n_en = re.subn(r'Mueangchamnong, T\.', 'Author, A.', doc)
 parts['word/document.xml'] = doc.encode('utf8')

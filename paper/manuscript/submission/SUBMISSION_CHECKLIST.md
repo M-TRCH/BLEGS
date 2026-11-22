@@ -69,6 +69,10 @@
 > **21 พ.ย. 2026 — ไฟล์บน Desktop ย้ายรวมไว้ที่ `OneDrive\Desktop\BLEGS_KMUTNB\`**: ต้นฉบับทุกรุ่นอยู่ `1_Manuscript\`, คู่มือ ThaiJO (เดิม `Desktop\ThaiJO\`) อยู่ `3_ThaiJO_Manual\`,
 > ชุดส่ง 19 พ.ย. (เดิม `Desktop\BLEGS_ThaiJO_Submission\`) อยู่ `9_Old_Package_2026-11-19_DO-NOT-SEND\` — ตำแหน่ง Desktop ที่เขียนไว้ด้านล่างคือที่เดิมก่อนย้าย
 
+> **22 พ.ย. 2026 — ชุดไฟล์ใหม่ที่ส่งจริง: `Desktop\BLEGS_KMUTNB\4_Submission_Package_2026-11-22\`** (ต้นฉบับ v14 แม่แบบ 2569, 15 หน้า, APA 17 รายการ,
+> ฉบับปิดชื่อ .docx + .pdf, Figure1–5 + Table1–4, ThaiJO_Metadata.txt ใหม่, หน้าสรุปแผนใหม่) — รายละเอียดใน `NEW_TEMPLATE_PLAN.md` หัวข้อ "ชุดไฟล์ส่ง 22 พ.ย."
+> ขั้นตอน ก–ค ด้านล่างยังใช้ได้ทั้งหมด ยกเว้นชื่อไฟล์/จำนวนไฟล์: Upload = ฉบับปิดชื่อ .docx และ .pdf เป็น Article Text + jpg 9 ไฟล์เป็น Other
+
 ## การส่งผ่านระบบ ThaiJO (แผน 18 พ.ย. · ทบทวนคู่มือทุกหน้าซ้ำ 19 พ.ย. 2026)
 
 ที่มา: คู่มือ ThaiJO (OJS 3.3.0-8) หน้า 175–229 ครบทุกหน้า ที่ผู้นิพนธ์บันทึกไว้ใน `OneDrive\Desktop\ThaiJO\` (13 ไฟล์ — อ่านทั้งข้อความและภาพหน้าจอทีละหน้าแล้ว) + `paper/journal/instructions/`
