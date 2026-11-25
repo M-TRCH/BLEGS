@@ -101,16 +101,21 @@
 - [ ] 3 Metadata: Prefix/Subtitle ว่าง · Title + Abstract ไทย/อังกฤษ · Contributors: ระบบใส่ชื่อผู้ส่งไว้แล้ว → Edit เติมชื่อไทย สังกัด ORCID, ติ๊ก Principal contact + Include in browse lists
       · Keywords ทีละคำ + Enter (ลูกโลกแดงที่ช่องนี้เป็นบั๊กของระบบตามคู่มือ) · Supporting Agencies ว่าง · References วางทีละบรรทัด
 - [ ] 4 Confirmation: Finish Submission → กล่อง "Are you sure…" → OK — **หลังกด OK แก้ข้อมูลเองไม่ได้** ต้องขอผ่าน Pre-Review Discussions
-- [x] 5 Next Steps (ส่งแล้ว 22 พ.ย. 2026, **ID 88_272060**, ประเภท: บทความวิจัย ด้านวิศวกรรมศาสตร์): "Submission complete" + อีเมล "Submission Acknowledgement" (มีลิงก์และเลข ID บทความ) — จด ID ไว้ที่นี่: ______
+- [x] 5 Next Steps (ส่งแล้ว 22 พ.ย. 2026, **ID 88_272060**, ประเภท: บทความวิจัย ด้านวิศวกรรมศาสตร์): "Submission complete" + อีเมล "Submission Acknowledgement" (มีลิงก์และเลข ID บทความ) — จด ID ไว้ที่นี่: **88_272060**
 
 ### ค. หลังส่ง (ตามคู่มือหน้า 213–229)
 - สถานะเดินตาม Submission → Review → Copyediting → Production → Archives (Published / Declined) ดูได้จาก Dashboard → View
 - ขอแก้ข้อมูลก่อนเข้าสู่ Review: Workflow → Submission → **Pre-Review Discussions → Add discussion**
 - Editor Decision มาทางอีเมล/Discussion พร้อมไฟล์ผลประเมิน (ถ้าบรรณาธิการเปิดให้เห็น) และกำหนดส่ง
 - แก้ไข: **ห้ามกด New Submission** (จะได้ ID ใหม่) → Review → Revisions → Upload File: ต้นฉบับแก้แล้ว = Article Text, **ตารางสรุปการแก้ไข** = Other
-      (อัปโหลดทีละไฟล์ ตั้งชื่อไฟล์ทั้งช่องไทยและอังกฤษ; ไฟล์แก้ต้องปิดชื่อเหมือนเดิม) แล้วตอบกลับใน Review Discussions ด้วย Add Message
+      (อัปโหลดทีละไฟล์ ตั้งชื่อไฟล์ทั้งช่องไทยและอังกฤษ; วารสารนี้ขอฉบับมีชื่อในไฟล์ template — ปิดชื่อเฉพาะเมื่อวารสารขอ) แล้วตอบกลับใน Review Discussions ด้วย Add Message
 - Copyediting / Production: ตรวจไฟล์และตอบกระทู้ที่วารสารส่งมา โดยเฉพาะ PDF ฉบับจัดหน้า (สมการ ตาราง ภาษาไทย)
 - กระทู้ Discussion ใช้ได้ทุกสถานะ แนบไฟล์ได้ ≤ 50 MB/ไฟล์
+
+### ง. บันทึกแต่ละรอบ
+- 22 พ.ย. 2026: ส่งครั้งแรก (v14 ฉบับปิดชื่อ) · ชุดไฟล์ `4_Submission_Package_2026-11-22` · tag `submission-1`
+- 25 พ.ย. 2026: บรรณาธิการพิจารณาเบื้องต้นในกระทู้ Discussion — ขอชื่อ สังกัด โทร อีเมลในไฟล์, (ก)/(ข) รูปที่ 1, ตารางภาษาไทย, ตรวจรายชื่อผู้นิพนธ์ร่วม, ปรับลงไฟล์ template ที่แนบ
+  → **ส่งกลับ 25 พ.ย. 20:10 ในกระทู้เดิม** (Message สั้น + Upload File: 88_272060_revised.docx/.pdf = v16 และ Figure1–5/Table1–4.jpg) · ชุดไฟล์ `6_Revision_1_2026-11-25` · tag `revision-1`
 
 ### ยังต้องตัดสินใจ / ดูบนเว็บวารสาร
 - ส่งฉบับปิดชื่อหรือฉบับมีชื่อเป็น Article Text — ดูจาก Step 1 (ค่าเริ่มต้น: ปิดชื่อ)
