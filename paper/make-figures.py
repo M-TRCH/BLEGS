@@ -195,7 +195,7 @@ def fig1():
     ax.annotate('', xy=(96, -300), xytext=(96, -250),
                 arrowprops=dict(arrowstyle='-|>', lw=0.7, color=MID))             # gravity
     ax.text(102, -275, r'$g$', va='center', fontsize=MATH, color=MID)
-    ax.text(-122, 50, '(a)', fontsize=TXT, fontweight='bold', va='top', color=INK)
+    ax.text(-122, 50, '(ก)', fontsize=TXT, fontweight='bold', va='top', color=INK)
 
     # (a) right: the camera stands 1.2 m in front of that plane, axis normal to it
     ax = fig.add_subplot(gs[0, 1]); ax.axis('off'); ax.set_aspect('equal')
@@ -239,7 +239,7 @@ def fig1():
     ax.plot([cx, -4.5], [ry, ry], color=INK, lw=0.5, ls='--')                     # camera to the first tag row
     ax.text((cx - 4.5) / 2, ry, '%.2f m' % CAM_BACK_M, **lab, **onl)
     ax.text(cx - 9, ry - 11, 'camera\n%.1f m high' % CAM_HIGH_M, ha='center', va='top', **lab)
-    ax.text(cx - 28, 104, '(b)', fontsize=TXT, fontweight='bold', va='top', color=INK)
+    ax.text(cx - 28, 104, '(ข)', fontsize=TXT, fontweight='bold', va='top', color=INK)
     save(fig, 'fig1', svg=True)
 
 
@@ -322,7 +322,7 @@ def fig3():
     ax.add_patch(Rectangle((1.25, 4.0), 0.12, 0.3, fc='w', ec='k', lw=0.5, clip_on=False))
     ax.text(1.41, 4.15, 'swing', va='center', fontsize=TXT)
     ax.tick_params(axis='x', top=False)                       # the legend sits on the top edge
-    ax.text(-0.16, 1.0, '(a)', fontsize=TXT, fontweight='bold', transform=ax.transAxes)
+    ax.text(-0.16, 1.0, '(ก)', fontsize=TXT, fontweight='bold', transform=ax.transAxes)
 
     # (b) the foot path in the leg frame: the foot pushes back along the ground
     # during stance, so the body advances the other way.  Dashed = the Bezier curve,
@@ -338,7 +338,7 @@ def fig3():
     ax.text(0, apex + 3, 'swing', ha='center', va='bottom', fontsize=TXT)
     ax.set_xlabel('x (mm)'); ax.set_ylabel('y (mm)')
     ax.set_xlim(-STEP - 40, STEP + 40); ax.set_ylim(HOME[1] - 24, apex + 20)
-    ax.text(-0.3, 1.0, '(b)', fontsize=TXT, fontweight='bold', transform=ax.transAxes)
+    ax.text(-0.3, 1.0, '(ข)', fontsize=TXT, fontweight='bold', transform=ax.transAxes)
     save(fig, 'fig3', svg=True)
 
 

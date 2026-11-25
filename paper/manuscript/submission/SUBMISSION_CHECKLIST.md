@@ -101,7 +101,7 @@
 - [ ] 3 Metadata: Prefix/Subtitle ว่าง · Title + Abstract ไทย/อังกฤษ · Contributors: ระบบใส่ชื่อผู้ส่งไว้แล้ว → Edit เติมชื่อไทย สังกัด ORCID, ติ๊ก Principal contact + Include in browse lists
       · Keywords ทีละคำ + Enter (ลูกโลกแดงที่ช่องนี้เป็นบั๊กของระบบตามคู่มือ) · Supporting Agencies ว่าง · References วางทีละบรรทัด
 - [ ] 4 Confirmation: Finish Submission → กล่อง "Are you sure…" → OK — **หลังกด OK แก้ข้อมูลเองไม่ได้** ต้องขอผ่าน Pre-Review Discussions
-- [x] 5 Next Steps (ส่งแล้ว 22 พ.ย. 2026, ประเภท: บทความวิจัย ด้านวิศวกรรมศาสตร์): "Submission complete" + อีเมล "Submission Acknowledgement" (มีลิงก์และเลข ID บทความ) — จด ID ไว้ที่นี่: ______
+- [x] 5 Next Steps (ส่งแล้ว 22 พ.ย. 2026, **ID 88_272060**, ประเภท: บทความวิจัย ด้านวิศวกรรมศาสตร์): "Submission complete" + อีเมล "Submission Acknowledgement" (มีลิงก์และเลข ID บทความ) — จด ID ไว้ที่นี่: ______
 
 ### ค. หลังส่ง (ตามคู่มือหน้า 213–229)
 - สถานะเดินตาม Submission → Review → Copyediting → Production → Archives (Published / Declined) ดูได้จาก Dashboard → View

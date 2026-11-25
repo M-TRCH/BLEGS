@@ -1,3 +1,6 @@
+<!-- 25 Nov 2026: the editor of The Journal of KMUTNB asked for every table header and row label in Thai
+     (preliminary check of article 88_272060); units follow the body text (Thai unit names). -->
+
 <!-- Cross-condition model comparison.  Every value from
      ../../python/paper_testing/test_2/output/data/dynamic_eval.csv
      (dynamic_model_evaluation.py) - do not hand-edit, re-run the script.
@@ -12,11 +15,11 @@
      The finding is that the five models are indistinguishable: 0.30 mm
      separates best from worst, against the 6.64 mm each of them removes. -->
 
-| Model | No-load | 1 kg | 2 kg | 3 kg | Mean |
+| แบบจำลอง | ไม่มีโหลด | 1 กิโลกรัม | 2 กิโลกรัม | 3 กิโลกรัม | เฉลี่ย |
 |---|---|---|---|---|---|
-| None | 8.70 | 11.92 | 13.32 | 14.54 | 12.12 |
-| POLY3 | 3.63 | 5.17 | 6.06 | 7.03 | 5.47 |
-| MLP | 3.27 | 5.94 | 6.06 | 6.88 | 5.54 |
-| RF | 3.57 | 5.55 | 5.96 | 7.14 | 5.56 |
-| POLY4 | 3.56 | 5.95 | 5.90 | 7.21 | 5.66 |
-| SVR | 3.78 | 5.78 | 5.78 | 7.78 | 5.78 |
+| ไม่ชดเชย | 8.70 | 11.92 | 13.32 | 14.54 | 12.12 |
+| พหุนามอันดับ 3 | 3.63 | 5.17 | 6.06 | 7.03 | 5.47 |
+| โครงข่ายประสาทเทียม (MLP) | 3.27 | 5.94 | 6.06 | 6.88 | 5.54 |
+| ป่าสุ่ม (RF) | 3.57 | 5.55 | 5.96 | 7.14 | 5.56 |
+| พหุนามอันดับ 4 | 3.56 | 5.95 | 5.90 | 7.21 | 5.66 |
+| เวกเตอร์สนับสนุน (SVR) | 3.78 | 5.78 | 5.78 | 7.78 | 5.78 |
