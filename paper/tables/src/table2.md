@@ -1,6 +1,5 @@
 <!-- 25 Nov 2026: the editor of The Journal of KMUTNB asked for every table header and row label in Thai
      (preliminary check of article 88_272060); units follow the body text (Thai unit names). -->
-
 <!-- Transposed like table4, for the same reason: the four payload levels read
      across, the quantities down the side, so it stays at 5 columns and fits a
      7.5 cm journal column.
@@ -21,5 +20,5 @@
 | จุดศูนย์กลางแกน $y$ ชดเชยด้วยพหุนามอันดับ 4 | −173.86 | −178.28 | −178.39 | −180.87 |
 | ระยะเยื้องจุดศูนย์กลาง ปิดการชดเชย | 11.51 | 17.24 | 19.52 | 21.79 |
 | ระยะเยื้องจุดศูนย์กลาง ชดเชยด้วยพหุนามอันดับ 4 | 4.45 | 8.38 | 8.58 | 11.00 |
-| ค่า RMS ของการสวมวงกลม ปิดการชดเชย | 1.29 | 0.91 | 1.35 | 1.81 |
-| ค่า RMS ของการสวมวงกลม ชดเชยด้วยพหุนามอันดับ 4 | 1.69 | 1.70 | 1.25 | 1.46 |
+| ค่ารากกำลังสองเฉลี่ยของการสวมวงกลม ปิดการชดเชย | 1.29 | 0.91 | 1.35 | 1.81 |
+| ค่ารากกำลังสองเฉลี่ยของการสวมวงกลม ชดเชยด้วยพหุนามอันดับ 4 | 1.69 | 1.70 | 1.25 | 1.46 |
